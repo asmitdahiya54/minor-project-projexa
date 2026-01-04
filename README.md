@@ -1,4 +1,3 @@
-# minor-project-projexa
 # Student Information Management Web Application
 
 ## Project Description
