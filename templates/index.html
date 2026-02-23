@@ -1,19 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Student Information System</title>
+    <title>Student Management</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-
     <h1>Student Information Management System</h1>
-
-    <form>
-        <input type="text" placeholder="Enter Student Name"><br><br>
-        <input type="text" placeholder="Enter Roll Number"><br><br>
-        <input type="text" placeholder="Enter Course"><br><br>
-        <button type="submit">Add Student</button>
-    </form>
-
+    <a href="/add">Add Student</a>
+    <a href="/view">View Students</a>
 </body>
 </html>
