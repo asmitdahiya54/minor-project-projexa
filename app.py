@@ -8,3 +8,5 @@ def home():
 
 if __name__ == "__main__":
     app.run(debug=True)
+    https://github.com/asmitdahiya54/minor-project-projexa#:~:text=Settings-,minor%2Dproject%2Dprojexa,-Public
+
