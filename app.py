@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect
 
 app = Flask(__name__)
 
-students = []   # Temporary storage
+students = []
 
 @app.route('/')
 def home():
@@ -27,7 +27,15 @@ def add_student():
 
 @app.route('/view')
 def view_students():
-    return render_template('view_students.html', students=students)
+    return render_template('view_students.html',
+                           students=students,
+                           count=len(students))
+
+@app.route('/delete/<int:index>')
+def delete_student(index):
+    if 0 <= index < len(students):
+        students.pop(index)
+    return redirect('/view')
 
 if __name__ == '__main__':
     app.run(debug=True)
