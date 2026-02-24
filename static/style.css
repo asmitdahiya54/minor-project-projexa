@@ -63,3 +63,18 @@ th {
     background-color: #3498db;
     color: white;
 }
+.navbar {
+    background-color: #ffffff;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-links a {
+    margin-left: 15px;
+}
+
+.dashboard-header {
+    padding: 30px;
+}
