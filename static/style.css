@@ -78,3 +78,31 @@ th {
 .dashboard-header {
     padding: 30px;
 }
+.stats-section {
+    display: flex;
+    justify-content: space-around;
+    margin: 40px;
+    flex-wrap: wrap;
+}
+
+.card {
+    background-color: white;
+    padding: 25px;
+    width: 200px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    margin: 10px;
+}
+
+.card h3 {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 15px;
+}
+
+.card p {
+    font-size: 28px;
+    font-weight: bold;
+    color: #2c3e50;
+}
