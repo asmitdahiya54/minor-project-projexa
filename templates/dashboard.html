@@ -9,15 +9,15 @@
     <div class="navbar">
         <h2>StudentInfoLite</h2>
         <div class="nav-links">
-            <a href="/">Dashboard</a>
-            <a href="/add">Add Student</a>
-            <a href="/view">View Students</a>
+            <a href="{{ url_for('home') }}">Dashboard</a>
+            <a href="{{ url_for('add_student') }}">Add Student</a>
+            <a href="{{ url_for('view_students') }}">View Students</a>
         </div>
     </div>
 
     <div class="dashboard-header">
         <h1>Dashboard</h1>
-        <p>Overview of student records and quick access to core actions</p>
+        <p>Overview of student records</p>
     </div>
 
     <div class="stats-section">
@@ -42,9 +42,6 @@
             <p>1</p>
         </div>
 
-    </div>
-
-    <div class="content-section">
     </div>
 
 </body>

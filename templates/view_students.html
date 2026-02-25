@@ -5,13 +5,26 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h2>Student List</h2>
 
-    <table border="1">
+    <div class="navbar">
+        <h2>StudentInfoLite</h2>
+        <div class="nav-links">
+            <a href="{{ url_for('home') }}">Dashboard</a>
+            <a href="{{ url_for('add_student') }}">Add Student</a>
+            <a href="{{ url_for('view_students') }}">View Students</a>
+        </div>
+    </div>
+
+    <h2>Student List</h2>
+    <h3>Total Students: {{ count }}</h3>
+
+    {% if students %}
+    <table>
         <tr>
             <th>Name</th>
             <th>Email</th>
             <th>Course</th>
+            <th>Action</th>
         </tr>
 
         {% for student in students %}
@@ -19,10 +32,15 @@
             <td>{{ student.name }}</td>
             <td>{{ student.email }}</td>
             <td>{{ student.course }}</td>
+            <td>
+                <a href="{{ url_for('delete_student', index=loop.index0) }}">Delete</a>
+            </td>
         </tr>
         {% endfor %}
     </table>
+    {% else %}
+        <p>No students added yet.</p>
+    {% endif %}
 
-    <a href="/">Back to Home</a>
 </body>
 </html>
