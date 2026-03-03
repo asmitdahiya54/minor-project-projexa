@@ -1,41 +1,101 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template
+import sqlite3
+import os
+from datetime import datetime
 
 app = Flask(__name__)
+app.secret_key = "studentinfolite_secret_2024"
 
-students = []
+# Database path
+DB_PATH = os.path.join(os.path.dirname(__file__), "students.db")
 
-@app.route('/')
-def home():
-    return render_template('dashboard.html')
+# Connect database
+def get_db():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
 
-@app.route('/add', methods=['GET', 'POST'])
-def add_student():
-    if request.method == 'POST':
-        name = request.form['name']
-        email = request.form['email']
-        course = request.form['course']
+# Create table
+def init_db():
+    conn = get_db()
+    c = conn.cursor()
 
-        students.append({
-            'name': name,
-            'email': email,
-            'course': course
-        })
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS students (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student_id TEXT UNIQUE NOT NULL,
+            full_name TEXT NOT NULL,
+            email TEXT,
+            phone TEXT,
+            department TEXT NOT NULL,
+            academic_year TEXT NOT NULL,
+            status TEXT DEFAULT 'Active',
+            address TEXT,
+            date_of_birth TEXT,
+            enrollment_date TEXT,
+            notes TEXT,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
 
-        return redirect(url_for('view_students'))
+    # ✅ INSERT THIS PART HERE
+    c.execute("SELECT COUNT(*) FROM students")
+    count = c.fetchone()[0]
 
-    return render_template('add_student.html')
+    if count == 0:
+        sample_students = [
+            ("CS001", "Rahul Sharma", "rahul@email.com", "9876543210", "Computer Science", "First Year", "Active"),
+            ("CS002", "Anjali Verma", "anjali@email.com", "9876543211", "Computer Science", "Second Year", "Active"),
+            ("IT001", "Amit Singh", "amit@email.com", "9876543212", "Information Technology", "Third Year", "Graduated"),
+            ("ME001", "Pooja Yadav", "pooja@email.com", "9876543213", "Mechanical Engineering", "Fourth Year", "On Leave"),
+        ]
 
-@app.route('/view')
+        for s in sample_students:
+            c.execute("""
+                INSERT INTO students 
+                (student_id, full_name, email, phone, department, academic_year, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, s)
+
+    # ❗ DO NOT REMOVE THIS
+    conn.commit()
+    conn.close()
+
+# Inject current date in templates
+@app.context_processor
+def inject_now():
+    return {"now": datetime.now().strftime("%d %b %Y")}
+
+# Dashboard route
+@app.route("/")
+def dashboard():
+    conn = get_db()
+    c = conn.cursor()
+
+    total = c.execute("SELECT COUNT(*) FROM students").fetchone()[0]
+    active = c.execute("SELECT COUNT(*) FROM students WHERE status='Active'").fetchone()[0]
+    graduated = c.execute("SELECT COUNT(*) FROM students WHERE status='Graduated'").fetchone()[0]
+    on_leave = c.execute("SELECT COUNT(*) FROM students WHERE status='On Leave'").fetchone()[0]
+
+    conn.close()
+
+    return render_template(
+        "dashboard.html",
+        total=total,
+        active=active,
+        graduated=graduated,
+        on_leave=on_leave
+    )
+@app.route("/students")
 def view_students():
-    return render_template('view_students.html',
-                           students=students,
-                           count=len(students))
+    conn = get_db()
+    students = conn.execute(
+        "SELECT * FROM students ORDER BY created_at DESC"
+    ).fetchall()
+    conn.close()
 
-@app.route('/delete/<int:index>')
-def delete_student(index):
-    if 0 <= index < len(students):
-        students.pop(index)
-    return redirect(url_for('view_students'))
+    return render_template("view_students.html", students=students)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
+    init_db()
     app.run(debug=True)

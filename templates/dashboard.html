@@ -1,48 +1,12 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Student Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
+{% extends "base.html" %}
 
-    <div class="navbar">
-        <h2>StudentInfoLite</h2>
-        <div class="nav-links">
-            <a href="{{ url_for('home') }}">Dashboard</a>
-            <a href="{{ url_for('add_student') }}">Add Student</a>
-            <a href="{{ url_for('view_students') }}">View Students</a>
-        </div>
-    </div>
+{% block content %}
+<h1>Dashboard</h1>
 
-    <div class="dashboard-header">
-        <h1>Dashboard</h1>
-        <p>Overview of student records</p>
-    </div>
+<p>Total Students: {{ total }}</p>
+<p>Active: {{ active }}</p>
+<p>Graduated: {{ graduated }}</p>
+<p>On Leave: {{ on_leave }}</p>
 
-    <div class="stats-section">
-
-        <div class="card total">
-            <h3>Total Students</h3>
-            <p>30</p>
-        </div>
-
-        <div class="card active">
-            <h3>Active Students</h3>
-            <p>28</p>
-        </div>
-
-        <div class="card graduated">
-            <h3>Graduated</h3>
-            <p>1</p>
-        </div>
-
-        <div class="card leave">
-            <h3>On Leave</h3>
-            <p>1</p>
-        </div>
-
-    </div>
-
-</body>
-</html>
+<p>Today: {{ now }}</p>
+{% endblock %}
