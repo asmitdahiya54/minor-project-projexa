@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
 import os
 from datetime import datetime
@@ -95,7 +95,32 @@ def view_students():
     conn.close()
 
     return render_template("view_students.html", students=students)
+from flask import request, redirect, url_for
 
+@app.route("/add", methods=["GET", "POST"])
+def add_student():
+
+    if request.method == "POST":
+        student_id = request.form["student_id"]
+        full_name = request.form["full_name"]
+        email = request.form["email"]
+        phone = request.form["phone"]
+        department = request.form["department"]
+        academic_year = request.form["academic_year"]
+        status = request.form["status"]
+
+        conn = get_db()
+        conn.execute("""
+            INSERT INTO students
+            (student_id, full_name, email, phone, department, academic_year, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (student_id, full_name, email, phone, department, academic_year, status))
+        conn.commit()
+        conn.close()
+
+        return redirect(url_for("view_students"))
+
+    return render_template("add_student.html")
 if __name__ == "__main__":
     init_db()
     app.run(debug=True)
