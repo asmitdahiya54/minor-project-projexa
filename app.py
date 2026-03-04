@@ -6,16 +6,13 @@ from datetime import datetime
 app = Flask(__name__)
 app.secret_key = "studentinfolite_secret_2024"
 
-# Database path
 DB_PATH = os.path.join(os.path.dirname(__file__), "students.db")
 
-# Connect database
 def get_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
-# Create table
 def init_db():
     conn = get_db()
     c = conn.cursor()
@@ -38,7 +35,6 @@ def init_db():
         )
     """)
 
-    # ✅ INSERT THIS PART HERE
     c.execute("SELECT COUNT(*) FROM students")
     count = c.fetchone()[0]
 
@@ -57,16 +53,13 @@ def init_db():
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             """, s)
 
-    # ❗ DO NOT REMOVE THIS
     conn.commit()
     conn.close()
 
-# Inject current date in templates
 @app.context_processor
 def inject_now():
     return {"now": datetime.now().strftime("%d %b %Y")}
 
-# Dashboard route
 @app.route("/")
 def dashboard():
     conn = get_db()
@@ -101,24 +94,35 @@ from flask import request, redirect, url_for
 def add_student():
 
     if request.method == "POST":
-        student_id = request.form["student_id"]
-        full_name = request.form["full_name"]
-        email = request.form["email"]
-        phone = request.form["phone"]
-        department = request.form["department"]
-        academic_year = request.form["academic_year"]
-        status = request.form["status"]
+        student_id = request.form.get("student_id")
+        full_name = request.form.get("full_name")
+        email = request.form.get("email")
+        phone = request.form.get("phone")
+        department = request.form.get("department")
+        academic_year = request.form.get("academic_year")
+        status = request.form.get("status")
 
-        conn = get_db()
-        conn.execute("""
-            INSERT INTO students
-            (student_id, full_name, email, phone, department, academic_year, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (student_id, full_name, email, phone, department, academic_year, status))
-        conn.commit()
-        conn.close()
+        # Basic validation
+        if not student_id or not full_name:
+            flash("Student ID and Name are required!", "error")
+            return redirect(url_for("add_student"))
 
-        return redirect(url_for("view_students"))
+        try:
+            conn = get_db()
+            conn.execute("""
+                INSERT INTO students
+                (student_id, full_name, email, phone, department, academic_year, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (student_id, full_name, email, phone, department, academic_year, status))
+            conn.commit()
+            conn.close()
+
+            flash("Student added successfully!", "success")
+            return redirect(url_for("view_students"))
+
+        except sqlite3.IntegrityError:
+            flash("Student ID already exists!", "error")
+            return redirect(url_for("add_student"))
 
     return render_template("add_student.html")
 if __name__ == "__main__":
