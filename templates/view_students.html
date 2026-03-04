@@ -19,7 +19,9 @@
         <td>{{ s.department }}</td>
         <td>{{ s.academic_year }}</td>
         <td>{{ s.status }}</td>
-        
+<td>
+<a href="/edit/{{ s.id }}">Edit</a>
+</td>     
     </tr>
     {% endfor %}
 </table>
