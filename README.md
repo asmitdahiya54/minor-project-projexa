@@ -1,4 +1,4 @@
-# Student Information Management Web Application
+# Student Information Management System(SIMS)
 
 ## Project Description
 This project is a simple web-based application developed to manage and organize student-related information efficiently. It provides a user-friendly interface for adding and viewing basic student details using HTML and CSS.
@@ -10,10 +10,11 @@ This project is a simple web-based application developed to manage and organize 
 - To gain hands-on experience with GitHub
 
 ## Technologies Used
-- HTML
-- CSS
-- Python (basic)
-- GitHub
+- Python (Flask) – Backend logic
+  SQLite – Database
+  HTML (Jinja Templates) – Web pages
+  CSS – Styling 
+  JavaScript – Small UI actions
 
 ## Team
 - Team Leader: Asmit 
