@@ -11,7 +11,7 @@
     <a href="/add">Add Student</a> |
 
     <hr>
- Inside base.html, above {% block content %}, add:
+ 
  {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     {% for category, message in messages %}
