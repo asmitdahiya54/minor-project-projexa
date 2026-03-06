@@ -125,6 +125,19 @@ def add_student():
             return redirect(url_for("add_student"))
 
     return render_template("add_student.html")
+
+@app.route("/delete/<int:id>")
+def delete_student(id):
+
+    conn = get_db()
+
+    conn.execute("DELETE FROM students WHERE id=?", (id,))
+    conn.commit()
+    conn.close()
+
+    flash("Student deleted successfully!", "success")
+
+    return redirect(url_for("view_students"))
 if __name__ == "__main__":
     init_db()
     app.run(debug=True)
