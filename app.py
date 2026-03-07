@@ -81,14 +81,27 @@ def dashboard():
     )
 @app.route("/students")
 def view_students():
+
+    search = request.args.get("search", "")
+
     conn = get_db()
-    students = conn.execute(
-        "SELECT * FROM students ORDER BY created_at DESC"
-    ).fetchall()
+
+    if search:
+        students = conn.execute("""
+            SELECT * FROM students
+            WHERE full_name LIKE ?
+            OR student_id LIKE ?
+            OR email LIKE ?
+            ORDER BY created_at DESC
+        """, (f"%{search}%", f"%{search}%", f"%{search}%")).fetchall()
+    else:
+        students = conn.execute(
+            "SELECT * FROM students ORDER BY created_at DESC"
+        ).fetchall()
+
     conn.close()
 
-    return render_template("view_students.html", students=students)
-from flask import request, redirect, url_for
+    return render_template("view_students.html", students=students, search=search)
 
 @app.route("/add", methods=["GET", "POST"])
 def add_student():
