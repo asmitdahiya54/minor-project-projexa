@@ -138,6 +138,52 @@ def delete_student(id):
     flash("Student deleted successfully!", "success")
 
     return redirect(url_for("view_students"))
+@app.route("/edit/<int:id>", methods=["GET", "POST"])
+def edit_student(id):
+
+    conn = get_db()
+
+    if request.method == "POST":
+        full_name = request.form.get("full_name")
+        email = request.form.get("email")
+        phone = request.form.get("phone")
+        department = request.form.get("department")
+        academic_year = request.form.get("academic_year")
+        status = request.form.get("status")
+
+        conn.execute("""
+            UPDATE students
+            SET full_name=?, email=?, phone=?, department=?, academic_year=?, status=?
+            WHERE id=?
+        """, (full_name, email, phone, department, academic_year, status, id))
+
+        conn.commit()
+        conn.close()
+
+        flash("Student updated successfully!", "success")
+        return redirect(url_for("view_students"))
+
+    student = conn.execute(
+        "SELECT * FROM students WHERE id=?", (id,)
+    ).fetchone()
+
+    conn.close()
+
+    return render_template("edit_student.html", student=student)
+@app.route("/student/<int:sid>")
+def student_detail(sid):
+
+    conn = get_db()
+    student = conn.execute(
+        "SELECT * FROM students WHERE id=?", (sid,)
+    ).fetchone()
+    conn.close()
+
+    if not student:
+        flash("Student not found.", "error")
+        return redirect(url_for("view_students"))
+
+    return render_template("student_detail.html", student=student)
 if __name__ == "__main__":
     init_db()
     app.run(debug=True)
