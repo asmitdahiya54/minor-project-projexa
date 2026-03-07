@@ -200,3 +200,40 @@ def student_detail(sid):
 if __name__ == "__main__":
     init_db()
     app.run(debug=True)
+@app.route("/students")
+def view_students():
+    @app.route("/students")
+    def view_students():
+
+    department = request.args.get("department")
+    year = request.args.get("year")
+    status = request.args.get("status")
+
+    conn = get_db()
+
+    query = "SELECT * FROM students WHERE 1=1"
+    params = []
+
+    if department:
+        query += " AND department=?"
+        params.append(department)
+
+    if year:
+        query += " AND academic_year=?"
+        params.append(year)
+
+    if status:
+        query += " AND status=?"
+        params.append(status)
+
+    students = conn.execute(query, params).fetchall()
+
+    conn.close()
+
+    return render_template(
+        "view_students.html",
+        students=students,
+        department=department,
+        year=year,
+        status=status
+    )
