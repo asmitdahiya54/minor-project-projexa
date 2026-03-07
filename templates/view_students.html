@@ -2,7 +2,15 @@
 
 {% block content %}
 <h1>All Students</h1>
+<form method="GET" action="/students">
 
+<input type="text" name="search" placeholder="Search students..."
+value="{{ search }}">
+
+<button type="submit">Search</button>
+
+</form>
+<br>
 <table border="1" cellpadding="8">
     <tr>
         <th>Student ID</th>
