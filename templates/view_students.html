@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>All Students</h1>
+<form method="GET" action="/students">
+
+<input type="text" name="search" placeholder="Search students..."
+value="{{ search }}">
+
+<button type="submit">Search</button>
+
+</form>
+<br>
+<table border="1" cellpadding="8">
+    <tr>
+        <th>Student ID</th>
+        <th>Name</th>
+        <th>Department</th>
+        <th>Year</th>
+        <th>Status</th>
+    </tr>
+
+    {% for s in students %}
+    <tr>
+        <td>{{ s.student_id }}</td>
+        <td>{{ s.full_name }}</td>
+        <td>{{ s.department }}</td>
+        <td>{{ s.academic_year }}</td>
+        <td>{{ s.status }}</td>
+<td>
+<a href="/edit/{{ s.id }}">Edit</a> |
+<a href="/delete/{{ s.id }}">Delete</a>
+</td>  
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}
