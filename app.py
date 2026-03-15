@@ -7,6 +7,8 @@ from datetime import datetime
 app = Flask(__name__)
 app.secret_key = "studentinfolite_secret_2024"
 
+DB_PATH = os.path.join(os.path.dirname(__file__), "students.db")
+
 @app.route("/")
 def dashboard():
     return render_template("dashboard.html")
