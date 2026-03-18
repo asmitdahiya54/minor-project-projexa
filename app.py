@@ -61,8 +61,25 @@ def dashboard():
     return render_template("dashboard.html")
 
 
-@app.route("/add")
+@app.route("/add", methods=["GET", "POST"])
 def add_student():
+
+    if request.method == "POST":
+        sid = request.form.get("student_id")
+        name = request.form.get("full_name")
+
+        conn = get_db()
+
+        conn.execute(
+            "INSERT INTO students (student_id, full_name) VALUES (?, ?)",
+            (sid, name)
+        )
+
+        conn.commit()
+        conn.close()
+
+        return redirect(url_for("dashboard"))
+
     return render_template("add_student.html")
 
 
