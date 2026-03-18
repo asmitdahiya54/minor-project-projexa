@@ -68,6 +68,9 @@ def add_student():
         sid = request.form.get("student_id")
         name = request.form.get("full_name")
 
+        if not sid or not name:
+            flash("Student ID and Name required!")
+            return redirect(url_for("add_student"))
         conn = get_db()
 
         conn.execute(
@@ -78,15 +81,12 @@ def add_student():
         conn.commit()
         conn.close()
 
+        flash("Student added successfully!")
+
         return redirect(url_for("dashboard"))
 
     return render_template("add_student.html")
 
-
-
-if __name__ == "__main__":
-    app.run(debug=True)
-    
 if __name__ == "__main__":
     init_db()
     app.run(debug=True)
