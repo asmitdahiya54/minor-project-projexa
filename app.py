@@ -1,5 +1,4 @@
-from flask import Flask
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for, flash
 import sqlite3
 import os
 from datetime import datetime
@@ -56,9 +55,17 @@ def init_db():
 
     conn.commit()
     conn.close()
+
 @app.route("/")
 def dashboard():
     return render_template("dashboard.html")
+
+
+@app.route("/add")
+def add_student():
+    return render_template("add_student.html")
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
