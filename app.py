@@ -37,6 +37,25 @@ def get_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
+def init_db():
+    conn = get_db()
+    c = conn.cursor()
+
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS students (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        student_id TEXT UNIQUE NOT NULL,
+        full_name TEXT NOT NULL,
+        email TEXT,
+        phone TEXT,
+        department TEXT,
+        academic_year TEXT,
+        status TEXT
+    )
+    """)
+
+    conn.commit()
+    conn.close()
 @app.route("/")
 def dashboard():
     return render_template("dashboard.html")
