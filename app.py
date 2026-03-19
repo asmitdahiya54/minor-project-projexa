@@ -99,7 +99,7 @@ def delete_student(id):
 
     conn.commit()
     conn.close()
-
+    flash("Student deleted successfully!")
     return redirect(url_for("view_students"))
 
 
