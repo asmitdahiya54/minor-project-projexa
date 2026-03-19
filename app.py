@@ -61,6 +61,18 @@ def dashboard():
     return render_template("dashboard.html")
 
 
+@app.route("/students")
+def view_students():
+
+    conn = get_db()
+
+    students = conn.execute(
+        "SELECT * FROM students"
+    ).fetchall()
+
+    conn.close()
+
+    return render_template("view_students.html", students=students)
 @app.route("/add", methods=["GET", "POST"])
 def add_student():
 
