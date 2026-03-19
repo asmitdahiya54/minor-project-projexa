@@ -87,6 +87,21 @@ def student_detail(sid):
     return render_template("student_detail.html", student=student)
 
 
+@app.route("/delete/<int:id>", methods=["POST"])
+def delete_student(id):
+
+    conn = get_db()
+
+    conn.execute(
+        "DELETE FROM students WHERE id=?",
+        (id,)
+    )
+
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for("view_students"))
+
 
 @app.route("/students")
 def view_students():
