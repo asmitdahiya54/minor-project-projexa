@@ -17,7 +17,11 @@
 
 <tr>
 <td>{{ s.student_id }}</td>
-<td>{{ s.full_name }}</td>
+<td>
+<a href="{{ url_for('student_detail', sid=s.id) }}">
+{{ s.full_name }}
+</a>
+</td>
 </tr>
 
 {% endfor %}
