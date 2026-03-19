@@ -102,7 +102,7 @@ def view_students():
 
     return render_template("view_students.html", students=students)
 
-@app.route("/edit/<int:id>")
+@app.route("/edit/<int:id>", methods=["GET", "POST"])
 def edit_student(id):
 
     conn = get_db()
@@ -111,6 +111,20 @@ def edit_student(id):
         "SELECT * FROM students WHERE id=?",
         (id,)
     ).fetchone()
+
+    if request.method == "POST":
+
+        name = request.form.get("full_name")
+
+        conn.execute(
+            "UPDATE students SET full_name=? WHERE id=?",
+            (name, id)
+        )
+
+        conn.commit()
+        conn.close()
+
+        return redirect(url_for("view_students"))
 
     conn.close()
 
