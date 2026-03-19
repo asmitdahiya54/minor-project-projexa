@@ -124,6 +124,8 @@ def edit_student(id):
         conn.commit()
         conn.close()
 
+        flash("Student updated successfully!")
+        
         return redirect(url_for("view_students"))
 
     conn.close()
