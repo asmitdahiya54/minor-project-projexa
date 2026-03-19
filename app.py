@@ -74,10 +74,6 @@ def student_detail(sid):
     ).fetchone()
 
     conn.close()
-
-    @app.route("/student/<int:sid>")
-def student_detail(sid):
-
     conn = get_db()
 
     student = conn.execute(
