@@ -11,6 +11,7 @@
 <body>
     <h2>Student Information System</h2>
     <a href="{{ url_for('add_student') }}">Add Student</a>
+    <a href="{{ url_for('view_students') }}">View Students</a>
 <hr>
 {% with messages = get_flashed_messages() %}
   {% if messages %}
