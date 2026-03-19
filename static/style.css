@@ -55,3 +55,7 @@ text-decoration:none;
 a:hover{
 text-decoration:underline;
 }
+input{
+border:1px solid #ccc;
+border-radius:5px;
+}
