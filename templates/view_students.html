@@ -22,6 +22,9 @@
 {{ s.full_name }}
 </a>
 </td>
+<td>
+<a href="{{ url_for('edit_student', id=s.id) }}">Edit</a>
+</td>
 </tr>
 
 {% endfor %}
