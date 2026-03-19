@@ -102,6 +102,19 @@ def view_students():
 
     return render_template("view_students.html", students=students)
 
+@app.route("/edit/<int:id>")
+def edit_student(id):
+
+    conn = get_db()
+
+    student = conn.execute(
+        "SELECT * FROM students WHERE id=?",
+        (id,)
+    ).fetchone()
+
+    conn.close()
+
+    return render_template("edit_student.html", student=student)
 
 @app.route("/add", methods=["GET", "POST"])
 def add_student():
