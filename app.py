@@ -67,10 +67,11 @@ def view_students():
     conn = get_db()
 
     students = conn.execute(
-        "SELECT * FROM students"
-    ).fetchall()
+    "SELECT * FROM students ORDER BY id DESC"
+).fetchall()
 
     conn.close()
+    students = students if students else []
 
     return render_template("view_students.html", students=students)
 @app.route("/add", methods=["GET", "POST"])
