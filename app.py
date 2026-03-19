@@ -56,9 +56,40 @@ def init_db():
     conn.commit()
     conn.close()
 
+
+
 @app.route("/")
 def dashboard():
     return render_template("dashboard.html")
+
+
+@app.route("/student/<int:sid>")
+def student_detail(sid):
+
+    conn = get_db()
+
+    student = conn.execute(
+        "SELECT * FROM students WHERE id=?",
+        (sid,)
+    ).fetchone()
+
+    conn.close()
+
+    @app.route("/student/<int:sid>")
+def student_detail(sid):
+
+    conn = get_db()
+
+    student = conn.execute(
+        "SELECT * FROM students WHERE id=?",
+        (sid,)
+    ).fetchone()
+
+    conn.close()
+
+    return render_template("student_detail.html", student=student)
+    return render_template("student_detail.html", student=student)
+
 
 
 @app.route("/students")
@@ -74,6 +105,8 @@ def view_students():
     students = students if students else []
 
     return render_template("view_students.html", students=students)
+
+
 @app.route("/add", methods=["GET", "POST"])
 def add_student():
 
