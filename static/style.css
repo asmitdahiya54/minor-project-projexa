@@ -156,3 +156,45 @@ border-radius:6px;
 .sidebar-nav a:hover{
 background:#334155;
 }
+.sidebar{
+width:240px;
+background:#1e293b;
+color:white;
+display:flex;
+flex-direction:column;
+height:100vh;
+padding:20px;
+}
+
+.sidebar a{
+padding:10px;
+border-radius:8px;
+color:#cbd5e1;
+text-decoration:none;
+display:block;
+}
+
+.sidebar a:hover{
+background:#334155;
+color:white;
+}
+
+.sidebar a.active{
+background:#1d6ff3;
+color:white;
+}
+.stat-card{
+transition:0.2s;
+}
+
+.stat-card:hover{
+transform:translateY(-5px);
+}
+
+.topbar{
+align-items:center;
+}
+
+.topbar h3{
+margin:0;
+}

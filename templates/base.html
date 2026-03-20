@@ -20,9 +20,20 @@
 
 <nav class="sidebar-nav">
 
-<a href="{{ url_for('dashboard') }}">Dashboard</a>
-<a href="{{ url_for('add_student') }}">Add Student</a>
-<a href="{{ url_for('view_students') }}">View Students</a>
+<a href="{{ url_for('dashboard') }}" 
+class="{% if request.endpoint=='dashboard' %}active{% endif %}">
+Dashboard
+</a>
+
+<a href="{{ url_for('add_student') }}" 
+class="{% if request.endpoint=='add_student' %}active{% endif %}">
+Add Student
+</a>
+
+<a href="{{ url_for('view_students') }}" 
+class="{% if request.endpoint=='view_students' %}active{% endif %}">
+View Students
+</a>
 
 </nav>
 
