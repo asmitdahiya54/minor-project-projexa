@@ -22,9 +22,18 @@
 {{ s.full_name }}
 </a>
 </td>
+
 <td>
 <a href="{{ url_for('edit_student', id=s.id) }}">Edit</a>
+
+<form method="POST" action="{{ url_for('delete_student', id=s.id) }}" style="display:inline;">
+    <button type="submit" onclick="return confirm('Delete this student?')">
+        Delete
+    </button>
+</form>
+
 </td>
+
 </tr>
 
 {% endfor %}
