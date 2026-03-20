@@ -4,12 +4,32 @@
 
 <h1>Dashboard</h1>
 <p>Overview of student records</p>
+<div class="stats-grid">
 
-<div>
-<p>Total Students: {{ total }}</p>
-<p>Active Students: {{ active }}</p>
-<p>Graduated: {{ graduated }}</p>
-<p>On Leave: {{ on_leave }}</p>
+<div class="stat-card">
+<i class="fas fa-users"></i>
+<div class="stat-value">{{ total }}</div>
+<div class="stat-label">Total Students</div>
+</div>
+
+<div class="stat-card">
+<i class="fas fa-circle-check"></i>
+<div class="stat-value">{{ active }}</div>
+<div class="stat-label">Active Students</div>
+</div>
+
+<div class="stat-card">
+<i class="fas fa-graduation-cap"></i>
+<div class="stat-value">{{ graduated }}</div>
+<div class="stat-label">Graduated</div>
+</div>
+
+<div class="stat-card">
+<i class="fas fa-clock"></i>
+<div class="stat-value">{{ on_leave }}</div>
+<div class="stat-label">On Leave</div>
+</div>
+
 </div>
 <div class="card">
 <p>Database connected successfully</p>
