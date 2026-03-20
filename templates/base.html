@@ -1,16 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    
-<title>StudentInfoLite</title>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>StudentInfoLite{% block title %}{% endblock %}</title>
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
 </head>
 
+
 <body>
 
+
 <!-- SIDEBAR -->
+
 <aside class="sidebar">
 
 <div class="sidebar-brand">
@@ -21,51 +30,113 @@
 <nav class="sidebar-nav">
 
 <a href="{{ url_for('dashboard') }}" 
-class="{% if request.endpoint=='dashboard' %}active{% endif %}">
+class="nav-item {% if request.endpoint=='dashboard' %}active{% endif %}">
+<i class="fas fa-gauge-high"></i>
 Dashboard
 </a>
 
 <a href="{{ url_for('add_student') }}" 
-class="{% if request.endpoint=='add_student' %}active{% endif %}">
+class="nav-item {% if request.endpoint=='add_student' %}active{% endif %}">
+<i class="fas fa-user-plus"></i>
 Add Student
 </a>
 
 <a href="{{ url_for('view_students') }}" 
-class="{% if request.endpoint=='view_students' %}active{% endif %}">
+class="nav-item {% if request.endpoint=='view_students' %}active{% endif %}">
+<i class="fas fa-users"></i>
 View Students
 </a>
+<div class="sidebar-footer">
 
+<div class="admin-avatar">
+A
+</div>
+
+<div class="admin-info">
+<div class="admin-name">Admin</div>
+<div class="admin-role">Administrator</div>
+</div>
+
+</div>
 </nav>
 
 </aside>
 
-<!-- MAIN -->
+
+
+<!-- MAIN CONTENT -->
+
 <div class="main-content">
 
+
 <!-- TOPBAR -->
+
 <header class="topbar">
 
-<div class="topbar-left">
-<h3>Welcome Admin</h3>
+<div class="topbar-search">
+<form action="{{ url_for('view_students') }}" method="GET">
+<input type="text" name="search" placeholder="Search students...">
+</form>
 </div>
 
 <div class="topbar-right">
+<span>Welcome Admin</span>
+<span><i class="far fa-calendar"></i> {{ now }}</span>
+
 <a href="{{ url_for('add_student') }}" class="btn-add-top">
-+ Add Student
+<i class="fas fa-plus"></i> Add Student
 </a>
 </div>
 
 </header>
 
-<!-- CONTENT -->
+
+
+<!-- FLASH MESSAGES -->
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+
+{% if messages %}
+
+<div class="flash-container">
+
+{% for category, message in messages %}
+
+<div class="flash flash-{{ category }}">
+
+<i class="fas fa-info-circle"></i>
+
+{{ message }}
+
+</div>
+
+{% endfor %}
+
+</div>
+
+{% endif %}
+
+{% endwith %}
+
+
+
+<!-- PAGE CONTENT -->
+
 <main class="page-content">
 
 {% block content %}
+
 {% endblock %}
 
 </main>
 
+
+
 </div>
+
+
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
 
 </body>
 </html>
