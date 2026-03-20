@@ -173,6 +173,22 @@ def add_student():
 
     return render_template("add_student.html")
 
+def get_stats():
+
+    conn = get_db()
+    c = conn.cursor()
+
+    total = c.execute("SELECT COUNT(*) FROM students").fetchone()[0]
+
+    active = c.execute(
+        "SELECT COUNT(*) FROM students WHERE status='Active'"
+    ).fetchone()[0]
+
+    conn.close()
+
+    return total, active
+
+
 if __name__ == "__main__":
     init_db()
     app.run(debug=True)
