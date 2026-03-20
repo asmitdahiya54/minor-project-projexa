@@ -1,0 +1,18 @@
+# Database
+sims.db
+ 
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+ 
+# Virtual environment
+venv/
+env/
+.venv/
+ 
+# Flask / OS
+instance/
+.env
+.DS_Store
+Thumbs.db
