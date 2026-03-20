@@ -9,21 +9,52 @@
 </head>
 
 <body>
-    <h2>Student Information System</h2>
-    <a href="{{ url_for('add_student') }}">Add Student</a>
-    <a href="{{ url_for('view_students') }}">View Students</a>
-<hr>
-{% with messages = get_flashed_messages() %}
-  {% if messages %}
-    <ul>
-      {% for msg in messages %}
-        <li>{{ msg }}</li>
-      {% endfor %}
-    </ul>
-  {% endif %}
-{% endwith %}
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+
+<div class="sidebar-brand">
+<i class="fas fa-graduation-cap"></i>
+<span>StudentInfoLite</span>
+</div>
+
+<nav class="sidebar-nav">
+
+<a href="{{ url_for('dashboard') }}">Dashboard</a>
+<a href="{{ url_for('add_student') }}">Add Student</a>
+<a href="{{ url_for('view_students') }}">View Students</a>
+
+</nav>
+
+</aside>
+
+<!-- MAIN -->
+<div class="main-content">
+
+<!-- TOPBAR -->
+<header class="topbar">
+
+<div class="topbar-left">
+<h3>Welcome Admin</h3>
+</div>
+
+<div class="topbar-right">
+<a href="{{ url_for('add_student') }}" class="btn-add-top">
++ Add Student
+</a>
+</div>
+
+</header>
+
+<!-- CONTENT -->
+<main class="page-content">
+
 {% block content %}
 {% endblock %}
+
+</main>
+
+</div>
 
 </body>
 </html>

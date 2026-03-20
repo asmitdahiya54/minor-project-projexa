@@ -96,3 +96,63 @@ font-weight:bold;
 .stat-label{
 color:#666;
 }
+/* SIDEBAR */
+.sidebar{
+width:220px;
+height:100vh;
+background:#1e293b;
+color:white;
+padding:20px;
+position:fixed;
+}
+
+.sidebar a{
+display:block;
+color:#cbd5e1;
+text-decoration:none;
+margin:10px 0;
+}
+
+.sidebar a:hover{
+color:white;
+}
+
+/* MAIN */
+.main-content{
+margin-left:220px;
+}
+
+/* TOPBAR */
+.topbar{
+background:white;
+padding:15px 20px;
+display:flex;
+justify-content:space-between;
+border-bottom:1px solid #ddd;
+}
+
+/* BUTTON */
+.btn-add-top{
+background:#1d6ff3;
+color:white;
+padding:8px 12px;
+border-radius:5px;
+text-decoration:none;
+}
+.page-content{
+padding:20px;
+}
+
+.sidebar-brand{
+font-weight:bold;
+margin-bottom:20px;
+}
+
+.sidebar-nav a{
+padding:8px;
+border-radius:6px;
+}
+
+.sidebar-nav a:hover{
+background:#334155;
+}
