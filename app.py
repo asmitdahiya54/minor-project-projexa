@@ -60,7 +60,14 @@ def init_db():
 
 @app.route("/")
 def dashboard():
-    return render_template("dashboard.html")
+
+    total, active = get_stats()
+
+    return render_template(
+        "dashboard.html",
+        total=total,
+        active=active
+    )
 
 
 @app.route("/student/<int:sid>")
