@@ -1,307 +1,201 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
-import sqlite3
-import os
-from datetime import datetime
+from flask import Flask, app, render_template, request, redirect, url_for, flash
+import sqlite3, os
 
-app = Flask(__name__)
-app.secret_key = "studentinfolite_secret_2024"
+app = Flask(__name__, template_folder='templates', static_folder='static')
+app.secret_key = 'sims_secret_key_2024'
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "students.db")
+DB = 'sims.db'
 
-DEPARTMENTS = [
-    'Computer Science',
-    'Information Technology',
-    'Electronics',
-    'Mechanical Engineering',
-    'Civil Engineering',
-    'Business Administration',
-    'Other'
-]
-
-YEARS = [
-    'First Year',
-    'Second Year',
-    'Third Year',
-    'Fourth Year'
-]
-
-STATUSES = [
-    'Active',
-    'Graduated',
-    'On Leave',
-    'Inactive'
-]
-
-
+# ── DB SETUP ──────────────────────────────────────────────
 def get_db():
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB)
     conn.row_factory = sqlite3.Row
     return conn
 
-
 def init_db():
-    conn = get_db()
-    c = conn.cursor()
+    with get_db() as conn:
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS students (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                student_id  TEXT UNIQUE NOT NULL,
+                name        TEXT NOT NULL,
+                email       TEXT,
+                dob         TEXT,
+                gender      TEXT,
+                department  TEXT NOT NULL,
+                year        TEXT NOT NULL,
+                status      TEXT DEFAULT 'Active',
+                address     TEXT,
+                enroll_date TEXT,
+                created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        # Seed sample data if empty
+        cur = conn.execute('SELECT COUNT(*) FROM students')
+        if cur.fetchone()[0] == 0:
+            seed = [
+                ('CS2024001','Asmit Dahiya','asmit@example.com','2003-05-12','Male','Computer Science','Third Year','Active','Delhi','2022-07-15'),
+                ('CS2024002','Dev Narwal','dev@example.com','2004-02-18','Male','Computer Science','Second Year','Active','Haryana','2023-07-10'),
+                ('IT2024001','Manish Chauhan','manish@example.com','2005-09-30','Male','Information Technology','First Year','Active','Punjab','2024-07-08'),
+                ('IT2024002','Dikshit Kumar','dikshit@example.com','2004-11-22','Male','Information Technology','Second Year','Active','Delhi','2023-07-12'),
+                ('EC2024001','Gourav Sharma','gourav@example.com','2005-03-05','Male','Electronics','First Year','Active','Rajasthan','2024-07-15'),
+                ('ME2024001','Aditya Dangi','aditya@example.com','2005-07-19','Male','Mechanical Engineering','First Year','On Leave','MP','2024-07-14'),
+                ('CS2021001','Priya Mehta','priya@example.com','2002-01-25','Female','Computer Science','Fourth Year','Active','Mumbai','2021-07-10'),
+                ('IT2021001','Riya Verma','riya@example.com','2002-06-14','Female','Information Technology','Third Year','Graduated','Pune','2021-07-11'),
+                ('EC2023001','Sahil Bisht','sahil@example.com','2003-12-01','Male','Electronics','Second Year','Active','Chandigarh','2023-07-09'),
+                ('ME2022001','Neha Rawat','neha@example.com','2003-04-08','Female','Mechanical Engineering','Third Year','Active','Dehradun','2022-07-13'),
+            ]
+            conn.executemany('''
+                INSERT INTO students
+                (student_id,name,email,dob,gender,department,year,status,address,enroll_date)
+                VALUES (?,?,?,?,?,?,?,?,?,?)
+            ''', seed)
+            conn.commit()
 
-    c.execute("""
-    CREATE TABLE IF NOT EXISTS students (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        student_id TEXT UNIQUE NOT NULL,
-        full_name TEXT NOT NULL,
-        email TEXT,
-        phone TEXT,
-        department TEXT NOT NULL,
-        academic_year TEXT NOT NULL,
-        status TEXT DEFAULT 'Active',
-        address TEXT,
-        date_of_birth TEXT,
-        enrollment_date TEXT,
-        notes TEXT,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP
-    )
-    """)
+init_db()
 
-    conn.commit()
-    conn.close()
-
-
-@app.context_processor
-def inject_now():
-    return {"now": datetime.now().strftime("%d %b %Y")}
-
-
-def get_stats():
-
-    conn = get_db()
-    c = conn.cursor()
-
-    total = c.execute("SELECT COUNT(*) FROM students").fetchone()[0]
-
-    active = c.execute(
-        "SELECT COUNT(*) FROM students WHERE status='Active'"
-    ).fetchone()[0]
-
-    graduated = c.execute(
-        "SELECT COUNT(*) FROM students WHERE status='Graduated'"
-    ).fetchone()[0]
-
-    on_leave = c.execute(
-        "SELECT COUNT(*) FROM students WHERE status='On Leave'"
-    ).fetchone()[0]
-
-    dept_counts = {
-        d: c.execute(
-            "SELECT COUNT(*) FROM students WHERE department=?",
-            (d,)
-        ).fetchone()[0] for d in DEPARTMENTS
-    }
-
-    year_counts = {
-        y: c.execute(
-            "SELECT COUNT(*) FROM students WHERE academic_year=?",
-            (y,)
-        ).fetchone()[0] for y in YEARS
-    }
-
-    conn.close()
-
-    return total, active, graduated, on_leave, dept_counts, year_counts
+DEPARTMENTS = [
+    'Computer Science', 'Information Technology', 'Electronics',
+    'Mechanical Engineering', 'Civil Engineering', 'Business Administration'
+]
+YEARS    = ['First Year', 'Second Year', 'Third Year', 'Fourth Year']
+STATUSES = ['Active', 'On Leave', 'Graduated']
 
 
-@app.route("/")
+# ── ROUTES ────────────────────────────────────────────────
+
+@app.route('/')
 def dashboard():
+    with get_db() as conn:
+        total   = conn.execute('SELECT COUNT(*) FROM students').fetchone()[0]
+        active  = conn.execute("SELECT COUNT(*) FROM students WHERE status='Active'").fetchone()[0]
+        grad    = conn.execute("SELECT COUNT(*) FROM students WHERE status='Graduated'").fetchone()[0]
+        leave   = conn.execute("SELECT COUNT(*) FROM students WHERE status='On Leave'").fetchone()[0]
 
-    total, active, graduated, on_leave, dept_counts, year_counts = get_stats()
+        dept_counts = {d: conn.execute(
+            'SELECT COUNT(*) FROM students WHERE department=?', (d,)
+        ).fetchone()[0] for d in DEPARTMENTS}
 
-    conn = get_db()
+        year_counts = {y: conn.execute(
+            'SELECT COUNT(*) FROM students WHERE year=?', (y,)
+        ).fetchone()[0] for y in YEARS}
 
-    recent = conn.execute(
-        "SELECT * FROM students ORDER BY created_at DESC LIMIT 8"
-    ).fetchall()
+        recent = conn.execute(
+            'SELECT * FROM students ORDER BY created_at DESC LIMIT 5'
+        ).fetchall()
 
-    conn.close()
-
-    return render_template(
-        "dashboard.html",
-        total=total,
-        active=active,
-        graduated=graduated,
-        on_leave=on_leave,
-        dept_counts=dept_counts,
-        year_counts=year_counts,
-        recent=recent,
-        departments=DEPARTMENTS,
-        years=YEARS
+    return render_template('dashboard.html',
+        total=total, active=active, grad=grad, leave=leave,
+        dept_counts=dept_counts, year_counts=year_counts,
+        recent=recent, departments=DEPARTMENTS, years=YEARS
     )
 
 
-@app.route("/students")
+@app.route('/students')
 def view_students():
+    dept   = request.args.get('dept', '')
+    year   = request.args.get('year', '')
+    status = request.args.get('status', '')
+    search = request.args.get('search', '')
 
-    df = request.args.get("department")
-    yf = request.args.get("year")
-    sf = request.args.get("status")
-    search = request.args.get("search")
-
-    query = "SELECT * FROM students WHERE 1=1"
+    query  = 'SELECT * FROM students WHERE 1=1'
     params = []
-
-    if df:
-        query += " AND department=?"
-        params.append(df)
-
-    if yf:
-        query += " AND academic_year=?"
-        params.append(yf)
-
-    if sf:
-        query += " AND status=?"
-        params.append(sf)
-
+    if dept:   query += ' AND department=?';  params.append(dept)
+    if year:   query += ' AND year=?';        params.append(year)
+    if status: query += ' AND status=?';      params.append(status)
     if search:
-        query += " AND (full_name LIKE ? OR student_id LIKE ? OR email LIKE ?)"
-        params += [f"%{search}%", f"%{search}%", f"%{search}%"]
+        query += ' AND (name LIKE ? OR student_id LIKE ?)'
+        params += [f'%{search}%', f'%{search}%']
+    query += ' ORDER BY created_at DESC'
 
-    query += " ORDER BY created_at DESC"
+    with get_db() as conn:
+        students = conn.execute(query, params).fetchall()
 
-    conn = get_db()
-    students = conn.execute(query, params).fetchall()
-    conn.close()
-
-    return render_template(
-        "view_students.html",
-        students=students,
-        departments=DEPARTMENTS,
-        years=YEARS,
-        statuses=STATUSES,
-        dept_filter=df,
-        year_filter=yf,
-        status_filter=sf,
-        search=search
+    return render_template('view_students.html',
+        students=students, departments=DEPARTMENTS,
+        years=YEARS, statuses=STATUSES,
+        filters={'dept': dept, 'year': year, 'status': status, 'search': search}
     )
 
 
-@app.route("/add", methods=["GET", "POST"])
+@app.route('/students/add', methods=['GET', 'POST'])
 def add_student():
-
-    if request.method == "POST":
-
-        sid = request.form.get("student_id")
-        name = request.form.get("full_name")
-        email = request.form.get("email")
-        phone = request.form.get("phone")
-        dept = request.form.get("department")
-        year = request.form.get("academic_year")
-        status = request.form.get("status")
-
-        if not sid or not name:
-            flash("Student ID and Name are required!", "error")
-            return redirect(url_for("add_student"))
+    if request.method == 'POST':
+        data = {k: request.form.get(k, '').strip() for k in [
+            'student_id','name','email','dob','gender',
+            'department','year','status','address','enroll_date'
+        ]}
+        if not data['name'] or not data['student_id'] or not data['department'] or not data['year']:
+            flash('Name, Student ID, Department and Year are required.', 'error')
+            return render_template('add_student.html', departments=DEPARTMENTS, years=YEARS, statuses=STATUSES, form=data)
 
         try:
-
-            conn = get_db()
-
-            conn.execute("""
-            INSERT INTO students
-            (student_id, full_name, email, phone, department, academic_year, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-            """, (sid, name, email, phone, dept, year, status))
-
-            conn.commit()
-            conn.close()
-
-            flash("Student added successfully!", "success")
-            return redirect(url_for("view_students"))
-
+            with get_db() as conn:
+                conn.execute('''
+                    INSERT INTO students
+                    (student_id,name,email,dob,gender,department,year,status,address,enroll_date)
+                    VALUES (:student_id,:name,:email,:dob,:gender,:department,:year,:status,:address,:enroll_date)
+                ''', data)
+                conn.commit()
+            flash(f'{data["name"]} has been registered successfully!', 'success')
+            return redirect(url_for('dashboard'))
         except sqlite3.IntegrityError:
+            flash('A student with that ID already exists.', 'error')
 
-            flash("Student ID already exists!", "error")
-
-    return render_template(
-        "add_student.html",
-        departments=DEPARTMENTS,
-        years=YEARS,
-        statuses=STATUSES
-    )
+    return render_template('add_student.html', departments=DEPARTMENTS, years=YEARS, statuses=STATUSES, form={})
 
 
-@app.route("/student/<int:sid>")
+@app.route('/students/<int:sid>')
 def student_detail(sid):
-
-    conn = get_db()
-
-    student = conn.execute(
-        "SELECT * FROM students WHERE id=?",
-        (sid,)
-    ).fetchone()
-
-    conn.close()
-
+    with get_db() as conn:
+        student = conn.execute('SELECT * FROM students WHERE id=?', (sid,)).fetchone()
     if not student:
-        flash("Student not found.", "error")
-        return redirect(url_for("view_students"))
+        flash('Student not found.', 'error')
+        return redirect(url_for('view_students'))
+    return render_template('student_detail.html', student=student)
 
-    return render_template("student_detail.html", student=student)
 
+@app.route('/students/<int:sid>/edit', methods=['GET', 'POST'])
+def edit_student(sid):
+    with get_db() as conn:
+        student = conn.execute('SELECT * FROM students WHERE id=?', (sid,)).fetchone()
+    if not student:
+        flash('Student not found.', 'error')
+        return redirect(url_for('view_students'))
 
-@app.route("/edit/<int:id>", methods=["GET", "POST"])
-def edit_student(id):
+    if request.method == 'POST':
+        data = {k: request.form.get(k, '').strip() for k in [
+            'name','email','dob','gender',
+            'department','year','status','address','enroll_date'
+        ]}
+        data['id'] = sid
+        with get_db() as conn:
+            conn.execute('''
+                UPDATE students SET
+                  name=:name, email=:email, dob=:dob, gender=:gender,
+                  department=:department, year=:year, status=:status,
+                  address=:address, enroll_date=:enroll_date
+                WHERE id=:id
+            ''', data)
+            conn.commit()
+        flash(f'{data["name"]} updated successfully!', 'success')
+        return redirect(url_for('student_detail', sid=sid))
 
-    conn = get_db()
-
-    student = conn.execute(
-        "SELECT * FROM students WHERE id=?",
-        (id,)
-    ).fetchone()
-
-    if request.method == "POST":
-
-        full_name = request.form.get("full_name")
-        email = request.form.get("email")
-        phone = request.form.get("phone")
-        department = request.form.get("department")
-        academic_year = request.form.get("academic_year")
-        status = request.form.get("status")
-
-        conn.execute("""
-        UPDATE students
-        SET full_name=?, email=?, phone=?, department=?, academic_year=?, status=?
-        WHERE id=?
-        """, (full_name, email, phone, department, academic_year, status, id))
-
-        conn.commit()
-        conn.close()
-
-        flash("Student updated successfully!", "success")
-        return redirect(url_for("view_students"))
-
-    conn.close()
-
-    return render_template(
-        "edit_student.html",
-        student=student,
-        departments=DEPARTMENTS,
-        years=YEARS,
-        statuses=STATUSES
+    return render_template('edit_student.html',
+        student=student, departments=DEPARTMENTS, years=YEARS, statuses=STATUSES
     )
 
 
-@app.route("/delete/<int:id>", methods=["POST"])
-def delete_student(id):
-
-    conn = get_db()
-
-    conn.execute("DELETE FROM students WHERE id=?", (id,))
-    conn.commit()
-
-    conn.close()
-
-    flash("Student deleted successfully!", "success")
-
-    return redirect(url_for("view_students"))
+@app.route('/students/<int:sid>/delete', methods=['POST'])
+def delete_student(sid):
+    with get_db() as conn:
+        s = conn.execute('SELECT name FROM students WHERE id=?', (sid,)).fetchone()
+        if s:
+            conn.execute('DELETE FROM students WHERE id=?', (sid,))
+            conn.commit()
+            flash(f'{s["name"]} has been removed.', 'success')
+    return redirect(url_for('view_students'))
 
 
-if __name__ == "__main__":
-    init_db()
+if __name__ == '__main__':
     app.run(debug=True)

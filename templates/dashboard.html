@@ -1,195 +1,138 @@
-{% extends 'base.html' %}
-
-{% block title %} — Dashboard{% endblock %}
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
 
 {% block content %}
 
+<!-- ── PAGE HEADER ─────────────────────────────── -->
 <div class="page-header">
-  <h1>Dashboard</h1>
-  <p>Overview of student records and quick access to core actions</p>
+  <h1>Dashboard <span class="gradient-text">Overview</span></h1>
+  <p>Track student records and monitor key statistics at a glance</p>
 </div>
 
-<!-- Stat Cards -->
+<!-- ── STAT CARDS ──────────────────────────────── -->
 <div class="stats-grid">
-
-<div class="stat-card">
-<i class="fas fa-users"></i>
-<div class="stat-value">{{ total }}</div>
-<div class="stat-label">Total Students</div>
+  <div class="stat-card blue">
+    <div class="stat-icon blue">👥</div>
+    <div class="stat-value">{{ total }}</div>
+    <div class="stat-label">Total Students</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-icon green">✅</div>
+    <div class="stat-value">{{ active }}</div>
+    <div class="stat-label">Active Students</div>
+  </div>
+  <div class="stat-card amber">
+    <div class="stat-icon amber"></div>
+    <div class="stat-value">{{ grad }}</div>
+    <div class="stat-label">Graduated</div>
+  </div>
+  <div class="stat-card cyan">
+    <div class="stat-icon cyan">🔄</div>
+    <div class="stat-value">{{ leave }}</div>
+    <div class="stat-label">On Leave</div>
+  </div>
 </div>
 
-<div class="stat-card">
-<i class="fas fa-circle-check"></i>
-<div class="stat-value">{{ active }}</div>
-<div class="stat-label">Active Students</div>
-</div>
+<!-- ── CHARTS ROW ──────────────────────────────── -->
+<div class="charts-row">
 
-<div class="stat-card">
-<i class="fas fa-graduation-cap"></i>
-<div class="stat-value">{{ graduated }}</div>
-<div class="stat-label">Graduated</div>
-</div>
-
-<div class="stat-card">
-<i class="fas fa-clock"></i>
-<div class="stat-value">{{ on_leave }}</div>
-<div class="stat-label">On Leave</div>
-</div>
-
-</div>
-
-<!-- Department + Year Stats -->
-<div class="two-col">
-
+  <!-- Department Breakdown -->
   <div class="card">
-    <div class="card-header">
-      <div class="card-title">
-        <i class="fas fa-building-columns"></i>
-        Students by Department
-      </div>
-    </div>
-
-    <div class="card-body">
-
-      <div class="dept-list">
-
-        {% for dept in departments %}
-
-        <div class="dept-row">
-          <span class="dept-name">{{ dept }}</span>
-          <span class="dept-count">{{ dept_counts[dept] }}</span>
+    <div class="card-title">🏛 Students by Department</div>
+    {% set dept_colors = ['#3b82f6','#06b6d4','#10b981','#f59e0b','#8b5cf6','#ec4899'] %}
+    {% set max_d = dept_counts.values()|max if dept_counts.values()|max > 0 else 1 %}
+    {% for dept, count in dept_counts.items() %}
+      {% set pct = (count / max_d * 100)|round|int %}
+      {% set clr = dept_colors[loop.index0 % dept_colors|length] %}
+      <div class="dept-row">
+        <div class="dept-name">{{ dept }}</div>
+        <div class="dept-bar-wrap">
+          <div class="dept-bar" style="width:{{ pct }}%; background:{{ clr }}"></div>
         </div>
-
-        {% endfor %}
-
+        <div class="dept-count {% if count == 0 %}zero{% endif %}">{{ count }}</div>
       </div>
-
-    </div>
+    {% endfor %}
   </div>
 
-
+  <!-- Academic Year Breakdown -->
   <div class="card">
-    <div class="card-header">
-      <div class="card-title">
-        <i class="fas fa-calendar-days"></i>
-        Students by Academic Year
-      </div>
-    </div>
-
-    <div class="card-body">
-
-      <div class="dept-list">
-
-        {% for year in years %}
-
-        <div class="dept-row">
-          <span class="dept-name">{{ year }}</span>
-          <span class="dept-count">{{ year_counts[year] }}</span>
+    <div class="card-title">📅 Students by Year</div>
+    {% set year_colors = ['#3b82f6','#06b6d4','#10b981','#f59e0b'] %}
+    <div class="year-pills">
+      {% for yr, count in year_counts.items() %}
+        {% set clr = year_colors[loop.index0 % year_colors|length] %}
+        <div class="year-pill">
+          <div class="year-pill-name">{{ yr }}</div>
+          <div class="year-pill-count" style="color:{{ clr }}">{{ count }}</div>
         </div>
-
-        {% endfor %}
-
-      </div>
-
+      {% endfor %}
     </div>
   </div>
 
 </div>
 
-
-<!-- Recently Added Students -->
-
+<!-- ── RECENT STUDENTS ─────────────────────────── -->
 <div class="card">
+  <div class="card-title" style="margin-bottom:16px">⏱ Recently Added Students</div>
 
-  <div class="card-header">
-    <div class="card-title">
-      <i class="fas fa-clock-rotate-left"></i>
-      Recently Added Students
+  {% if recent %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Department</th>
+            <th>Year</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in recent %}
+            {% set colors = ['#3b82f6','#06b6d4','#10b981','#f59e0b','#8b5cf6','#ec4899','#ef4444','#14b8a6'] %}
+            {% set clr = colors[loop.index0 % colors|length] %}
+            {% set initials = (s.name.split()[0][0] + (s.name.split()[1][0] if s.name.split()|length > 1 else ''))|upper %}
+            <tr>
+              <td>
+                <div class="student-cell">
+                  <div class="avatar-circle" style="background:{{ clr }}">{{ initials }}</div>
+                  <div>
+                    <div class="student-name">{{ s.name }}</div>
+                    <div class="student-sid">{{ s.student_id }}</div>
+                  </div>
+                </div>
+              </td>
+              <td style="color:var(--text-dim)">{{ s.department }}</td>
+              <td style="color:var(--text-dim)">{{ s.year }}</td>
+              <td>
+                {% if s.status == 'Active' %}
+                  <span class="badge badge-active">Active</span>
+                {% elif s.status == 'On Leave' %}
+                  <span class="badge badge-leave">On Leave</span>
+                {% else %}
+                  <span class="badge badge-grad">Graduated</span>
+                {% endif %}
+              </td>
+              <td>
+                <a href="{{ url_for('student_detail', sid=s.id) }}"
+                   class="btn-icon-sm" title="View">👁</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
-
-    <a href="{{ url_for('add_student') }}" class="btn btn-primary btn-sm">
-      <i class="fas fa-plus"></i> Add Student
-    </a>
-  </div>
-
-
-  <div class="table-wrap">
-
-    {% if recent %}
-
-    <table>
-
-      <thead>
-        <tr>
-          <th>Student ID</th>
-          <th>Full Name</th>
-          <th>Department</th>
-          <th>Year</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-
-      <tbody>
-
-        {% for s in recent %}
-
-        <tr>
-
-          <td>{{ s.student_id }}</td>
-          <td>{{ s.full_name }}</td>
-          <td>{{ s.department }}</td>
-          <td>{{ s.academic_year }}</td>
-
-          <td>
-            <span class="badge badge-{{ s.status | lower | replace(' ', '-') }}">
-              {{ s.status }}
-            </span>
-          </td>
-
-          <td>
-
-            <div class="action-btns">
-
-              <a href="{{ url_for('student_detail', sid=s.id) }}" class="btn-icon btn-icon-view">
-                <i class="fas fa-eye"></i>
-              </a>
-
-              <a href="{{ url_for('edit_student', id=s.id) }}" class="btn-icon btn-icon-edit">
-                <i class="fas fa-pen"></i>
-              </a>
-
-              <form method="POST" action="{{ url_for('delete_student', id=s.id) }}" style="display:inline">
-
-                <button type="submit" class="btn-icon btn-icon-del">
-                  <i class="fas fa-trash"></i>
-                </button>
-
-              </form>
-
-            </div>
-
-          </td>
-
-        </tr>
-
-        {% endfor %}
-
-      </tbody>
-
-    </table>
-
-    {% else %}
-
+    <div style="margin-top:16px">
+      <a href="{{ url_for('view_students') }}" class="btn btn-secondary btn-sm">
+        View All Students →
+      </a>
+    </div>
+  {% else %}
     <div class="empty-state">
-      <i class="fas fa-users-slash"></i>
-      <p>No students yet. Add your first student.</p>
+      <div class="empty-icon">📭</div>
+      <p>No students yet. <a href="{{ url_for('add_student') }}" style="color:var(--accent)">Add the first one!</a></p>
     </div>
-
-    {% endif %}
-
-  </div>
-
+  {% endif %}
 </div>
 
 {% endblock %}
