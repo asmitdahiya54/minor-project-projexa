@@ -98,7 +98,7 @@ color:#666;
 }
 /* SIDEBAR */
 .sidebar{
-width:240px;
+width:250px;
 height:100vh;
 background:#1e293b;
 color:white;
@@ -119,7 +119,7 @@ color:white;
 
 /* MAIN */
 .main-content{
-margin-left:240px;  /* match sidebar width */
+margin-left:250px;  /* match sidebar width */
 padding:20px;
 }
 /* TOPBAR */
