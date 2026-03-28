@@ -1,10 +1,10 @@
-from flask import Flask, app, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 import sqlite3, os
+from datetime import date, datetime
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
-app.secret_key = 'sims_secret_key_2024'
-
-DB = 'sims.db'
+app.secret_key = os.environ.get("SECRET_KEY", "dev_key")
+DB = os.path.join(os.path.dirname(__file__), 'sims.db')
 
 # ── DB SETUP ──────────────────────────────────────────────
 def get_db():
