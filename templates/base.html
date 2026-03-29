@@ -80,51 +80,34 @@
   </nav>
 </aside>
 
-  <!-- ══ MAIN ════════════════════════════════════ -->
-  <main class="main">
+  <!-- Main -->
+<div class="main-wrap">
+  <header class="topbar">
+    <span class="topbar-title">{% block topbar_title %}{% endblock %}</span>
+    <span class="topbar-date" id="topbarDate"></span>
+  </header>
 
-    <!-- TOPBAR -->
-    <div class="topbar">
-      <form action="{{ url_for('view_students') }}" method="get" class="search-wrap">
-        <span class="search-icon">🔍</span>
-        <input type="text" name="search" placeholder="Search students by name or ID…"
-               value="{{ request.args.get('search','') }}">
-      </form>
-      <div class="topbar-right">
-        <div class="date-chip" id="js-date"></div>
-        <a href="{{ url_for('add_student') }}" class="btn btn-primary">＋ Add Student</a>
-      </div>
-    </div>
-
-    <!-- FLASH MESSAGES -->
+  <main class="main-content">
     {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <div class="flash-wrap">
-          {% for category, message in messages %}
-            <div class="flash {{ category }}">
-              {% if category == 'success' %}✅{% else %}⚠️{% endif %}
-              {{ message }}
-            </div>
-          {% endfor %}
-        </div>
-      {% endif %}
+    {% if messages %}
+    <div class="flash-list">
+      {% for cat, msg in messages %}
+      <div class="flash-msg {{ cat }}">
+        {% if cat=='success' %}✅{% else %}❌{% endif %} {{ msg }}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
     {% endwith %}
 
-    <!-- PAGE CONTENT -->
-    <div class="content">
-      {% block content %}{% endblock %}
-    </div>
-
+    {% block content %}{% endblock %}
   </main>
-  <!-- ══ END MAIN ═════════════════════════════════ -->
+</div>
 
-  <script>
-    // Inject current date
-    const d = new Date();
-    document.getElementById('js-date').textContent =
-      d.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
-  </script>
-
-  {% block extra_scripts %}{% endblock %}
+<script>
+  const d = new Date();
+  document.getElementById('topbarDate').textContent =
+    d.toLocaleDateString('en-IN', {weekday:'short',year:'numeric',month:'short',day:'numeric'});
+</script>
 </body>
 </html>
