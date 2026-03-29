@@ -120,6 +120,8 @@ def get_grade_color(grade):
     colors = {'O':'#10b981','A+':'#3b82f6','A':'#6366f1',
               'B+':'#f59e0b','B':'#f97316','C':'#ef4444','F':'#dc2626'}
     return colors.get(grade,'#6b7280')
+
+
 # ── ROUTES ────────────────────────────────────────────────
 
 @app.route('/')
