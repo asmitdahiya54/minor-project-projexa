@@ -30,7 +30,47 @@ def init_db():
                 created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
-        # Seed sample data if empty
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS attendance (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                student_id  INTEGER NOT NULL,
+                date        TEXT NOT NULL,
+                status      TEXT NOT NULL CHECK(status IN ('Present','Absent','Late')),
+                subject     TEXT DEFAULT 'General',
+                remarks     TEXT,
+                created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(student_id, date, subject),
+                FOREIGN KEY(student_id) REFERENCES students(id)
+            )
+        ''')
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS results (
+                id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                student_id      INTEGER NOT NULL,
+                subject         TEXT NOT NULL,
+                marks_obtained  REAL NOT NULL,
+                max_marks       REAL NOT NULL DEFAULT 100,
+                exam_type       TEXT DEFAULT 'Midterm',
+                semester        TEXT NOT NULL,
+                grade           TEXT,
+                remarks         TEXT,
+                created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY(student_id) REFERENCES students(id)
+            )
+        ''')
+        # ── NEW: Feedback table ───────────────────────────────
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS feedback (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                student_id  INTEGER NOT NULL,
+                message     TEXT NOT NULL,
+                rating      INTEGER NOT NULL CHECK(rating BETWEEN 1 AND 5),
+                category    TEXT DEFAULT 'General',
+                created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY(student_id) REFERENCES students(id)
+            )
+        ''')
+
         cur = conn.execute('SELECT COUNT(*) FROM students')
         if cur.fetchone()[0] == 0:
             seed = [
@@ -54,14 +94,32 @@ def init_db():
 
 init_db()
 
-DEPARTMENTS = [
-    'Computer Science', 'Information Technology', 'Electronics',
-    'Mechanical Engineering', 'Civil Engineering', 'Business Administration'
-]
-YEARS    = ['First Year', 'Second Year', 'Third Year', 'Fourth Year']
-STATUSES = ['Active', 'On Leave', 'Graduated']
+DEPARTMENTS = ['Computer Science','Information Technology','Electronics',
+               'Mechanical Engineering','Civil Engineering','Business Administration']
+YEARS      = ['First Year','Second Year','Third Year','Fourth Year']
+STATUSES   = ['Active','On Leave','Graduated']
+SEMESTERS  = ['Semester 1','Semester 2','Semester 3','Semester 4',
+              'Semester 5','Semester 6','Semester 7','Semester 8']
+EXAM_TYPES = ['Midterm','Final','Quiz','Assignment','Practical']
+SUBJECTS   = ['Mathematics','Physics','Chemistry','English','Data Structures',
+              'Algorithms','DBMS','Operating Systems','Computer Networks',
+              'Software Engineering','Web Development','Machine Learning',
+              'Discrete Mathematics','Digital Electronics','Circuit Theory',
+              'Thermodynamics','Fluid Mechanics','General']
 
+def calculate_grade(pct):
+    if pct >= 90: return 'O'
+    if pct >= 80: return 'A+'
+    if pct >= 70: return 'A'
+    if pct >= 60: return 'B+'
+    if pct >= 50: return 'B'
+    if pct >= 40: return 'C'
+    return 'F'
 
+def get_grade_color(grade):
+    colors = {'O':'#10b981','A+':'#3b82f6','A':'#6366f1',
+              'B+':'#f59e0b','B':'#f97316','C':'#ef4444','F':'#dc2626'}
+    return colors.get(grade,'#6b7280')
 # ── ROUTES ────────────────────────────────────────────────
 
 @app.route('/')
