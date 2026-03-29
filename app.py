@@ -153,29 +153,21 @@ def dashboard():
 
 @app.route('/students')
 def view_students():
-    dept   = request.args.get('dept', '')
-    year   = request.args.get('year', '')
-    status = request.args.get('status', '')
-    search = request.args.get('search', '')
-
-    query  = 'SELECT * FROM students WHERE 1=1'
-    params = []
-    if dept:   query += ' AND department=?';  params.append(dept)
-    if year:   query += ' AND year=?';        params.append(year)
-    if status: query += ' AND status=?';      params.append(status)
+    dept=request.args.get('dept',''); year=request.args.get('year','')
+    status=request.args.get('status',''); search=request.args.get('search','')
+    q='SELECT * FROM students WHERE 1=1'; p=[]
+    if dept:   q+=' AND department=?';p.append(dept)
+    if year:   q+=' AND year=?';p.append(year)
+    if status: q+=' AND status=?';p.append(status)
     if search:
-        query += ' AND (name LIKE ? OR student_id LIKE ?)'
-        params += [f'%{search}%', f'%{search}%']
-    query += ' ORDER BY created_at DESC'
-
+        q+=' AND (name LIKE ? OR student_id LIKE ?)'; p+=[f'%{search}%',f'%{search}%']
+    q+=' ORDER BY created_at DESC'
     with get_db() as conn:
-        students = conn.execute(query, params).fetchall()
+        students=conn.execute(q,p).fetchall()
+    return render_template('view_students.html',students=students,
+        departments=DEPARTMENTS,years=YEARS,statuses=STATUSES,
+        filters={'dept':dept,'year':year,'status':status,'search':search})
 
-    return render_template('view_students.html',
-        students=students, departments=DEPARTMENTS,
-        years=YEARS, statuses=STATUSES,
-        filters={'dept': dept, 'year': year, 'status': status, 'search': search}
-    )
 
 
 @app.route('/students/add', methods=['GET', 'POST'])
