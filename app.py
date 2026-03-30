@@ -168,32 +168,25 @@ def view_students():
         filters={'dept':dept,'year':year,'status':status,'search':search})
 
 
-
-@app.route('/students/add', methods=['GET', 'POST'])
+@app.route('/students/add',methods=['GET','POST'])
 def add_student():
-    if request.method == 'POST':
-        data = {k: request.form.get(k, '').strip() for k in [
-            'student_id','name','email','dob','gender',
-            'department','year','status','address','enroll_date'
-        ]}
+    if request.method=='POST':
+        data={k:request.form.get(k,'').strip() for k in
+              ['student_id','name','email','dob','gender','department','year','status','address','enroll_date']}
         if not data['name'] or not data['student_id'] or not data['department'] or not data['year']:
-            flash('Name, Student ID, Department and Year are required.', 'error')
-            return render_template('add_student.html', departments=DEPARTMENTS, years=YEARS, statuses=STATUSES, form=data)
-
+            flash('Name, Student ID, Department and Year are required.','error')
+            return render_template('add_student.html',departments=DEPARTMENTS,years=YEARS,statuses=STATUSES,form=data)
         try:
             with get_db() as conn:
-                conn.execute('''
-                    INSERT INTO students
+                conn.execute('''INSERT INTO students
                     (student_id,name,email,dob,gender,department,year,status,address,enroll_date)
-                    VALUES (:student_id,:name,:email,:dob,:gender,:department,:year,:status,:address,:enroll_date)
-                ''', data)
+                    VALUES (:student_id,:name,:email,:dob,:gender,:department,:year,:status,:address,:enroll_date)''',data)
                 conn.commit()
-            flash(f'{data["name"]} has been registered successfully!', 'success')
+            flash(f'{data["name"]} has been registered successfully!','success')
             return redirect(url_for('dashboard'))
         except sqlite3.IntegrityError:
-            flash('A student with that ID already exists.', 'error')
-
-    return render_template('add_student.html', departments=DEPARTMENTS, years=YEARS, statuses=STATUSES, form={})
+            flash('A student with that ID already exists.','error')
+    return render_template('add_student.html',departments=DEPARTMENTS,years=YEARS,statuses=STATUSES,form={})
 
 
 @app.route('/students/<int:sid>')
