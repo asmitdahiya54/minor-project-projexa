@@ -149,6 +149,7 @@ def dashboard():
         results_count=results_count,today=today,
         feedback_count=feedback_count,avg_rating=avg_rating)
 
+
 @app.route('/students')
 def view_students():
     dept=request.args.get('dept',''); year=request.args.get('year','')
