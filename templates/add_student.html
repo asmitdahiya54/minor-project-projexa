@@ -1,14 +1,13 @@
 {% extends "base.html" %}
 {% block title %}Add Student{% endblock %}
-
 {% block content %}
-
-<!-- ── PAGE HEADER ─────────────────────────────── -->
 <div class="page-header">
-  <h1>Add <span class="gradient-text">New Student</span></h1>
-  <p>Fill in the details below to register a new student record</p>
+  <div>
+    <a href="{{ url_for('view_students') }}" class="back-link">← Back to Students</a>
+    <h1 class="page-title">➕ Add Student</h1>
+    <p class="page-sub">Register a new student record</p>
+  </div>
 </div>
-
 <!-- ── FORM ────────────────────────────────────── -->
 <div class="card form-card">
   <form method="post" action="{{ url_for('add_student') }}">
