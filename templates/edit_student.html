@@ -1,15 +1,12 @@
 {% extends "base.html" %}
-{% block title %}Edit – {{ student.name }}{% endblock %}
-
+{% block title %}Edit {{ student.name }}{% endblock %}
 {% block content %}
-
-<!-- ── BREADCRUMB ───────────────────────────────── -->
-<div class="breadcrumb">
-  <a href="{{ url_for('view_students') }}">Students</a>
-  <span class="breadcrumb-sep">›</span>
-  <a href="{{ url_for('student_detail', sid=student.id) }}">{{ student.name }}</a>
-  <span class="breadcrumb-sep">›</span>
-  <span>Edit</span>
+<div class="page-header">
+  <div>
+    <a href="{{ url_for('student_detail', sid=student.id) }}" class="back-link">← Back to {{ student.name }}</a>
+    <h1 class="page-title">✏️ Edit Student</h1>
+    <p class="page-sub">{{ student.student_id }}</p>
+  </div>
 </div>
 
 <!-- ── PAGE HEADER ─────────────────────────────── -->
