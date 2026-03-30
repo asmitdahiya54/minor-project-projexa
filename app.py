@@ -127,29 +127,27 @@ def get_grade_color(grade):
 @app.route('/')
 def dashboard():
     with get_db() as conn:
-        total   = conn.execute('SELECT COUNT(*) FROM students').fetchone()[0]
-        active  = conn.execute("SELECT COUNT(*) FROM students WHERE status='Active'").fetchone()[0]
-        grad    = conn.execute("SELECT COUNT(*) FROM students WHERE status='Graduated'").fetchone()[0]
-        leave   = conn.execute("SELECT COUNT(*) FROM students WHERE status='On Leave'").fetchone()[0]
-
-        dept_counts = {d: conn.execute(
-            'SELECT COUNT(*) FROM students WHERE department=?', (d,)
-        ).fetchone()[0] for d in DEPARTMENTS}
-
-        year_counts = {y: conn.execute(
-            'SELECT COUNT(*) FROM students WHERE year=?', (y,)
-        ).fetchone()[0] for y in YEARS}
-
-        recent = conn.execute(
-            'SELECT * FROM students ORDER BY created_at DESC LIMIT 5'
-        ).fetchall()
-
+        total  = conn.execute('SELECT COUNT(*) FROM students').fetchone()[0]
+        active = conn.execute("SELECT COUNT(*) FROM students WHERE status='Active'").fetchone()[0]
+        grad   = conn.execute("SELECT COUNT(*) FROM students WHERE status='Graduated'").fetchone()[0]
+        leave  = conn.execute("SELECT COUNT(*) FROM students WHERE status='On Leave'").fetchone()[0]
+        dept_counts = {d: conn.execute('SELECT COUNT(*) FROM students WHERE department=?',(d,)).fetchone()[0] for d in DEPARTMENTS}
+        year_counts = {y: conn.execute('SELECT COUNT(*) FROM students WHERE year=?',(y,)).fetchone()[0] for y in YEARS}
+        recent = conn.execute('SELECT * FROM students ORDER BY created_at DESC LIMIT 5').fetchall()
+        today  = date.today().isoformat()
+        att_today    = conn.execute('SELECT COUNT(*) FROM attendance WHERE date=?',(today,)).fetchone()[0]
+        present_today= conn.execute("SELECT COUNT(*) FROM attendance WHERE date=? AND status='Present'",(today,)).fetchone()[0]
+        results_count= conn.execute('SELECT COUNT(*) FROM results').fetchone()[0]
+        feedback_count= conn.execute('SELECT COUNT(*) FROM feedback').fetchone()[0]
+        avg_rating   = conn.execute('SELECT AVG(rating) FROM feedback').fetchone()[0]
+        avg_rating   = round(avg_rating,1) if avg_rating else 0
     return render_template('dashboard.html',
-        total=total, active=active, grad=grad, leave=leave,
-        dept_counts=dept_counts, year_counts=year_counts,
-        recent=recent, departments=DEPARTMENTS, years=YEARS
-    )
-
+        total=total,active=active,grad=grad,leave=leave,
+        dept_counts=dept_counts,year_counts=year_counts,recent=recent,
+        departments=DEPARTMENTS,years=YEARS,
+        att_today=att_today,present_today=present_today,
+        results_count=results_count,today=today,
+        feedback_count=feedback_count,avg_rating=avg_rating)
 
 @app.route('/students')
 def view_students():
