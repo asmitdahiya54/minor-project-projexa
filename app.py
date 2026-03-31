@@ -239,3 +239,7 @@ def delete_student(sid):
             conn.commit()
             flash(f'{s["name"]} has been removed.','success')
     return redirect(url_for('view_students'))
+
+
+# ── ATTENDANCE ROUTES ─────────────────────────────────────
+@app.route('/attendance')
