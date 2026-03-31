@@ -206,37 +206,27 @@ def student_detail(sid):
         att_pct=att_pct,recent_att=recent_att,results=results)
 
 
-@app.route('/students/<int:sid>/edit', methods=['GET', 'POST'])
+@app.route('/students/<int:sid>/edit',methods=['GET','POST'])
 def edit_student(sid):
     with get_db() as conn:
-        student = conn.execute('SELECT * FROM students WHERE id=?', (sid,)).fetchone()
+        student=conn.execute('SELECT * FROM students WHERE id=?',(sid,)).fetchone()
     if not student:
-        flash('Student not found.', 'error')
-        return redirect(url_for('view_students'))
-
-    if request.method == 'POST':
-        data = {k: request.form.get(k, '').strip() for k in [
-            'name','email','dob','gender',
-            'department','year','status','address','enroll_date'
-        ]}
-        data['id'] = sid
+        flash('Student not found.','error'); return redirect(url_for('view_students'))
+    if request.method=='POST':
+        data={k:request.form.get(k,'').strip() for k in
+              ['name','email','dob','gender','department','year','status','address','enroll_date']}
+        data['id']=sid
         with get_db() as conn:
-            conn.execute('''
-                UPDATE students SET
-                  name=:name, email=:email, dob=:dob, gender=:gender,
-                  department=:department, year=:year, status=:status,
-                  address=:address, enroll_date=:enroll_date
-                WHERE id=:id
-            ''', data)
+            conn.execute('''UPDATE students SET name=:name,email=:email,dob=:dob,gender=:gender,
+                department=:department,year=:year,status=:status,address=:address,enroll_date=:enroll_date
+                WHERE id=:id''',data)
             conn.commit()
-        flash(f'{data["name"]} updated successfully!', 'success')
-        return redirect(url_for('student_detail', sid=sid))
+        flash(f'{data["name"]} updated successfully!','success')
+        return redirect(url_for('student_detail',sid=sid))
+    return render_template('edit_student.html',student=student,
+        departments=DEPARTMENTS,years=YEARS,statuses=STATUSES)
 
-    return render_template('edit_student.html',
-        student=student, departments=DEPARTMENTS, years=YEARS, statuses=STATUSES
-    )
-
-
+# ------
 @app.route('/students/<int:sid>/delete', methods=['POST'])
 def delete_student(sid):
     with get_db() as conn:
