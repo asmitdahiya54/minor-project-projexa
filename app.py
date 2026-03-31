@@ -192,11 +192,18 @@ def add_student():
 @app.route('/students/<int:sid>')
 def student_detail(sid):
     with get_db() as conn:
-        student = conn.execute('SELECT * FROM students WHERE id=?', (sid,)).fetchone()
+        student=conn.execute('SELECT * FROM students WHERE id=?',(sid,)).fetchone()
+        att_total  =conn.execute('SELECT COUNT(*) FROM attendance WHERE student_id=?',(sid,)).fetchone()[0]
+        att_present=conn.execute("SELECT COUNT(*) FROM attendance WHERE student_id=? AND status='Present'",(sid,)).fetchone()[0]
+        att_late   =conn.execute("SELECT COUNT(*) FROM attendance WHERE student_id=? AND status='Late'",(sid,)).fetchone()[0]
+        att_pct    =round((att_present/att_total*100),1) if att_total>0 else 0
+        recent_att =conn.execute('SELECT * FROM attendance WHERE student_id=? ORDER BY date DESC LIMIT 10',(sid,)).fetchall()
+        results    =conn.execute('SELECT * FROM results WHERE student_id=? ORDER BY semester,subject',(sid,)).fetchall()
     if not student:
-        flash('Student not found.', 'error')
-        return redirect(url_for('view_students'))
-    return render_template('student_detail.html', student=student)
+        flash('Student not found.','error'); return redirect(url_for('view_students'))
+    return render_template('student_detail.html',student=student,
+        att_total=att_total,att_present=att_present,att_late=att_late,
+        att_pct=att_pct,recent_att=recent_att,results=results)
 
 
 @app.route('/students/<int:sid>/edit', methods=['GET', 'POST'])
