@@ -226,17 +226,16 @@ def edit_student(sid):
     return render_template('edit_student.html',student=student,
         departments=DEPARTMENTS,years=YEARS,statuses=STATUSES)
 
-# ------
-@app.route('/students/<int:sid>/delete', methods=['POST'])
+
+@app.route('/students/<int:sid>/delete',methods=['POST'])
 def delete_student(sid):
     with get_db() as conn:
-        s = conn.execute('SELECT name FROM students WHERE id=?', (sid,)).fetchone()
+        s=conn.execute('SELECT name FROM students WHERE id=?',(sid,)).fetchone()
         if s:
-            conn.execute('DELETE FROM students WHERE id=?', (sid,))
+            conn.execute('DELETE FROM attendance WHERE student_id=?',(sid,))
+            conn.execute('DELETE FROM results WHERE student_id=?',(sid,))
+            conn.execute('DELETE FROM feedback WHERE student_id=?',(sid,))
+            conn.execute('DELETE FROM students WHERE id=?',(sid,))
             conn.commit()
-            flash(f'{s["name"]} has been removed.', 'success')
+            flash(f'{s["name"]} has been removed.','success')
     return redirect(url_for('view_students'))
-
-
-if __name__ == '__main__':
-    app.run(debug=True)
