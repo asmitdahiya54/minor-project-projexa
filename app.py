@@ -242,4 +242,27 @@ def delete_student(sid):
 
 
 # ── ATTENDANCE ROUTES ─────────────────────────────────────
+
 @app.route('/attendance')
+def attendance():
+    sel_date   =request.args.get('date',date.today().isoformat())
+    sel_dept   =request.args.get('dept','')
+    sel_subject=request.args.get('subject','General')
+    with get_db() as conn:
+        q="SELECT * FROM students WHERE status='Active'"; p=[]
+        if sel_dept: q+=' AND department=?'; p.append(sel_dept)
+        q+=' ORDER BY name'
+        students=conn.execute(q,p).fetchall()
+        att_records=conn.execute('SELECT student_id,status FROM attendance WHERE date=? AND subject=?',
+            (sel_date,sel_subject)).fetchall()
+        att_map={r['student_id']:r['status'] for r in att_records}
+        total_marked=len(att_map)
+        present_ct=sum(1 for v in att_map.values() if v=='Present')
+        absent_ct =sum(1 for v in att_map.values() if v=='Absent')
+        late_ct   =sum(1 for v in att_map.values() if v=='Late')
+    return render_template('attendance.html',
+        students=students,att_map=att_map,sel_date=sel_date,
+        sel_dept=sel_dept,sel_subject=sel_subject,
+        total_marked=total_marked,present_ct=present_ct,
+        absent_ct=absent_ct,late_ct=late_ct,
+        departments=DEPARTMENTS,subjects=SUBJECTS)
