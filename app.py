@@ -287,3 +287,27 @@ def mark_attendance():
         conn.commit()
     flash(f'Attendance saved for {saved} students on {att_date}.','success')
     return redirect(url_for('attendance',date=att_date,dept=dept,subject=subject))
+
+
+@app.route('/attendance/report')
+def attendance_report():
+    sel_dept=request.args.get('dept','')
+    with get_db() as conn:
+        q="SELECT * FROM students WHERE 1=1"; p=[]
+        if sel_dept: q+=' AND department=?'; p.append(sel_dept)
+        q+=' ORDER BY name'
+        students=conn.execute(q,p).fetchall()
+        report=[]
+        for s in students:
+            sid=s['id']
+            total=conn.execute('SELECT COUNT(*) FROM attendance WHERE student_id=?',(sid,)).fetchone()[0]
+            pres =conn.execute("SELECT COUNT(*) FROM attendance WHERE student_id=? AND status='Present'",(sid,)).fetchone()[0]
+            late =conn.execute("SELECT COUNT(*) FROM attendance WHERE student_id=? AND status='Late'",(sid,)).fetchone()[0]
+            pct  =round(((pres+late*0.5)/total*100),1) if total>0 else 0
+            report.append({'id':sid,'student_id':s['student_id'],'name':s['name'],
+                'department':s['department'],'year':s['year'],
+                'total':total,'present':pres,'late':late,'absent':total-pres-late,
+                'percentage':pct,
+                'status_label':('Excellent' if pct>=85 else 'Good' if pct>=75 else 'Average' if pct>=60 else 'Low')})
+    return render_template('attendance_report.html',
+        report=report,sel_dept=sel_dept,departments=DEPARTMENTS)
