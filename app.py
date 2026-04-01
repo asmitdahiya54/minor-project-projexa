@@ -311,3 +311,26 @@ def attendance_report():
                 'status_label':('Excellent' if pct>=85 else 'Good' if pct>=75 else 'Average' if pct>=60 else 'Low')})
     return render_template('attendance_report.html',
         report=report,sel_dept=sel_dept,departments=DEPARTMENTS)
+
+
+@app.route('/attendance/student/<int:sid>')
+def student_attendance(sid):
+    with get_db() as conn:
+        student=conn.execute('SELECT * FROM students WHERE id=?',(sid,)).fetchone()
+        records=conn.execute('SELECT * FROM attendance WHERE student_id=? ORDER BY date DESC',(sid,)).fetchall()
+        total  =len(records)
+        present=sum(1 for r in records if r['status']=='Present')
+        late   =sum(1 for r in records if r['status']=='Late')
+        absent =total-present-late
+        pct    =round(((present+late*0.5)/total*100),1) if total>0 else 0
+        monthly={}
+        for r in records:
+            m=r['date'][:7]
+            if m not in monthly: monthly[m]={'present':0,'absent':0,'late':0}
+            monthly[m][r['status'].lower()]+=1
+    if not student:
+        flash('Student not found.','error'); return redirect(url_for('attendance_report'))
+    return render_template('student_attendance.html',
+        student=student,records=records,total=total,
+        present=present,late=late,absent=absent,pct=pct,
+        monthly=dict(sorted(monthly.items(),reverse=True)))
