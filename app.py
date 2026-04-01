@@ -266,3 +266,24 @@ def attendance():
         total_marked=total_marked,present_ct=present_ct,
         absent_ct=absent_ct,late_ct=late_ct,
         departments=DEPARTMENTS,subjects=SUBJECTS)
+
+
+@app.route('/attendance/mark',methods=['POST'])
+def mark_attendance():
+    att_date=request.form.get('date',date.today().isoformat())
+    subject =request.form.get('subject','General')
+    dept    =request.form.get('dept','')
+    with get_db() as conn:
+        students=conn.execute("SELECT id FROM students WHERE status='Active'"+
+            (' AND department=?' if dept else ''),([dept] if dept else [])).fetchall()
+        saved=0
+        for s in students:
+            sid=s['id']; status=request.form.get(f'att_{sid}','')
+            if status in ('Present','Absent','Late'):
+                conn.execute('''INSERT INTO attendance (student_id,date,status,subject)
+                    VALUES (?,?,?,?) ON CONFLICT(student_id,date,subject) DO UPDATE SET status=excluded.status''',
+                    (sid,att_date,status,subject))
+                saved+=1
+        conn.commit()
+    flash(f'Attendance saved for {saved} students on {att_date}.','success')
+    return redirect(url_for('attendance',date=att_date,dept=dept,subject=subject))
