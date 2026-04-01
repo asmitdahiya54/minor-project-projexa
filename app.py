@@ -334,3 +334,16 @@ def student_attendance(sid):
         student=student,records=records,total=total,
         present=present,late=late,absent=absent,pct=pct,
         monthly=dict(sorted(monthly.items(),reverse=True)))
+    
+    
+@app.route('/attendance/<int:att_id>/delete',methods=['POST'])
+def delete_attendance(att_id):
+    sid=request.form.get('student_id')
+    with get_db() as conn:
+        conn.execute('DELETE FROM attendance WHERE id=?',(att_id,))
+        conn.commit()
+    flash('Attendance record removed.','success')
+    return redirect(url_for('student_attendance',sid=sid))
+
+
+# ── RESULTS ROUTES ────────────────────────────────────────
