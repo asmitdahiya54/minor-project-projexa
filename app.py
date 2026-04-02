@@ -372,3 +372,35 @@ def results():
         filters={'dept':sel_dept,'semester':sel_sem,'exam':sel_exam,'search':search},
         total_results=total_results,avg_pct=avg_pct)
 
+
+@app.route('/results/add',methods=['GET','POST'])
+def add_result():
+    if request.method=='POST':
+        try:
+            marks=float(request.form.get('marks_obtained',0))
+            max_m=float(request.form.get('max_marks',100))
+            pct=(marks/max_m*100) if max_m>0 else 0
+            grade=calculate_grade(pct)
+            sid=int(request.form.get('student_id'))
+            subject=request.form.get('subject','').strip()
+            exam_type=request.form.get('exam_type','Midterm')
+            semester=request.form.get('semester','').strip()
+            remarks=request.form.get('remarks','').strip()
+            if not subject or not semester:
+                flash('Subject and Semester are required.','error')
+            else:
+                with get_db() as conn:
+                    conn.execute('''INSERT INTO results
+                        (student_id,subject,marks_obtained,max_marks,exam_type,semester,grade,remarks)
+                        VALUES (?,?,?,?,?,?,?,?)''',(sid,subject,marks,max_m,exam_type,semester,grade,remarks))
+                    conn.commit()
+                flash(f'Result added! Grade: {grade}','success')
+                return redirect(url_for('results'))
+        except (ValueError,TypeError):
+            flash('Invalid marks entered.','error')
+    with get_db() as conn:
+        students=conn.execute('SELECT id,student_id,name,department FROM students ORDER BY name').fetchall()
+    pre_sid=request.args.get('student_id')
+    return render_template('add_result.html',students=students,
+        semesters=SEMESTERS,exam_types=EXAM_TYPES,subjects=SUBJECTS,pre_sid=pre_sid)
+
