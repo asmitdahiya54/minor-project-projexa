@@ -404,3 +404,33 @@ def add_result():
     return render_template('add_result.html',students=students,
         semesters=SEMESTERS,exam_types=EXAM_TYPES,subjects=SUBJECTS,pre_sid=pre_sid)
 
+
+@app.route('/results/student/<int:sid>')
+def student_results(sid):
+    with get_db() as conn:
+        student=conn.execute('SELECT * FROM students WHERE id=?',(sid,)).fetchone()
+        results=conn.execute('SELECT * FROM results WHERE student_id=? ORDER BY semester,subject',(sid,)).fetchall()
+        sem_data={}
+        for r in results:
+            sem=r['semester']
+            if sem not in sem_data: sem_data[sem]={'subjects':[],'total_marks':0,'total_max':0}
+            pct=round(r['marks_obtained']/r['max_marks']*100,1)
+            sem_data[sem]['subjects'].append({'id':r['id'],'subject':r['subject'],
+                'marks':r['marks_obtained'],'max':r['max_marks'],'pct':pct,
+                'grade':r['grade'],'exam_type':r['exam_type']})
+            sem_data[sem]['total_marks']+=r['marks_obtained']
+            sem_data[sem]['total_max']  +=r['max_marks']
+        for sem in sem_data:
+            tm=sem_data[sem]['total_marks']; mx=sem_data[sem]['total_max']
+            sem_data[sem]['sem_pct']  =round(tm/mx*100,1) if mx>0 else 0
+            sem_data[sem]['sem_grade']=calculate_grade(sem_data[sem]['sem_pct'])
+        overall_marks=sum(r['marks_obtained'] for r in results)
+        overall_max  =sum(r['max_marks'] for r in results)
+        overall_pct  =round(overall_marks/overall_max*100,1) if overall_max>0 else 0
+        overall_grade=calculate_grade(overall_pct)
+    if not student:
+        flash('Student not found.','error'); return redirect(url_for('results'))
+    return render_template('student_results.html',student=student,sem_data=sem_data,
+        overall_pct=overall_pct,overall_grade=overall_grade,
+        overall_marks=overall_marks,overall_max=overall_max,
+        calculate_grade=calculate_grade,get_grade_color=get_grade_color)
