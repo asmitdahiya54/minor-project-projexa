@@ -347,3 +347,28 @@ def delete_attendance(att_id):
 
 
 # ── RESULTS ROUTES ────────────────────────────────────────
+
+@app.route('/results')
+def results():
+    sel_dept=request.args.get('dept',''); sel_sem=request.args.get('semester','')
+    sel_exam=request.args.get('exam',''); search=request.args.get('search','')
+    q='''SELECT r.*,s.name,s.student_id as sid,s.department,s.year
+         FROM results r JOIN students s ON r.student_id=s.id WHERE 1=1'''
+    p=[]
+    if sel_dept: q+=' AND s.department=?'; p.append(sel_dept)
+    if sel_sem:  q+=' AND r.semester=?';   p.append(sel_sem)
+    if sel_exam: q+=' AND r.exam_type=?';  p.append(sel_exam)
+    if search:
+        q+=' AND (s.name LIKE ? OR s.student_id LIKE ? OR r.subject LIKE ?)'
+        p+=[f'%{search}%',f'%{search}%',f'%{search}%']
+    q+=' ORDER BY r.created_at DESC'
+    with get_db() as conn:
+        rows=conn.execute(q,p).fetchall()
+        total_results=conn.execute('SELECT COUNT(*) FROM results').fetchone()[0]
+        avg_row=conn.execute('SELECT AVG(marks_obtained*100.0/max_marks) FROM results').fetchone()[0]
+        avg_pct=round(avg_row,1) if avg_row else 0
+    return render_template('results.html',rows=rows,
+        departments=DEPARTMENTS,semesters=SEMESTERS,exam_types=EXAM_TYPES,
+        filters={'dept':sel_dept,'semester':sel_sem,'exam':sel_exam,'search':search},
+        total_results=total_results,avg_pct=avg_pct)
+
