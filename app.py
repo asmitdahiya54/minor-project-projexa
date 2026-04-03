@@ -516,3 +516,33 @@ def feedback():
         categories=FEEDBACK_CATEGORIES,
         filters={'rating':sel_rating,'category':sel_category,'student':sel_student}
     )
+
+
+@app.route('/feedback/add', methods=['GET','POST'])
+def add_feedback():
+    if request.method == 'POST':
+        try:
+            sid      = int(request.form.get('student_id'))
+            message  = request.form.get('message','').strip()
+            rating   = int(request.form.get('rating',3))
+            category = request.form.get('category','General')
+
+            if not message:
+                flash('Feedback message cannot be empty.','error')
+            elif not (1 <= rating <= 5):
+                flash('Rating must be between 1 and 5.','error')
+            else:
+                with get_db() as conn:
+                    conn.execute('''INSERT INTO feedback (student_id,message,rating,category)
+                        VALUES (?,?,?,?)''',(sid,message,rating,category))
+                    conn.commit()
+                flash('Feedback submitted successfully!','success')
+                return redirect(url_for('feedback'))
+        except (ValueError,TypeError):
+            flash('Invalid data submitted.','error')
+
+    with get_db() as conn:
+        students = conn.execute("SELECT id,student_id,name,department FROM students ORDER BY name").fetchall()
+    pre_sid = request.args.get('student_id')
+    return render_template('add_feedback.html',
+        students=students, categories=FEEDBACK_CATEGORIES, pre_sid=pre_sid)
