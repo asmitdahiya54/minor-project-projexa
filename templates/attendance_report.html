@@ -24,6 +24,61 @@
 <div class="filter-bar" style="margin-bottom:1.5rem">
   <form method="get" class="filter-form">
     <div class="filter-group">
+      <!-- Table -->
+<div class="table-wrap">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Student</th>
+        <th>Department</th>
+        <th>Year</th>
+        <th style="text-align:center">Total</th>
+        <th style="text-align:center">Present</th>
+        <th style="text-align:center">Late</th>
+        <th style="text-align:center">Absent</th>
+        <th>Attendance %</th>
+        <th style="text-align:center">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in report %}
+      <tr>
+        <td class="text-muted">{{ loop.index }}</td>
+        <td>
+          <div class="student-cell">
+            <span class="s-name">{{ r.name }}</span>
+            <span class="s-id">{{ r.student_id }}</span>
+          </div>
+        </td>
+        <td><span class="dept-tag">{{ r.department }}</span></td>
+        <td>{{ r.year }}</td>
+        <td style="text-align:center;font-weight:700">{{ r.total }}</td>
+        <td style="text-align:center"><span class="badge badge-success">{{ r.present }}</span></td>
+        <td style="text-align:center"><span class="badge badge-warn">{{ r.late }}</span></td>
+        <td style="text-align:center"><span class="badge badge-danger">{{ r.absent }}</span></td>
+        <td>
+          <div class="pct-bar-wrap">
+            <div class="pct-bar" style="width:{{ r.percentage }}%;
+              background:{% if r.percentage>=85 %}#10b981{% elif r.percentage>=75 %}#3b82f6{% elif r.percentage>=60 %}#f59e0b{% else %}#ef4444{% endif %}">
+            </div>
+            <span class="pct-label {% if r.percentage<75 %}pct-low{% endif %}">{{ r.percentage }}%</span>
+          </div>
+          <span class="status-micro {% if r.status_label=='Excellent' %}exc{% elif r.status_label=='Good' %}good{% elif r.status_label=='Average' %}avg{% else %}low{% endif %}">
+            {{ r.status_label }}
+          </span>
+        </td>
+        <td style="text-align:center">
+          <a href="{{ url_for('student_attendance', sid=r.id) }}" class="btn-icon" title="View Details">🔍</a>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="10" class="empty-cell">No records found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
       <label>🏛 Department</label>
       <select name="dept" onchange="this.form.submit()">
         <option value="">All Departments</option>
