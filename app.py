@@ -434,3 +434,13 @@ def student_results(sid):
         overall_pct=overall_pct,overall_grade=overall_grade,
         overall_marks=overall_marks,overall_max=overall_max,
         calculate_grade=calculate_grade,get_grade_color=get_grade_color)
+
+
+@app.route('/results/<int:rid>/delete',methods=['POST'])
+def delete_result(rid):
+    sid=request.form.get('student_id')
+    with get_db() as conn:
+        conn.execute('DELETE FROM results WHERE id=?',(rid,))
+        conn.commit()
+    flash('Result deleted.','success')
+    return redirect(url_for('student_results',sid=sid) if sid else url_for('results'))
