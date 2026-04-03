@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Mark Attendance{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">📋 Attendance</h1>
+    <p class="page-sub">Mark &amp; manage student attendance</p>
+  </div>
+  <a href="{{ url_for('attendance_report') }}" class="btn btn-outline"> View Report</a>
+</div>
+
+<!-- Stats Bar -->
+<div class="att-stats-row">
+  <div class="att-stat-card present">
+    <span class="att-stat-num">{{ present_ct }}</span>
+    <span class="att-stat-label">Present</span>
+  </div>
+  <div class="att-stat-card absent">
+    <span class="att-stat-num">{{ absent_ct }}</span>
+    <span class="att-stat-label">Absent</span>
+  </div>
+  <div class="att-stat-card late">
+    <span class="att-stat-num">{{ late_ct }}</span>
+    <span class="att-stat-label">Late</span>
+  </div>
+  <div class="att-stat-card total">
+    <span class="att-stat-num">{{ total_marked }}</span>
+    <span class="att-stat-label">Marked</span>
+  </div>
+</div>
