@@ -546,3 +546,12 @@ def add_feedback():
     pre_sid = request.args.get('student_id')
     return render_template('add_feedback.html',
         students=students, categories=FEEDBACK_CATEGORIES, pre_sid=pre_sid)
+
+
+@app.route('/feedback/<int:fid>/delete', methods=['POST'])
+def delete_feedback(fid):
+    with get_db() as conn:
+        conn.execute('DELETE FROM feedback WHERE id=?',(fid,))
+        conn.commit()
+    flash('Feedback entry removed.','success')
+    return redirect(url_for('feedback'))
