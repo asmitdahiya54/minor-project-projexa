@@ -479,3 +479,40 @@ def api_students():
         rows=conn.execute('SELECT id,student_id,name,department FROM students ORDER BY name').fetchall()
     return jsonify([dict(r) for r in rows])
 
+
+# ── FEEDBACK ROUTES ───────────────────────────────────────
+
+FEEDBACK_CATEGORIES = ['General','Teaching Quality','Infrastructure','Canteen','Library','Sports','Administration']
+
+@app.route('/feedback')
+def feedback():
+    sel_rating   = request.args.get('rating','')
+    sel_category = request.args.get('category','')
+    sel_student  = request.args.get('student','')
+
+    q = '''SELECT f.*, s.name, s.student_id as sid, s.department
+           FROM feedback f JOIN students s ON f.student_id = s.id WHERE 1=1'''
+    p = []
+    if sel_rating:   q += ' AND f.rating=?';   p.append(int(sel_rating))
+    if sel_category: q += ' AND f.category=?'; p.append(sel_category)
+    if sel_student:  q += ' AND (s.name LIKE ? OR s.student_id LIKE ?)'; p+=[f'%{sel_student}%',f'%{sel_student}%']
+    q += ' ORDER BY f.created_at DESC'
+
+    with get_db() as conn:
+        entries = conn.execute(q, p).fetchall()
+        total   = conn.execute('SELECT COUNT(*) FROM feedback').fetchone()[0]
+        avg_rating = conn.execute('SELECT AVG(rating) FROM feedback').fetchone()[0]
+        avg_rating = round(avg_rating, 1) if avg_rating else 0
+
+        # Rating distribution
+        dist = {i: conn.execute('SELECT COUNT(*) FROM feedback WHERE rating=?',(i,)).fetchone()[0] for i in range(1,6)}
+        # Category breakdown
+        cat_counts = {c: conn.execute('SELECT COUNT(*) FROM feedback WHERE category=?',(c,)).fetchone()[0]
+                      for c in FEEDBACK_CATEGORIES}
+
+    return render_template('feedback.html',
+        entries=entries, total=total, avg_rating=avg_rating,
+        dist=dist, cat_counts=cat_counts,
+        categories=FEEDBACK_CATEGORIES,
+        filters={'rating':sel_rating,'category':sel_category,'student':sel_student}
+    )
