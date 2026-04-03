@@ -28,3 +28,108 @@
     <span class="att-stat-label">Marked</span>
   </div>
 </div>
+
+<!-- Filter Bar -->
+<div class="filter-bar" style="margin-bottom:1.5rem;">
+  <form method="get" class="filter-form" id="filterForm">
+    <div class="filter-group">
+      <label>Date</label>
+      <input type="date" name="date" value="{{ sel_date }}" onchange="this.form.submit()">
+    </div>
+    <div class="filter-group">
+      <label>🏛 Department</label>
+      <select name="dept" onchange="this.form.submit()">
+        <option value="">All Departments</option>
+        {% for d in departments %}
+        <option value="{{ d }}" {% if sel_dept==d %}selected{% endif %}>{{ d }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="filter-group">
+      <label> Subject</label>
+      <select name="subject" onchange="this.form.submit()">
+        {% for s in subjects %}
+        <option value="{{ s }}" {% if sel_subject==s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </form>
+</div>
+
+<!-- Attendance Form -->
+<form method="post" action="{{ url_for('mark_attendance') }}">
+  <input type="hidden" name="date"    value="{{ sel_date }}">
+  <input type="hidden" name="subject" value="{{ sel_subject }}">
+  <input type="hidden" name="dept"    value="{{ sel_dept }}">
+
+  <div class="att-table-wrap">
+    <div class="att-toolbar">
+      <span class="att-info">{{ students|length }} students &nbsp;·&nbsp; {{ sel_date }} &nbsp;·&nbsp; {{ sel_subject }}</span>
+      <div class="att-bulk-btns">
+        <button type="button" class="btn-bulk present" onclick="markAll('Present')">✓ All Present</button>
+        <button type="button" class="btn-bulk absent"  onclick="markAll('Absent')">✗ All Absent</button>
+      </div>
+    </div>
+
+    {% if students %}
+    <table class="att-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Student ID</th>
+          <th>Name</th>
+          <th>Department</th>
+          <th style="text-align:center">Present</th>
+          <th style="text-align:center">Absent</th>
+          <th style="text-align:center">Late</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in students %}
+        {% set current = att_map.get(s.id, '') %}
+        <tr class="att-row {% if current=='Present' %}row-present{% elif current=='Absent' %}row-absent{% elif current=='Late' %}row-late{% endif %}">
+          <td class="att-num">{{ loop.index }}</td>
+          <td><span class="sid-badge">{{ s.student_id }}</span></td>
+          <td class="att-name">{{ s.name }}</td>
+          <td><span class="dept-tag">{{ s.department }}</span></td>
+          <td style="text-align:center">
+            <label class="radio-pill present">
+              <input type="radio" name="att_{{ s.id }}" value="Present" {% if current=='Present' %}checked{% endif %}>
+              <span>P</span>
+            </label>
+          </td>
+          <td style="text-align:center">
+            <label class="radio-pill absent">
+              <input type="radio" name="att_{{ s.id }}" value="Absent" {% if current=='Absent' %}checked{% endif %}>
+              <span>A</span>
+            </label>
+          </td>
+          <td style="text-align:center">
+            <label class="radio-pill late">
+              <input type="radio" name="att_{{ s.id }}" value="Late" {% if current=='Late' %}checked{% endif %}>
+              <span>L</span>
+            </label>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="att-save-bar">
+      <button type="submit" class="btn btn-primary btn-lg">💾 Save Attendance</button>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <p>No active students found{% if sel_dept %} in {{ sel_dept }}{% endif %}.</p>
+    </div>
+    {% endif %}
+  </div>
+</form>
+<script>
+function markAll(status) {
+  document.querySelectorAll(`input[type=radio][value="${status}"]`).forEach(r => {
+    r.checked = true;
+    r.closest('tr').className = 'att-row row-' + status.toLowerCase();
+  });
+}
+</script>
+{% endblock %}
