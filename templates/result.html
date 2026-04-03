@@ -20,3 +20,42 @@
     <span class="res-sum-lbl">Avg Score</span>
   </div>
 </div>
+
+
+<!-- Filters -->
+<div class="filter-bar" style="margin-bottom:1.5rem">
+  <form method="get" class="filter-form" id="ff">
+    <div class="filter-group">
+      <label> Search</label>
+      <input type="text" name="search" value="{{ filters.search }}" placeholder="Name / ID / Subject...">
+    </div>
+    <div class="filter-group">
+      <label> Department</label>
+      <select name="dept" onchange="ff.submit()">
+        <option value="">All</option>
+        {% for d in departments %}
+        <option value="{{ d }}" {% if filters.dept==d %}selected{% endif %}>{{ d }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="filter-group">
+      <label> Semester</label>
+      <select name="semester" onchange="ff.submit()">
+        <option value="">All</option>
+        {% for s in semesters %}
+        <option value="{{ s }}" {% if filters.semester==s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="filter-group">
+      <label> Exam Type</label>
+      <select name="exam" onchange="ff.submit()">
+        <option value="">All</option>
+        {% for e in exam_types %}
+        <option value="{{ e }}" {% if filters.exam==e %}selected{% endif %}>{{ e }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn btn-outline">Search</button>
+  </form>
+</div>
