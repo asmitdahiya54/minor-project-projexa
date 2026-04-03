@@ -472,3 +472,10 @@ def edit_result(rid):
     return render_template('edit_result.html',result=result,student=student,
         semesters=SEMESTERS,exam_types=EXAM_TYPES,subjects=SUBJECTS)
 
+
+@app.route('/api/students')
+def api_students():
+    with get_db() as conn:
+        rows=conn.execute('SELECT id,student_id,name,department FROM students ORDER BY name').fetchall()
+    return jsonify([dict(r) for r in rows])
+
