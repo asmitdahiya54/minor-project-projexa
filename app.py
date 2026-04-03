@@ -444,3 +444,31 @@ def delete_result(rid):
         conn.commit()
     flash('Result deleted.','success')
     return redirect(url_for('student_results',sid=sid) if sid else url_for('results'))
+
+
+@app.route('/results/<int:rid>/edit',methods=['GET','POST'])
+def edit_result(rid):
+    with get_db() as conn:
+        result =conn.execute('SELECT * FROM results WHERE id=?',(rid,)).fetchone()
+        student=conn.execute('SELECT * FROM students WHERE id=?',(result['student_id'],)).fetchone() if result else None
+    if not result:
+        flash('Result not found.','error'); return redirect(url_for('results'))
+    if request.method=='POST':
+        try:
+            marks=float(request.form.get('marks_obtained',0))
+            max_m=float(request.form.get('max_marks',100))
+            grade=calculate_grade((marks/max_m*100) if max_m>0 else 0)
+            with get_db() as conn:
+                conn.execute('''UPDATE results SET subject=?,marks_obtained=?,max_marks=?,
+                    exam_type=?,semester=?,grade=?,remarks=? WHERE id=?''',
+                    (request.form.get('subject'),marks,max_m,
+                     request.form.get('exam_type'),request.form.get('semester'),
+                     grade,request.form.get('remarks'),rid))
+                conn.commit()
+            flash(f'Result updated! Grade: {grade}','success')
+            return redirect(url_for('student_results',sid=result['student_id']))
+        except (ValueError,TypeError):
+            flash('Invalid marks.','error')
+    return render_template('edit_result.html',result=result,student=student,
+        semesters=SEMESTERS,exam_types=EXAM_TYPES,subjects=SUBJECTS)
+
