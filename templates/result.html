@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Results{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">🎓 Results</h1>
+    <p class="page-sub">Manage student exam results and grades</p>
+  </div>
+  <a href="{{ url_for('add_result') }}" class="btn btn-primary">＋ Add Result</a>
+</div>
+
+<!-- Summary -->
+<div class="res-summary">
+  <div class="res-sum-card">
+    <span class="res-sum-num">{{ total_results }}</span>
+    <span class="res-sum-lbl">Total Records</span>
+  </div>
+  <div class="res-sum-card" style="--c:#3b82f6;--cb:#dbeafe">
+    <span class="res-sum-num">{{ avg_pct }}%</span>
+    <span class="res-sum-lbl">Avg Score</span>
+  </div>
+</div>
