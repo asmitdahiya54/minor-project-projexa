@@ -85,7 +85,6 @@ a { color: inherit; }
   color: rgba(255,255,255,.4);
 }
 
-<<<<<<< HEAD
 .nav-link {
   display: flex;
   align-items: center;
@@ -97,11 +96,7 @@ a { color: inherit; }
   font-weight: 500;
   border-left: 3px solid transparent;
   transition: background .15s, color .15s;
-=======
-.stat-label{
-color:#666;
 }
-
 
 .nav-link:hover {
   background: rgba(255,255,255,.08);
@@ -188,5 +183,4 @@ color:#666;
   text-decoration: none;
   display: block;
   margin-bottom: .5rem;
->>>>>>> 5981b30 (css updated)
 }
