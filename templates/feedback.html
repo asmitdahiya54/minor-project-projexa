@@ -29,3 +29,110 @@
   </div>
   {% endfor %}
 </div>
+
+<!-- Rating Bar Chart (mini) -->
+<div class="fb-charts-row">
+  <div class="fb-chart-card">
+    <h3 class="chart-title">⭐ Rating Distribution</h3>
+    <div class="rating-bars">
+      {% for i in range(5,0,-1) %}
+      {% set pct = (dist[i]/total*100)|round|int if total>0 else 0 %}
+      <div class="rbar-row">
+        <span class="rbar-label">{{ i }} ★</span>
+        <div class="rbar-bg">
+          <div class="rbar-fill" style="width:{{ pct }}%;background:{% if i>=4 %}#10b981{% elif i==3 %}#f59e0b{% else %}#ef4444{% endif %}"></div>
+        </div>
+        <span class="rbar-count">{{ dist[i] }}</span>
+        <span class="rbar-pct">({{ pct }}%)</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="fb-chart-card">
+    <h3 class="chart-title">🏷 By Category</h3>
+    <div class="cat-grid">
+      {% for cat, cnt in cat_counts.items() %}
+      {% if cnt > 0 %}
+      <div class="cat-item">
+        <span class="cat-name">{{ cat }}</span>
+        <span class="cat-badge">{{ cnt }}</span>
+      </div>
+      {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="filter-bar" style="margin-bottom:1.25rem">
+  <form method="get" class="filter-form" id="ff">
+    <div class="filter-group">
+      <label>🔍 Student</label>
+      <input type="text" name="student" value="{{ filters.student }}" placeholder="Name or ID...">
+    </div>
+    <div class="filter-group">
+      <label>⭐ Rating</label>
+      <select name="rating" onchange="ff.submit()">
+        <option value="">All Ratings</option>
+        {% for i in range(5,0,-1) %}
+        <option value="{{ i }}" {% if filters.rating==i|string %}selected{% endif %}>{{ i }} Star{{ 's' if i!=1 }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>🏷 Category</label>
+      <select name="category" onchange="ff.submit()">
+        <option value="">All Categories</option>
+        {% for c in categories %}
+        <option value="{{ c }}" {% if filters.category==c %}selected{% endif %}>{{ c }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn btn-outline">Search</button>
+    {% if filters.student or filters.rating or filters.category %}
+    <a href="{{ url_for('feedback') }}" class="btn btn-outline">✕ Clear</a>
+    {% endif %}
+  </form>
+</div>
+
+<!-- Feedback Entries -->
+{% if entries %}
+<div class="fb-list">
+  {% for e in entries %}
+  <div class="fb-card rating-{{ e.rating }}">
+    <div class="fb-card-header">
+      <div class="fb-student-info">
+        <div class="fb-avatar">{{ e.name[0] }}</div>
+        <div>
+          <span class="fb-name">{{ e.name }}</span>
+          <span class="fb-sid">{{ e.sid }}</span>
+          <span class="fb-dept">{{ e.department }}</span>
+        </div>
+      </div>
+      <div class="fb-meta">
+        <span class="fb-category">{{ e.category }}</span>
+        <div class="fb-stars">
+          {% for i in range(1,6) %}
+          <span class="star {% if i<=e.rating %}filled{% endif %}">★</span>
+          {% endfor %}
+        </div>
+        <span class="fb-date">{{ e.created_at[:10] }}</span>
+        <form method="post" action="{{ url_for('delete_feedback', fid=e.id) }}"
+              onsubmit="return confirm('Delete this feedback?')" style="display:inline">
+          <button type="submit" class="btn-del" title="Delete">🗑</button>
+        </form>
+      </div>
+    </div>
+    <p class="fb-message">{{ e.message }}</p>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <p style="font-size:3rem;margin-bottom:.5rem">💬</p>
+  <p>No feedback entries yet.</p>
+  <a href="{{ url_for('add_feedback') }}" class="btn btn-primary" style="margin-top:1rem">Submit First Feedback</a>
+</div>
+{% endif %}
+{% endblock %}
