@@ -69,3 +69,52 @@
         <input type="text" name="remarks" placeholder="Any notes about this result...">
       </div>
     </div>
+
+    <!-- Live Grade Preview -->
+    <div class="grade-preview" id="gradePreview" style="display:none">
+      <div class="gp-row">
+        <div class="gp-item">
+          <span class="gp-label">Score</span>
+          <span class="gp-val" id="gpPct">—</span>
+        </div>
+        <div class="gp-item">
+          <span class="gp-label">Grade</span>
+          <span class="gp-val grade-big" id="gpGrade">—</span>
+        </div>
+        <div class="gp-item">
+          <span class="gp-label">Status</span>
+          <span class="gp-val" id="gpStatus">—</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <a href="{{ url_for('results') }}" class="btn btn-outline">Cancel</a>
+      <button type="submit" class="btn btn-primary">💾 Save Result</button>
+    </div>
+  </form>
+</div>
+<script>
+function calcGrade() {
+  const m = parseFloat(document.getElementById('marksObtained').value);
+  const mx = parseFloat(document.getElementById('maxMarks').value) || 100;
+  const prev = document.getElementById('gradePreview');
+  if (isNaN(m) || m === '') { prev.style.display='none'; return; }
+  const pct = Math.min((m / mx * 100), 100);
+  let grade, color, status;
+  if (pct>=90){grade='O';color='#10b981';status='Outstanding'}
+  else if(pct>=80){grade='A+';color='#3b82f6';status='Excellent'}
+  else if(pct>=70){grade='A';color='#6366f1';status='Very Good'}
+  else if(pct>=60){grade='B+';color='#f59e0b';status='Good'}
+  else if(pct>=50){grade='B';color='#f97316';status='Average'}
+  else if(pct>=40){grade='C';color='#ef4444';status='Pass'}
+  else{grade='F';color='#dc2626';status='Fail'}
+  document.getElementById('gpPct').textContent = pct.toFixed(1)+'%';
+  document.getElementById('gpGrade').textContent = grade;
+  document.getElementById('gpGrade').style.color = color;
+  document.getElementById('gpStatus').textContent = status;
+  document.getElementById('gpStatus').style.color = color;
+  prev.style.display='block';
+}
+</script>
+{% endblock %}
