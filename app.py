@@ -684,5 +684,5 @@ def chart_dashboard():
     })
 
 
-if _name=='main_':
+if __name__=='__main__':
     app.run(debug=True)
