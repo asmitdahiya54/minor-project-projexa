@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Dashboard{% endblock %}
+
 {% block content %}
 <div class="page-header">
   <div>
@@ -16,32 +17,38 @@
     <div class="stat-val">{{ total }}</div>
     <div class="stat-lbl">Total Students</div>
   </div>
+
   <div class="stat-card stat-active">
     <div class="stat-icon">✅</div>
     <div class="stat-val">{{ active }}</div>
     <div class="stat-lbl">Active</div>
   </div>
+
   <div class="stat-card stat-leave">
     <div class="stat-icon">⏸</div>
     <div class="stat-val">{{ leave }}</div>
     <div class="stat-lbl">On Leave</div>
   </div>
+
   <div class="stat-card stat-grad">
     <div class="stat-icon">🎓</div>
     <div class="stat-val">{{ grad }}</div>
     <div class="stat-lbl">Graduated</div>
   </div>
+
   <div class="stat-card stat-att">
     <div class="stat-icon">📋</div>
     <div class="stat-val">{{ present_today }}</div>
     <div class="stat-lbl">Present Today</div>
     <div class="stat-sub">{{ att_today }} marked</div>
   </div>
+
   <div class="stat-card stat-results">
     <div class="stat-icon">📝</div>
     <div class="stat-val">{{ results_count }}</div>
     <div class="stat-lbl">Result Records</div>
   </div>
+
   <div class="stat-card stat-feedback">
     <div class="stat-icon">💬</div>
     <div class="stat-val">{{ feedback_count }}</div>
@@ -50,7 +57,7 @@
   </div>
 </div>
 
-<!-- Department breakdown + Recent -->
+<!-- Department + Year -->
 <div class="dash-grid">
   <div class="dash-card">
     <h3 class="card-title">By Department</h3>
@@ -66,7 +73,104 @@
     {% endif %}
     {% endfor %}
   </div>
-<canvas id="myChart"></canvas>
+
+  <div class="dash-card">
+    <h3 class="card-title">By Year</h3>
+    {% for year, count in year_counts.items() %}
+    <div class="year-row">
+      <span class="year-label">{{ year }}</span>
+      <div class="year-dots">
+        {% for i in range([count,10]|min) %}
+        <span class="dot"></span>
+        {% endfor %}
+      </div>
+      <span class="year-count">{{ count }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Recent Students -->
+<div class="section-head">
+  <h3 class="section-title">Recently Added</h3>
+  <a href="{{ url_for('view_students') }}" class="btn btn-outline" style="font-size:.8rem;padding:.35rem .85rem">
+    View All →
+  </a>
+</div>
+
+<div class="table-wrap">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Student ID</th>
+        <th>Name</th>
+        <th>Department</th>
+        <th>Year</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in recent %}
+      <tr>
+        <td><span class="sid-badge">{{ s.student_id }}</span></td>
+        <td style="font-weight:600">{{ s.name }}</td>
+        <td>{{ s.department }}</td>
+        <td>{{ s.year }}</td>
+        <td>
+          <span class="status-chip s-{{ s.status|lower|replace(' ','-') }}">
+            {{ s.status }}
+          </span>
+        </td>
+        <td>
+          <a href="{{ url_for('student_detail', sid=s.id) }}" class="btn btn-outline" style="font-size:.78rem;padding:.3rem .7rem">
+            View
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Quick Links -->
+<div class="quick-links">
+  <a href="{{ url_for('attendance') }}" class="ql-card">
+    <span class="ql-icon">📋</span>
+    <span class="ql-label">Mark Attendance</span>
+    <span class="ql-sub">Today's attendance</span>
+  </a>
+
+  <a href="{{ url_for('attendance_report') }}" class="ql-card">
+    <span class="ql-icon">📊</span>
+    <span class="ql-label">Attendance Report</span>
+    <span class="ql-sub">View all records</span>
+  </a>
+
+  <a href="{{ url_for('results') }}" class="ql-card">
+    <span class="ql-icon">🎓</span>
+    <span class="ql-label">Results</span>
+    <span class="ql-sub">{{ results_count }} records</span>
+  </a>
+
+  <a href="{{ url_for('feedback') }}" class="ql-card">
+    <span class="ql-icon">💬</span>
+    <span class="ql-label">Feedback</span>
+    <span class="ql-sub">{{ feedback_count }} entries · ⭐ {{ avg_rating }}</span>
+  </a>
+
+  <a href="{{ url_for('charts') }}" class="ql-card">
+    <span class="ql-icon">📈</span>
+    <span class="ql-label">Charts</span>
+    <span class="ql-sub">Analytics & insights</span>
+  </a>
+</div>
+
+<!-- ✅ Chart Section -->
+<div class="dash-card" style="margin-top:20px;">
+  <h3 class="card-title">Student Overview</h3>
+  <canvas id="myChart"></canvas>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
@@ -83,74 +187,5 @@ new Chart(ctx, {
     }
 });
 </script>
-  <div class="dash-card">
-    <h3 class="card-title">By Year</h3>
-    {% for year, count in year_counts.items() %}
-    <div class="year-row">
-      <span class="year-label">{{ year }}</span>
-      <div class="year-dots">
-        {% for i in range([count,10]|min) %}<span class="dot"></span>{% endfor %}
-      </div>
-      <span class="year-count">{{ count }}</span>
-    </div>
-    {% endfor %}
-  </div>
-</div>
-
-<!-- Recent Students -->
-<div class="section-head">
-  <h3 class="section-title">Recently Added</h3>
-  <a href="{{ url_for('view_students') }}" class="btn btn-outline" style="font-size:.8rem;padding:.35rem .85rem">View All →</a>
-</div>
-<div class="table-wrap">
-  <table class="data-table">
-    <thead>
-      <tr><th>Student ID</th><th>Name</th><th>Department</th><th>Year</th><th>Status</th><th>Actions</th></tr>
-    </thead>
-    <tbody>
-      {% for s in recent %}
-      <tr>
-        <td><span class="sid-badge">{{ s.student_id }}</span></td>
-        <td style="font-weight:600">{{ s.name }}</td>
-        <td>{{ s.department }}</td>
-        <td>{{ s.year }}</td>
-        <td><span class="status-chip s-{{ s.status|lower|replace(' ','-') }}">{{ s.status }}</span></td>
-        <td>
-          <a href="{{ url_for('student_detail', sid=s.id) }}" class="btn btn-outline" style="font-size:.78rem;padding:.3rem .7rem">View</a>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
-
-<!-- Quick Links -->
-<div class="quick-links">
-  <a href="{{ url_for('attendance') }}" class="ql-card">
-    <span class="ql-icon">📋</span>
-    <span class="ql-label">Mark Attendance</span>
-    <span class="ql-sub">Today's attendance</span>
-  </a>
-  <a href="{{ url_for('attendance_report') }}" class="ql-card">
-    <span class="ql-icon">📊</span>
-    <span class="ql-label">Attendance Report</span>
-    <span class="ql-sub">View all records</span>
-  </a>
-  <a href="{{ url_for('results') }}" class="ql-card">
-    <span class="ql-icon">🎓</span>
-    <span class="ql-label">Results</span>
-    <span class="ql-sub">{{ results_count }} records</span>
-  </a>
-  <a href="{{ url_for('feedback') }}" class="ql-card">
-    <span class="ql-icon">💬</span>
-    <span class="ql-label">Feedback</span>
-    <span class="ql-sub">{{ feedback_count }} entries · ⭐ {{ avg_rating }}</span>
-  </a>
-  <a href="{{ url_for('charts') }}" class="ql-card">
-    <span class="ql-icon">📈</span>
-    <span class="ql-label">Charts</span>
-    <span class="ql-sub">Analytics & insights</span>
-  </a>
-</div>
 
 {% endblock %}
