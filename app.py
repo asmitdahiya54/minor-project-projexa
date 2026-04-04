@@ -555,3 +555,21 @@ def delete_feedback(fid):
         conn.commit()
     flash('Feedback entry removed.','success')
     return redirect(url_for('feedback'))
+
+
+# ── CHART DATA API ENDPOINTS ──────────────────────────────
+
+@app.route('/api/charts/attendance')
+def chart_attendance():
+    """Per-student attendance percentage for chart"""
+    with get_db() as conn:
+        students = conn.execute("SELECT id,name FROM students WHERE status='Active' ORDER BY name").fetchall()
+        data = []
+        for s in students:
+            total = conn.execute('SELECT COUNT(*) FROM attendance WHERE student_id=?',(s['id'],)).fetchone()[0]
+            pres  = conn.execute("SELECT COUNT(*) FROM attendance WHERE student_id=? AND status='Present'",(s['id'],)).fetchone()[0]
+            late  = conn.execute("SELECT COUNT(*) FROM attendance WHERE student_id=? AND status='Late'",(s['id'],)).fetchone()[0]
+            pct   = round(((pres + late*0.5)/total*100),1) if total>0 else 0
+            data.append({'name':s['name'],'percentage':pct,'total':total})
+    return jsonify(data)
+
