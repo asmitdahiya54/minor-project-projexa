@@ -698,3 +698,34 @@ a { color: inherit; }
   gap: .75rem;
   margin-bottom: .75rem;
 }
+
+.att-mini {
+  background: var(--cb);
+  border: 1.5px solid var(--c);
+  border-radius: 10px;
+  padding: .75rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: .15rem;
+}
+
+.am-val { font-size: 1.4rem; font-weight: 800; color: var(--c); }
+.am-lbl { font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; opacity: .7; }
+
+.recent-att { display: flex; gap: .3rem; flex-wrap: wrap; }
+
+.att-dot             { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.att-dot.att-present { background: #10b981; }
+.att-dot.att-absent  { background: #ef4444; }
+.att-dot.att-late    { background: #f59e0b; }
+
+.no-data   { color: var(--text-muted); font-size: .875rem; }
+.no-data a { color: var(--primary); }
+
+/* Student name/id two-line cell */
+.student-cell   { display: flex; flex-direction: column; gap: .1rem; }
+.s-name         { font-weight: 600; }
+.s-name:hover   { color: var(--primary); }
+.s-id           { font-size: .72rem; color: var(--text-muted); font-family: monospace; }
+.student-link   { text-decoration: none; display: flex; flex-direction: column; gap: .1rem; }
