@@ -600,6 +600,56 @@ def chart_feedback():
         ''').fetchall()
     return jsonify({'distribution':dist, 'by_category':[dict(r) for r in cat_data]})
 @app.route('/api/charts/feedback')
+
+@app.route('/charts')
+def charts():
+    with get_db() as conn:
+        # Attendance per student
+        students = conn.execute("SELECT id,name FROM students WHERE status='Active' ORDER BY name").fetchall()
+        att_data = []
+        for s in students:
+            total = conn.execute('SELECT COUNT(*) FROM attendance WHERE student_id=?',(s['id'],)).fetchone()[0]
+            pres  = conn.execute("SELECT COUNT(*) FROM attendance WHERE student_id=? AND status='Present'",(s['id'],)).fetchone()[0]
+            late  = conn.execute("SELECT COUNT(*) FROM attendance WHERE student_id=? AND status='Late'",(s['id'],)).fetchone()[0]
+            pct   = round(((pres+late*0.5)/total*100),1) if total>0 else 0
+            if total > 0:
+                att_data.append({'name':s['name'],'pct':pct})
+
+        # Marks per subject
+        subj_rows = conn.execute('''SELECT subject,ROUND(AVG(marks_obtained*100.0/max_marks),1) as avg_pct,
+            COUNT(*) as cnt FROM results GROUP BY subject ORDER BY avg_pct DESC''').fetchall()
+        subj_data = [dict(r) for r in subj_rows]
+
+        # Feedback rating distribution
+        fb_dist = [conn.execute('SELECT COUNT(*) FROM feedback WHERE rating=?',(i,)).fetchone()[0] for i in range(1,6)]
+
+        # Feedback by category
+        cat_rows = conn.execute('''SELECT category, ROUND(AVG(rating),1) as avg_r
+            FROM feedback GROUP BY category''').fetchall()
+        cat_data = [dict(r) for r in cat_rows]
+
+        # Department distribution
+        dept_data = [(d, conn.execute('SELECT COUNT(*) FROM students WHERE department=?',(d,)).fetchone()[0])
+                     for d in DEPARTMENTS]
+        dept_data = [(d,c) for d,c in dept_data if c>0]
+
+        # Grade distribution
+        grade_rows = conn.execute('''SELECT grade,COUNT(*) as cnt FROM results
+            GROUP BY grade ORDER BY grade''').fetchall()
+        grade_data = [dict(r) for r in grade_rows]
+
+        # Attendance trend last 10 days
+        trend_rows = conn.execute('''SELECT date,
+            SUM(CASE WHEN status='Present' THEN 1 ELSE 0 END) as present,
+            COUNT(*) as total FROM attendance GROUP BY date ORDER BY date DESC LIMIT 10''').fetchall()
+        trend_data = [dict(r) for r in reversed(list(trend_rows))]
+
+    return render_template('charts.html',
+        att_data=att_data, subj_data=subj_data,
+        fb_dist=fb_dist, cat_data=cat_data,
+        dept_data=dept_data, grade_data=grade_data,
+        trend_data=trend_data
+    )
 def chart_feedback():
     """Feedback rating distribution"""
     with get_db() as conn:
