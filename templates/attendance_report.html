@@ -9,22 +9,22 @@
   <a href="{{ url_for('attendance') }}" class="btn btn-primary">📋 Mark Attendance</a>
 </div>
 
-{% extends "base.html" %}
-{% block title %}Attendance Report{% endblock %}
-{% block content %}
-<div class="page-header">
-  <div>
-    <h1 class="page-title">📊 Attendance Report</h1>
-    <p class="page-sub">Overall attendance summary for all students</p>
-  </div>
-  <a href="{{ url_for('attendance') }}" class="btn btn-primary">📋 Mark Attendance</a>
-</div>
-
 <!-- Filter -->
 <div class="filter-bar" style="margin-bottom:1.5rem">
   <form method="get" class="filter-form">
     <div class="filter-group">
-      <!-- Table -->
+      <label>🏛 Department</label>
+      <select name="dept" onchange="this.form.submit()">
+        <option value="">All Departments</option>
+        {% for d in departments %}
+        <option value="{{ d }}" {% if sel_dept==d %}selected{% endif %}>{{ d }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </form>
+</div>
+
+<!-- Table -->
 <div class="table-wrap">
   <table class="data-table">
     <thead>
@@ -79,13 +79,3 @@
   </table>
 </div>
 {% endblock %}
-      <label>🏛 Department</label>
-      <select name="dept" onchange="this.form.submit()">
-        <option value="">All Departments</option>
-        {% for d in departments %}
-        <option value="{{ d }}" {% if sel_dept==d %}selected{% endif %}>{{ d }}</option>
-        {% endfor %}
-      </select>
-    </div>
-  </form>
-</div>
