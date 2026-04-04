@@ -22,40 +22,63 @@
 </div>
 
 
-<!-- Filters -->
-<div class="filter-bar" style="margin-bottom:1.5rem">
-  <form method="get" class="filter-form" id="ff">
-    <div class="filter-group">
-      <label> Search</label>
-      <input type="text" name="search" value="{{ filters.search }}" placeholder="Name / ID / Subject...">
-    </div>
-    <div class="filter-group">
-      <label> Department</label>
-      <select name="dept" onchange="ff.submit()">
-        <option value="">All</option>
-        {% for d in departments %}
-        <option value="{{ d }}" {% if filters.dept==d %}selected{% endif %}>{{ d }}</option>
-        {% endfor %}
-      </select>
-    </div>
-    <div class="filter-group">
-      <label> Semester</label>
-      <select name="semester" onchange="ff.submit()">
-        <option value="">All</option>
-        {% for s in semesters %}
-        <option value="{{ s }}" {% if filters.semester==s %}selected{% endif %}>{{ s }}</option>
-        {% endfor %}
-      </select>
-    </div>
-    <div class="filter-group">
-      <label> Exam Type</label>
-      <select name="exam" onchange="ff.submit()">
-        <option value="">All</option>
-        {% for e in exam_types %}
-        <option value="{{ e }}" {% if filters.exam==e %}selected{% endif %}>{{ e }}</option>
-        {% endfor %}
-      </select>
-    </div>
-    <button type="submit" class="btn btn-outline">Search</button>
-  </form>
+<!-- Table -->
+<div class="table-wrap">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Student</th>
+        <th>Department</th>
+        <th>Subject</th>
+        <th>Exam Type</th>
+        <th>Semester</th>
+        <th style="text-align:center">Marks</th>
+        <th>Score</th>
+        <th style="text-align:center">Grade</th>
+        <th style="text-align:center">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      {% set pct = (r.marks_obtained / r.max_marks * 100)|round(1) %}
+      <tr>
+        <td class="text-muted">{{ loop.index }}</td>
+        <td>
+          <a href="{{ url_for('student_results', sid=r.student_id) }}" class="student-link">
+            <span class="s-name">{{ r.name }}</span>
+            <span class="s-id">{{ r.sid }}</span>
+          </a>
+        </td>
+        <td><span class="dept-tag">{{ r.department }}</span></td>
+        <td style="font-weight:600">{{ r.subject }}</td>
+        <td><span class="exam-tag">{{ r.exam_type }}</span></td>
+        <td class="text-muted">{{ r.semester }}</td>
+        <td style="text-align:center;font-weight:700">{{ r.marks_obtained|int }}/{{ r.max_marks|int }}</td>
+        <td>
+          <div class="score-bar-bg">
+            <div class="score-bar" style="width:{{ pct }}%;background:{% if pct>=80 %}#10b981{% elif pct>=60 %}#3b82f6{% elif pct>=40 %}#f59e0b{% else %}#ef4444{% endif %}"></div>
+          </div>
+          <span class="score-pct">{{ pct }}%</span>
+        </td>
+        <td style="text-align:center">
+          <span class="grade-chip grade-{{ r.grade }}">{{ r.grade }}</span>
+        </td>
+        <td style="text-align:center">
+          <div style="display:flex;gap:.4rem;justify-content:center">
+            <a href="{{ url_for('edit_result', rid=r.id) }}" class="btn-icon" title="Edit">✏️</a>
+            <form method="post" action="{{ url_for('delete_result', rid=r.id) }}"
+                  onsubmit="return confirm('Delete this result?')">
+              <input type="hidden" name="student_id" value="{{ r.student_id }}">
+              <button type="submit" class="btn-icon" title="Delete">🗑</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="10" class="empty-cell">No results found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
+{% endblock %}
