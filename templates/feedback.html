@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Feedback{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">💬 Feedback</h1>
+    <p class="page-sub">Student feedback &amp; ratings admin dashboard</p>
+  </div>
+  <a href="{{ url_for('add_feedback') }}" class="btn btn-primary">➕ Submit Feedback</a>
+</div>
+
+<!-- Summary Cards -->
+<div class="fb-summary">
+  <div class="fb-sum-card" style="--c:#6366f1;--cb:#eef2ff">
+    <div class="fbs-icon">💬</div>
+    <div class="fbs-val">{{ total }}</div>
+    <div class="fbs-lbl">Total Entries</div>
+  </div>
+  <div class="fb-sum-card" style="--c:#f59e0b;--cb:#fffbeb">
+    <div class="fbs-icon">⭐</div>
+    <div class="fbs-val">{{ avg_rating }}</div>
+    <div class="fbs-lbl">Avg Rating</div>
+  </div>
+  {% for star in range(5,0,-1) %}
+  <div class="fb-sum-card" style="--c:{% if star>=4 %}#10b981{% elif star==3 %}#f59e0b{% else %}#ef4444{% endif %};--cb:{% if star>=4 %}#d1fae5{% elif star==3 %}#fef3c7{% else %}#fecaca{% endif %}">
+    <div class="fbs-icon">{{ '★'*star }}{% sif star<5 %}{{ '☆'*(5-star) }}{% endif %}</div>
+    <div class="fbs-val">{{ dist[star] }}</div>
+    <div class="fbs-lbl">{{ star }} Star{{ 's' if star!=1 }}</div>
+  </div>
+  {% endfor %}
+</div>
