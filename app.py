@@ -573,3 +573,16 @@ def chart_attendance():
             data.append({'name':s['name'],'percentage':pct,'total':total})
     return jsonify(data)
 
+
+@app.route('/api/charts/results')
+def chart_results():
+    """Average marks per subject for chart"""
+    with get_db() as conn:
+        rows = conn.execute('''
+            SELECT subject,
+                   ROUND(AVG(marks_obtained*100.0/max_marks),1) as avg_pct,
+                   COUNT(*) as count
+            FROM results GROUP BY subject ORDER BY avg_pct DESC
+        ''').fetchall()
+    return jsonify([dict(r) for r in rows])
+
