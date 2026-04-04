@@ -586,3 +586,17 @@ def chart_results():
         ''').fetchall()
     return jsonify([dict(r) for r in rows])
 
+
+@app.route('/api/charts/feedback')
+def chart_feedback():
+    """Feedback rating distribution"""
+    with get_db() as conn:
+        dist = {}
+        for i in range(1,6):
+            dist[str(i)] = conn.execute('SELECT COUNT(*) FROM feedback WHERE rating=?',(i,)).fetchone()[0]
+        cat_data = conn.execute('''
+            SELECT category, ROUND(AVG(rating),1) as avg_r, COUNT(*) as cnt
+            FROM feedback GROUP BY category
+        ''').fetchall()
+    return jsonify({'distribution':dist, 'by_category':[dict(r) for r in cat_data]})
+
