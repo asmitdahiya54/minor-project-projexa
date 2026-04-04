@@ -653,3 +653,36 @@ def charts():
     
     
     
+def chart_dashboard():
+    """All dashboard chart data in one call"""
+    with get_db() as conn:
+        # Dept breakdown
+        dept_data = {d: conn.execute('SELECT COUNT(*) FROM students WHERE department=?',(d,)).fetchone()[0]
+                     for d in DEPARTMENTS}
+        # Year breakdown
+        year_data = {y: conn.execute('SELECT COUNT(*) FROM students WHERE year=?',(y,)).fetchone()[0]
+                     for y in YEARS}
+        # Status breakdown
+        status_data = {s: conn.execute('SELECT COUNT(*) FROM students WHERE status=?',(s,)).fetchone()[0]
+                       for s in STATUSES}
+        # Attendance trend (last 7 days)
+        att_trend = conn.execute('''
+            SELECT date, SUM(CASE WHEN status='Present' THEN 1 ELSE 0 END) as present,
+                   COUNT(*) as total
+            FROM attendance GROUP BY date ORDER BY date DESC LIMIT 7
+        ''').fetchall()
+        # Grade distribution
+        grade_dist = conn.execute('''
+            SELECT grade, COUNT(*) as cnt FROM results GROUP BY grade ORDER BY grade
+        ''').fetchall()
+    return jsonify({
+        'dept':    dept_data,
+        'year':    year_data,
+        'status':  status_data,
+        'att_trend': [dict(r) for r in att_trend],
+        'grades':  [dict(r) for r in grade_dist]
+    })
+
+
+if _name=='main_':
+    app.run(debug=True)
