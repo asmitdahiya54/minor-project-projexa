@@ -3,18 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}SIMS{% endblock %} |  StudentInfoLite</title>
+  <title>{% block title %}SIMS{% endblock %} | Student Information System</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
-<!-- Sidebar -->
+<!-- ══ SIDEBAR ════════════════════════════════════════════ -->
 <aside class="sidebar">
   <div class="sidebar-brand">
     <div class="brand-title">🎓 SIMS</div>
     <div class="brand-sub">Student Info System</div>
   </div>
 
+  {% if session.get('role') == 'admin' %}
+  <!-- ── Admin navigation ──────────────────────────────── -->
   <nav class="nav-section">
     <div class="nav-label">Overview</div>
     <a href="{{ url_for('dashboard') }}"
@@ -78,13 +80,66 @@
       <span class="nav-icon">📈</span> Charts
     </a>
   </nav>
+
+  {% elif session.get('role') == 'student' %}
+  <!-- ── Student navigation ────────────────────────────── -->
+  <nav class="nav-section">
+    <div class="nav-label">My Portal</div>
+    <a href="{{ url_for('student_dashboard') }}"
+       class="nav-link {% if request.endpoint=='student_dashboard' %}active{% endif %}">
+      <span class="nav-icon">🏠</span> My Dashboard
+    </a>
+  </nav>
+
+  <nav class="nav-section">
+    <div class="nav-label">Academics</div>
+    <a href="{{ url_for('student_dashboard') }}#attendance"
+       class="nav-link">
+      <span class="nav-icon">📋</span> My Attendance
+    </a>
+    <a href="{{ url_for('student_dashboard') }}#results"
+       class="nav-link">
+      <span class="nav-icon">🎓</span> My Results
+    </a>
+    <a href="{{ url_for('student_dashboard') }}#feedback"
+       class="nav-link">
+      <span class="nav-icon">💬</span> My Feedback
+    </a>
+  </nav>
+  {% endif %}
+
+  <!-- ── Logout at bottom ──────────────────────────────── -->
+  {% if session.get('user_id') %}
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="su-avatar">{{ (session.get('display_name','?'))[0] | upper }}</div>
+      <div class="su-info">
+        <span class="su-name">{{ session.get('display_name', 'User') }}</span>
+        <span class="su-role">{{ session.get('role','') | capitalize }}</span>
+      </div>
+    </div>
+    <a href="{{ url_for('logout') }}" class="nav-link logout-link">
+      <span class="nav-icon">🚪</span> Logout
+    </a>
+  </div>
+  {% endif %}
 </aside>
 
-  <!-- Main -->
+<!-- ══ MAIN ═══════════════════════════════════════════════ -->
 <div class="main-wrap">
   <header class="topbar">
     <span class="topbar-title">{% block topbar_title %}{% endblock %}</span>
-    <span class="topbar-date" id="topbarDate"></span>
+    <div class="topbar-right">
+      {% if session.get('user_id') %}
+      <div class="topbar-user">
+        <span class="tu-role-badge tu-{{ session.get('role','') }}">
+          {% if session.get('role') == 'admin' %}🛡 Admin{% else %}🎓 Student{% endif %}
+        </span>
+        <span class="tu-name">{{ session.get('display_name', '') }}</span>
+      </div>
+      {% endif %}
+      <span class="topbar-date" id="topbarDate"></span>
+    </div>
   </header>
 
   <main class="main-content">
@@ -93,7 +148,7 @@
     <div class="flash-list">
       {% for cat, msg in messages %}
       <div class="flash-msg {{ cat }}">
-        {% if cat=='success' %}✅{% else %}❌{% endif %} {{ msg }}
+        {% if cat == 'success' %}✅{% else %}❌{% endif %} {{ msg }}
       </div>
       {% endfor %}
     </div>
