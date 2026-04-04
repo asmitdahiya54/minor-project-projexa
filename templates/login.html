@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | SIMS</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="login-body">
+
+<div class="login-wrap">
+
+  <!-- Left panel — branding -->
+  <div class="login-panel-left">
+    <div class="login-brand">
+      <div class="login-brand-icon">🎓</div>
+      <h1 class="login-brand-title">SIMS</h1>
+      <p class="login-brand-sub">Student Information Management System</p>
+    </div>
+    <div class="login-features">
+      <div class="lf-item"><span class="lf-icon">👥</span><span>Student Records</span></div>
+      <div class="lf-item"><span class="lf-icon">📋</span><span>Attendance Tracking</span></div>
+      <div class="lf-item"><span class="lf-icon">🎓</span><span>Results & Grades</span></div>
+      <div class="lf-item"><span class="lf-icon">📈</span><span>Analytics & Reports</span></div>
+    </div>
+    <p class="login-panel-foot">Rohtak, Haryana · 2024</p>
+  </div>
+
+  <!-- Right panel — form -->
+  <div class="login-panel-right">
+    <div class="login-card">
+
+      <div class="login-card-head">
+        <h2 class="login-title">Welcome back</h2>
+        <p class="login-sub">Sign in to continue to your portal</p>
+      </div>
+
+      <!-- Flash messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="login-flash-list">
+        {% for cat, msg in messages %}
+        <div class="login-flash {{ cat }}">
+          {% if cat == 'success' %}✅{% else %}❌{% endif %} {{ msg }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% endwith %}
+
+      <form method="post" class="login-form" autocomplete="off">
+
+        <div class="lf-group">
+          <label class="lf-label" for="username">Username or Email</label>
+          <div class="lf-input-wrap">
+            <span class="lf-icon-pre">👤</span>
+            <input id="username" type="text" name="username"
+                   class="lf-input" placeholder="e.g. admin or CS2024001"
+                   autofocus required>
+          </div>
+        </div>
+
+        <div class="lf-group">
+          <label class="lf-label" for="password">Password</label>
+          <div class="lf-input-wrap">
+            <span class="lf-icon-pre">🔒</span>
+            <input id="password" type="password" name="password"
+                   class="lf-input" placeholder="Enter your password" required>
+            <button type="button" class="lf-eye" onclick="togglePwd()" title="Show/hide">👁</button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-login">Sign In →</button>
+      </form>
+
+      <!-- Demo credentials hint -->
+      <div class="login-demo">
+        <p class="demo-title">🔑 Demo Credentials</p>
+        <div class="demo-grid">
+          <div class="demo-card" onclick="fillDemo('admin','admin123')">
+            <span class="demo-role admin-role">🛡 Admin</span>
+            <code>admin / admin123</code>
+            <span class="demo-tap">Click to fill</span>
+          </div>
+          <div class="demo-card" onclick="fillDemo('CS2024001','student123')">
+            <span class="demo-role student-role">🎓 Student</span>
+            <code>CS2024001 / student123</code>
+            <span class="demo-tap">Click to fill</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+function togglePwd() {
+  const p = document.getElementById('password');
+  p.type = p.type === 'password' ? 'text' : 'password';
+}
+function fillDemo(user, pass) {
+  document.getElementById('username').value = user;
+  document.getElementById('password').value = pass;
+  document.getElementById('username').focus();
+}
+</script>
+</body>
+</html>
