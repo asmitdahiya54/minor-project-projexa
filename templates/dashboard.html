@@ -66,7 +66,23 @@
     {% endif %}
     {% endfor %}
   </div>
+<canvas id="myChart"></canvas>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('myChart');
+
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ['Active', 'Graduated', 'On Leave'],
+        datasets: [{
+            label: 'Students',
+            data: [{{ active }}, {{ grad }}, {{ leave }}]
+        }]
+    }
+});
+</script>
   <div class="dash-card">
     <h3 class="card-title">By Year</h3>
     {% for year, count in year_counts.items() %}
@@ -136,4 +152,5 @@
     <span class="ql-sub">Analytics & insights</span>
   </a>
 </div>
+
 {% endblock %}
