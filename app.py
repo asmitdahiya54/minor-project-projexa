@@ -1,5 +1,6 @@
 from flask import (Flask, render_template, request, redirect,
-                   url_for, flash, jsonify, session)
+                   url_for, flash, jsonify, session, Response)
+import csv
 import sqlite3, os
 from datetime import date, datetime
 from functools import wraps
@@ -300,6 +301,7 @@ def student_dashboard():
         att_late    = sum(1 for r in att_records if r['status'] == 'Late')
         att_absent  = att_total - att_present - att_late
         att_pct     = round(((att_present + att_late * 0.5) / att_total * 100), 1) if att_total else 0
+        low_attendance = att_pct < 75
 
         # Monthly attendance breakdown
         monthly = {}
@@ -358,6 +360,7 @@ def student_dashboard():
         att_records=att_records[:15],
         att_total=att_total, att_present=att_present,
         att_late=att_late, att_absent=att_absent, att_pct=att_pct,
+        low_attendance=low_attendance,  
         monthly=dict(sorted(monthly.items(), reverse=True)),
         # results
         sem_data=sem_data,
@@ -423,6 +426,24 @@ def view_students():
     return render_template('view_students.html', students=students,
         departments=DEPARTMENTS, years=YEARS, statuses=STATUSES,
         filters={'dept': dept, 'year': year, 'status': status, 'search': search})
+
+
+
+@app.route('/export_students')
+@admin_required
+def export_students():
+    with get_db() as conn:
+        students = conn.execute("SELECT * FROM students").fetchall()
+
+    def generate():
+        yield "Student ID,Name,Email,Department,Year,Status\n"
+        for s in students:
+            yield f"{s['student_id']},{s['name']},{s['email']},{s['department']},{s['year']},{s['status']}\n"
+
+    return Response(generate(),
+        mimetype='text/csv',
+        headers={"Content-Disposition": "attachment;filename=students.csv"})
+
 
 
 @app.route('/students/add', methods=['GET', 'POST'])
@@ -959,7 +980,34 @@ def chart_feedback():
             FROM feedback GROUP BY category''').fetchall()
     return jsonify({'distribution': dist, 'by_category': [dict(r) for r in cat_data]})
 
+# ------
+# pass change
+#------
+@app.route('/change-password', methods=['GET', 'POST'])
+def change_password():
+    if request.method == 'POST':
+        password = request.form.get('password')
+        confirm = request.form.get('confirm_password')
 
+        if not password:
+            flash("Password is required", "error")
+            return redirect(url_for('change_password'))
+
+        if password != confirm:
+            flash("Passwords do not match", "error")
+            return redirect(url_for('change_password'))
+
+        hashed = generate_password_hash(password)
+
+        conn = get_db_connection()
+        conn.execute("UPDATE users SET password=? WHERE id=?", (hashed, session['user_id']))
+        conn.commit()
+        conn.close()
+
+        flash("Password updated successfully", "success")
+        return redirect(url_for('dashboard'))
+
+    return render_template('change_password.html')
 # ══════════════════════════════════════════════════════════════
 #  ENTRYPOINT
 # ══════════════════════════════════════════════════════════════

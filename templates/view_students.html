@@ -7,6 +7,9 @@
     <p class="page-sub">{{ students|length }} student{{ 's' if students|length != 1 }} found</p>
   </div>
   <a href="{{ url_for('add_student') }}" class="btn btn-primary">➕ Add Student</a>
+  <a href="{{ url_for('export_students') }}" class="btn btn-outline">
+  ⬇ Export CSV
+  </a>
 </div>
 
 <div class="filter-bar" style="margin-bottom:1.5rem">
@@ -69,8 +72,16 @@
         </td>
       </tr>
       {% else %}
-      <tr><td colspan="8" class="empty-cell">No students found.</td></tr>
-      {% endfor %}
+<tr>
+  <td colspan="8" style="text-align:center; padding:20px;">
+    😔 No students found  
+    <br><br>
+    <a href="{{ url_for('add_student') }}" class="btn btn-primary">
+      ➕ Add First Student
+    </a>
+  </td>
+</tr>
+{% endfor %}
     </tbody>
   </table>
 </div>
