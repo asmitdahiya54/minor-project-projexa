@@ -1,276 +1,62 @@
 {% extends "base.html" %}
-{% block title %}My Dashboard{% endblock %}
+{% block title %}My Dashboard | {{ app_name }}{% endblock %}
+{% block page_heading %}Student Dashboard{% endblock %}
 {% block content %}
-
-<!-- ══ PAGE HEADER ═══════════════════════════════════════ -->
-<div class="page-header">
-  <div>
-    <h1 class="page-title">👋 My Dashboard</h1>
-    <p class="page-sub">Welcome, {{ student.name }} · {{ student.student_id }}</p>
-  </div>
-  <span class="status-chip s-{{ student.status|lower|replace(' ','-') }}">{{ student.status }}</span>
-</div>
-
-
-<!-- ══ PROFILE BANNER ════════════════════════════════════ -->
-<div class="sd-profile-banner">
-  <div class="sd-avatar">{{ student.name[0] }}</div>
-  <div class="sd-profile-info">
-    <h2 class="sd-name">{{ student.name }}</h2>
-    <div class="sd-meta-row">
-      <span class="sd-meta-chip">🏛 {{ student.department }}</span>
-      <span class="sd-meta-chip">📅 {{ student.year }}</span>
-      {% if student.email %}<span class="sd-meta-chip">✉ {{ student.email }}</span>{% endif %}
-      {% if student.gender %}<span class="sd-meta-chip">{{ student.gender }}</span>{% endif %}
-      {% if student.address %}<span class="sd-meta-chip">📍 {{ student.address }}</span>{% endif %}
+<section class="profile-hero">
+  <div class="profile-summary">
+    {% if student.profile_image %}
+    <img src="{{ url_for('static', filename='uploads/' ~ student.profile_image) }}" alt="{{ student.name }}" class="profile-image">
+    {% else %}
+    <div class="profile-image profile-image--fallback">{{ student.name[0] }}</div>
+    {% endif %}
+    <div>
+      <span class="badge">{{ student.student_id }}</span>
+      <h2>{{ student.name }}</h2>
+      <p>{{ student.department }} • {{ student.year }}</p>
     </div>
   </div>
-  <div class="sd-overall-score">
-    <div class="sd-score-val" style="color:{{ get_grade_color(overall_grade) }}">{{ overall_grade }}</div>
-    <div class="sd-score-lbl">Overall Grade</div>
-    <div class="sd-score-pct">{{ overall_pct }}%</div>
+  <div class="hero-actions">
+    <a class="btn btn-secondary" href="{{ url_for('student_detail', student_id=student.id) }}"><i class="fa-solid fa-id-card"></i><span>Profile</span></a>
+    <a class="btn btn-primary" href="{{ url_for('add_feedback') }}"><i class="fa-solid fa-pen"></i><span>Submit feedback</span></a>
   </div>
-</div>
-
-
-<!-- ══ QUICK STATS ════════════════════════════════════════ -->
-<div class="sd-stats-row">
-  <div class="sd-stat-card" style="--c:#10b981;--cb:#d1fae5">
-    <div class="sd-stat-icon">📋</div>
-    <div class="sd-stat-val">{{ att_pct }}%</div>
-    <div class="sd-stat-lbl">Attendance</div>
-    <div class="sd-stat-sub">{{ att_present }}P · {{ att_absent }}A · {{ att_late }}L</div>
-  </div>
-  <div class="sd-stat-card" style="--c:#6366f1;--cb:#eef2ff">
-    <div class="sd-stat-icon">🎓</div>
-    <div class="sd-stat-val">{{ overall_pct }}%</div>
-    <div class="sd-stat-lbl">Academic Score</div>
-    <div class="sd-stat-sub">{{ overall_marks|int }} / {{ overall_max|int }} marks</div>
-  </div>
-  <div class="sd-stat-card" style="--c:#f59e0b;--cb:#fef3c7">
-    <div class="sd-stat-icon">📚</div>
-    <div class="sd-stat-val">{{ sem_data|length }}</div>
-    <div class="sd-stat-lbl">Semesters</div>
-    <div class="sd-stat-sub">{% set ns = namespace(n=0) %}{% for v in sem_data.values() %}{% set ns.n = ns.n + v.subjects|length %}{% endfor %}{{ ns.n }} subjects</div>
-  </div>
-  <div class="sd-stat-card" style="--c:#3b82f6;--cb:#dbeafe">
-    <div class="sd-stat-icon">💬</div>
-    <div class="sd-stat-val">{{ feedbacks|length }}</div>
-    <div class="sd-stat-lbl">Feedback Given</div>
-    <div class="sd-stat-sub">{% if avg_fb %}⭐ {{ avg_fb }} avg{% else %}None yet{% endif %}</div>
-  </div>
-</div>
-
-
-<!-- ══ ATTENDANCE SECTION ═════════════════════════════════ -->
-<div id="attendance" class="sd-section">
-  <div class="sd-section-head">
-    <h2 class="sd-section-title">📋 My Attendance</h2>
-    <span class="sd-badge {% if att_pct >= 85 %}badge-green{% elif att_pct >= 75 %}badge-blue{% elif att_pct >= 60 %}badge-warn{% else %}badge-danger{% endif %}">
-      {{ 'Excellent' if att_pct >= 85 else 'Good' if att_pct >= 75 else 'Average' if att_pct >= 60 else 'Low' }}
-    </span>
-  </div>
-
-  <div class="sd-att-wrap">
-    <!-- Gauge -->
-    <div class="sd-gauge-card">
-      <svg viewBox="0 0 120 120" width="140" height="140">
-        <circle cx="60" cy="60" r="50" fill="none" stroke="#e5e7eb" stroke-width="12"/>
-        <circle cx="60" cy="60" r="50" fill="none"
-          stroke="{% if att_pct>=75 %}#10b981{% elif att_pct>=60 %}#f59e0b{% else %}#ef4444{% endif %}"
-          stroke-width="12" stroke-linecap="round"
-          stroke-dasharray="{{ (att_pct/100 * 314.16)|round(1) }} 314.16"
-          transform="rotate(-90 60 60)"/>
-        <text x="60" y="65" text-anchor="middle" font-size="20" font-weight="800" fill="currentColor">{{ att_pct }}%</text>
-      </svg>
-      <p class="gauge-label">Overall Attendance</p>
-      {% if att_pct < 75 %}
-      <p class="gauge-warn">⚠️ Below 75% threshold</p>
-      {% elif att_pct >= 85 %}
-      <p class="gauge-good">🎉 Excellent attendance!</p>
-      {% endif %}
-      <div class="att-pill-row">
-        <span class="att-pill present">✅ {{ att_present }} Present</span>
-        <span class="att-pill absent">❌ {{ att_absent }} Absent</span>
-        <span class="att-pill late">⏰ {{ att_late }} Late</span>
-      </div>
-    </div>
-
-    <!-- Monthly breakdown -->
-    <div class="sd-monthly-card">
-      <h3 class="sd-card-title">Monthly Breakdown</h3>
-      {% if monthly %}
-        {% for month, data in monthly.items() %}
-        {% set m_total = data.present + data.absent + data.late %}
-        {% set m_pct = ((data.present + data.late * 0.5) / m_total * 100)|round(1) if m_total > 0 else 0 %}
-        <div class="month-row">
-          <span class="month-label">{{ month }}</span>
-          <div class="month-bar-bg">
-            <div class="month-bar" style="width:{{ m_pct }}%;background:{% if m_pct>=75 %}#10b981{% elif m_pct>=60 %}#f59e0b{% else %}#ef4444{% endif %}"></div>
-          </div>
-          <span class="month-pct">{{ m_pct }}%</span>
-          <span class="month-detail">P:{{ data.present }} A:{{ data.absent }} L:{{ data.late }}</span>
-        </div>
-        {% endfor %}
-      {% else %}
-      <p class="no-data">No attendance records yet.</p>
-      {% endif %}
-    </div>
-  </div>
-
-  <!-- Recent records table -->
-  {% if att_records %}
-  <div class="sd-table-section">
-    <h3 class="sd-card-title">Recent Records</h3>
+</section>
+<section class="stat-grid">
+  <article class="stat-card"><span>Attendance rate</span><strong>{{ attendance_summary.rate }}%</strong></article>
+  <article class="stat-card"><span>Total classes</span><strong>{{ attendance_summary.total }}</strong></article>
+  <article class="stat-card"><span>Estimated CGPA</span><strong>{{ cgpa_estimate }}</strong></article>
+  <article class="stat-card"><span>Recent results</span><strong>{{ recent_results|length }}</strong></article>
+</section>
+<section class="panel-grid two-col">
+  <article class="panel">
+    <div class="panel__header"><h3>Recent results</h3><a href="{{ url_for('student_results', student_id=student.id) }}">Open all</a></div>
     <div class="table-wrap">
       <table class="data-table">
-        <thead>
-          <tr><th>#</th><th>Date</th><th>Subject</th><th>Status</th></tr>
-        </thead>
+        <thead><tr><th>Subject</th><th>Semester</th><th>Score</th><th>Grade</th></tr></thead>
         <tbody>
-          {% for r in att_records %}
-          <tr>
-            <td class="text-muted">{{ loop.index }}</td>
-            <td style="font-weight:600">{{ r.date }}</td>
-            <td>{{ r.subject }}</td>
-            <td>
-              <span class="status-badge {% if r.status=='Present' %}s-present{% elif r.status=='Absent' %}s-absent{% else %}s-late{% endif %}">
-                {{ r.status }}
-              </span>
-            </td>
-          </tr>
+          {% for row in recent_results %}
+          <tr><td>{{ row.subject }}</td><td>{{ row.semester }}</td><td>{{ row.marks_obtained }} / {{ row.max_marks }}</td><td>{{ row.grade }}</td></tr>
+          {% else %}
+          <tr><td colspan="4" class="empty">No results available yet.</td></tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
-  </div>
-  {% endif %}
-</div>
-
-
-<!-- ══ RESULTS SECTION ════════════════════════════════════ -->
-<div id="results" class="sd-section">
-  <div class="sd-section-head">
-    <h2 class="sd-section-title">🎓 My Academic Results</h2>
-    {% if overall_max > 0 %}
-    <span class="sd-grade-chip" style="background:{{ get_grade_color(overall_grade) }}1a;color:{{ get_grade_color(overall_grade) }};border:1.5px solid {{ get_grade_color(overall_grade) }}">
-      {{ overall_grade }} · {{ overall_pct }}%
-    </span>
-    {% endif %}
-  </div>
-
-  {% if sem_data %}
-  <!-- Overall performance bar -->
-  <div class="overall-card" style="margin-bottom:1.5rem">
-    <div class="oc-left">
-      <div class="oc-label">Overall Performance</div>
-      <div class="oc-score">{{ overall_pct }}%</div>
-      <div class="oc-detail">{{ overall_marks|int }} / {{ overall_max|int }} marks</div>
-    </div>
-    <div class="oc-grade" style="color:{{ get_grade_color(overall_grade) }}">{{ overall_grade }}</div>
-    <div class="oc-bar-wrap">
-      <div class="oc-bar" style="width:{{ overall_pct }}%;background:{{ get_grade_color(overall_grade) }}"></div>
-    </div>
-  </div>
-
-  {% for sem, data in sem_data.items() %}
-  <div class="sem-block">
-    <div class="sem-header">
-      <div class="sem-title-row">
-        <h3 class="sem-title">{{ sem }}</h3>
-        <span class="sem-grade-chip" style="background:{{ get_grade_color(data.sem_grade) }}1a;color:{{ get_grade_color(data.sem_grade) }};border:1.5px solid {{ get_grade_color(data.sem_grade) }}">
-          {{ data.sem_grade }} · {{ data.sem_pct }}%
-        </span>
-      </div>
-      <span class="sem-marks">{{ data.total_marks|int }} / {{ data.total_max|int }}</span>
-    </div>
-
-    <table class="res-table">
-      <thead>
-        <tr>
-          <th>Subject</th>
-          <th>Exam Type</th>
-          <th style="text-align:center">Marks</th>
-          <th>Score</th>
-          <th style="text-align:center">Grade</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for sub in data.subjects %}
-        <tr>
-          <td style="font-weight:600">{{ sub.subject }}</td>
-          <td><span class="exam-tag">{{ sub.exam_type }}</span></td>
-          <td style="text-align:center;font-weight:700">{{ sub.marks|int }}/{{ sub.max|int }}</td>
-          <td>
-            <div class="score-bar-bg">
-              <div class="score-bar" style="width:{{ sub.pct }}%;background:{% if sub.pct>=80 %}#10b981{% elif sub.pct>=60 %}#3b82f6{% elif sub.pct>=40 %}#f59e0b{% else %}#ef4444{% endif %}"></div>
-            </div>
-            <span class="score-pct">{{ sub.pct }}%</span>
-          </td>
-          <td style="text-align:center">
-            <span class="grade-chip grade-{{ sub.grade }}">{{ sub.grade }}</span>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  {% endfor %}
-
-  {% else %}
-  <div class="empty-state">
-    <p style="font-size:3rem;margin-bottom:.5rem">📭</p>
-    <p>No results recorded yet. Please check back later.</p>
-  </div>
-  {% endif %}
-</div>
-
-
-<!-- ══ FEEDBACK SECTION ═══════════════════════════════════ -->
-<div id="feedback" class="sd-section">
-  <div class="sd-section-head">
-    <h2 class="sd-section-title">💬 My Feedback</h2>
-    {% if feedbacks %}
-    <span class="sd-badge badge-blue">⭐ {{ avg_fb }} avg · {{ feedbacks|length }} entries</span>
-    {% endif %}
-  </div>
-
-  {% if feedbacks %}
-  <div class="fb-list">
-    {% for e in feedbacks %}
-    <div class="fb-card rating-{{ e.rating }}">
-      <div class="fb-card-header">
+  </article>
+  <article class="panel">
+    <div class="panel__header"><h3>Feedback history</h3><a href="{{ url_for('feedback') }}">Open feedback</a></div>
+    <div class="result-list">
+      {% for entry in feedback_entries %}
+      <article class="result-item">
         <div>
-          <span class="fb-category">{{ e.category }}</span>
-          <span class="fb-date" style="margin-left:.5rem">{{ e.created_at[:10] }}</span>
+          <strong>{{ entry.category }}</strong>
+          <p>{{ entry.message }}</p>
         </div>
-        <div class="fb-stars">
-          {% for i in range(1,6) %}
-          <span class="star {% if i<=e.rating %}filled{% endif %}">★</span>
-          {% endfor %}
-        </div>
-      </div>
-      <p class="fb-message">{{ e.message }}</p>
+        <div class="grade-chip">{{ entry.rating }}/5</div>
+      </article>
+      {% else %}
+      <p class="empty">No feedback submitted yet.</p>
+      {% endfor %}
     </div>
-    {% endfor %}
-  </div>
-  {% else %}
-  <div class="empty-state">
-    <p style="font-size:3rem;margin-bottom:.5rem">💬</p>
-    <p>You haven't submitted any feedback yet.</p>
-  </div>
-  {% endif %}
-</div>
-
-<!-- Smooth scroll for anchor links -->
-<script>
-document.querySelectorAll('a[href*="#"]').forEach(a => {
-  a.addEventListener('click', e => {
-    const hash = a.getAttribute('href').split('#')[1];
-    const el = document.getElementById(hash);
-    if (el) { e.preventDefault(); el.scrollIntoView({behavior:'smooth', block:'start'}); }
-  });
-});
-</script>
-
+  </article>
+</section>
 {% endblock %}

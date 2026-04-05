@@ -1,87 +1,36 @@
 {% extends "base.html" %}
-{% block title %}{{ student.name }}{% endblock %}
+{% block title %}Student Profile | {{ app_name }}{% endblock %}
+{% block page_heading %}Student Profile{% endblock %}
 {% block content %}
-<div class="page-header">
-  <div>
-    <a href="{{ url_for('view_students') }}" class="back-link">← Back to Students</a>
-    <h1 class="page-title">{{ student.name }}</h1>
-    <p class="page-sub">{{ student.student_id }} · {{ student.department }}</p>
-  </div>
-  <div style="display:flex;gap:.5rem">
-    <a href="{{ url_for('edit_student', sid=student.id) }}" class="btn btn-outline">✏️ Edit</a>
-    <form method="post" action="{{ url_for('delete_student', sid=student.id) }}" onsubmit="return confirm('Delete this student?')">
-      <button type="submit" class="btn btn-danger">🗑 Delete</button>
-    </form>
-  </div>
-</div>
-
-<div class="detail-grid">
-  <!-- Profile Card -->
-  <div class="profile-card">
-    <div class="avatar">{{ student.name[0] }}</div>
-    <h2 class="profile-name">{{ student.name }}</h2>
-    <span class="status-chip s-{{ student.status|lower|replace(' ','-') }}">{{ student.status }}</span>
-    <div class="profile-fields">
-      <div class="pf-row"><span class="pf-label">Student ID</span><span class="pf-val mono">{{ student.student_id }}</span></div>
-      <div class="pf-row"><span class="pf-label">Department</span><span class="pf-val">{{ student.department }}</span></div>
-      <div class="pf-row"><span class="pf-label">Year</span><span class="pf-val">{{ student.year }}</span></div>
-      <div class="pf-row"><span class="pf-label">Email</span><span class="pf-val">{{ student.email or '—' }}</span></div>
-      <div class="pf-row"><span class="pf-label">Gender</span><span class="pf-val">{{ student.gender or '—' }}</span></div>
-      <div class="pf-row"><span class="pf-label">DOB</span><span class="pf-val">{{ student.dob or '—' }}</span></div>
-      <div class="pf-row"><span class="pf-label">Address</span><span class="pf-val">{{ student.address or '—' }}</span></div>
-      <div class="pf-row"><span class="pf-label">Enrolled</span><span class="pf-val">{{ student.enroll_date or '—' }}</span></div>
+<section class="profile-hero">
+  <div class="profile-summary">
+    {% if student.profile_image %}<img src="{{ url_for('static', filename='uploads/' ~ student.profile_image) }}" alt="{{ student.name }}" class="profile-image">{% else %}<div class="profile-image profile-image--fallback">{{ student.name[0] }}</div>{% endif %}
+    <div>
+      <span class="badge">{{ student.student_id }}</span>
+      <h2>{{ student.name }}</h2>
+      <p>{{ student.department }} • {{ student.year }} • {{ student.status }}</p>
+      <p class="muted">{{ student.email or 'No email added' }}</p>
     </div>
   </div>
-
-  <div class="detail-right">
-    <!-- Attendance Summary -->
-    <div class="detail-section">
-      <div class="ds-header">
-        <h3 class="ds-title">📋 Attendance</h3>
-        <a href="{{ url_for('student_attendance', sid=student.id) }}" class="btn btn-outline" style="font-size:.78rem;padding:.3rem .75rem">Full Report →</a>
-      </div>
-      <div class="att-mini-grid">
-        <div class="att-mini" style="--c:#10b981;--cb:#d1fae5"><span class="am-val">{{ att_present }}</span><span class="am-lbl">Present</span></div>
-        <div class="att-mini" style="--c:#ef4444;--cb:#fecaca"><span class="am-val">{{ att_total - att_present - att_late }}</span><span class="am-lbl">Absent</span></div>
-        <div class="att-mini" style="--c:#f59e0b;--cb:#fef3c7"><span class="am-val">{{ att_late }}</span><span class="am-lbl">Late</span></div>
-        <div class="att-mini" style="--c:{% if att_pct>=75 %}#10b981{% elif att_pct>=60 %}#f59e0b{% else %}#ef4444{% endif %};--cb:{% if att_pct>=75 %}#d1fae5{% elif att_pct>=60 %}#fef3c7{% else %}#fecaca{% endif %}">
-          <span class="am-val">{{ att_pct }}%</span><span class="am-lbl">Rate</span>
-        </div>
-      </div>
-      {% if recent_att %}
-      <div class="recent-att">
-        {% for r in recent_att %}
-        <span class="att-dot att-{{ r.status|lower }}" title="{{ r.date }} – {{ r.status }}"></span>
-        {% endfor %}
-      </div>
-      {% endif %}
-    </div>
-
-    <!-- Results Summary -->
-    <div class="detail-section">
-      <div class="ds-header">
-        <h3 class="ds-title">🎓 Results</h3>
-        <a href="{{ url_for('student_results', sid=student.id) }}" class="btn btn-outline" style="font-size:.78rem;padding:.3rem .75rem">View All →</a>
-      </div>
-      {% if results %}
-      <table class="mini-table">
-        <thead><tr><th>Subject</th><th>Semester</th><th>Marks</th><th>Grade</th></tr></thead>
-        <tbody>
-          {% for r in results[:6] %}
-          {% set pct = (r.marks_obtained/r.max_marks*100)|round(1) %}
-          <tr>
-            <td style="font-weight:600">{{ r.subject }}</td>
-            <td class="text-muted">{{ r.semester }}</td>
-            <td>{{ r.marks_obtained|int }}/{{ r.max_marks|int }}</td>
-            <td><span class="grade-chip grade-{{ r.grade }}">{{ r.grade }}</span></td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      {% else %}
-      <p class="no-data">No results added yet. <a href="{{ url_for('add_result') }}?student_id={{ student.id }}">Add one →</a></p>
-      {% endif %}
-    </div>
+  <div class="hero-actions">
+    {% if current_role == 'admin' %}<a class="btn btn-secondary" href="{{ url_for('edit_student', student_id=student.id) }}"><i class="fa-solid fa-pen"></i><span>Edit</span></a>{% endif %}
+    <a class="btn btn-primary" href="{{ url_for('report_card_pdf', student_id=student.id) }}"><i class="fa-solid fa-file-pdf"></i><span>Report card PDF</span></a>
   </div>
-</div>
+</section>
+<section class="stat-grid">
+  <article class="stat-card"><span>Attendance</span><strong>{{ attendance_summary.rate }}%</strong></article>
+  <article class="stat-card"><span>Present</span><strong>{{ attendance_summary.present }}</strong></article>
+  <article class="stat-card"><span>Absent</span><strong>{{ attendance_summary.absent }}</strong></article>
+  <article class="stat-card"><span>Late</span><strong>{{ attendance_summary.late }}</strong></article>
+</section>
+<section class="panel-grid two-col">
+  <article class="panel"><div class="panel__header"><h3>Recent results</h3><a href="{{ url_for('student_results', student_id=student.id) }}">Open all</a></div><div class="result-list">{% for row in results %}<article class="result-item"><div><strong>{{ row.subject }}</strong><p>{{ row.semester }} • {{ row.marks_obtained }} / {{ row.max_marks }}</p></div><div class="grade-chip">{{ row.grade }}</div></article>{% else %}<p class="empty">No results yet.</p>{% endfor %}</div></article>
+  <article class="panel"><div class="panel__header"><h3>Recent feedback</h3><a href="{{ url_for('feedback') }}">Open feedback</a></div><div class="result-list">{% for entry in feedback_entries %}<article class="result-item"><div><strong>{{ entry.category }}</strong><p>{{ entry.message }}</p></div><div class="grade-chip">{{ entry.rating }}/5</div></article>{% else %}<p class="empty">No feedback yet.</p>{% endfor %}</div></article>
+</section>
+{% if current_role == 'admin' %}
+<form method="post" action="{{ url_for('delete_student', student_id=student.id) }}" class="danger-zone" onsubmit="return confirm('Delete this student record?');">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <button class="btn btn-danger" type="submit"><i class="fa-solid fa-trash"></i><span>Delete student</span></button>
+</form>
+{% endif %}
 {% endblock %}

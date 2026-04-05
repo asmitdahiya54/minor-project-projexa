@@ -1,81 +1,75 @@
 {% extends "base.html" %}
-{% block title %}Attendance Report{% endblock %}
-{% block content %}
-<div class="page-header">
-  <div>
-    <h1 class="page-title">📊 Attendance Report</h1>
-    <p class="page-sub">Overall attendance summary for all students</p>
-  </div>
-  <a href="{{ url_for('attendance') }}" class="btn btn-primary">📋 Mark Attendance</a>
-</div>
+{% block title %}Attendance Report | {{ app_name }}{% endblock %}
+{% block page_heading %}Attendance Report{% endblock %}
 
-<!-- Filter -->
-<div class="filter-bar" style="margin-bottom:1.5rem">
-  <form method="get" class="filter-form">
-    <div class="filter-group">
-      <label>🏛 Department</label>
-      <select name="dept" onchange="this.form.submit()">
-        <option value="">All Departments</option>
-        {% for d in departments %}
-        <option value="{{ d }}" {% if sel_dept==d %}selected{% endif %}>{{ d }}</option>
+{% block content %}
+<section class="panel panel--form">
+  <form method="get" class="filters-grid compact-grid">
+    <label>
+      <span>Department</span>
+      <select name="dept">
+        <option value="">All departments</option>
+        {% for dept in departments %}
+        <option value="{{ dept }}" {% if filters.dept == dept %}selected{% endif %}>{{ dept }}</option>
         {% endfor %}
       </select>
-    </div>
-  </form>
-</div>
+    </label>
 
-<!-- Table -->
-<div class="table-wrap">
-  <table class="data-table">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Student</th>
-        <th>Department</th>
-        <th>Year</th>
-        <th style="text-align:center">Total</th>
-        <th style="text-align:center">Present</th>
-        <th style="text-align:center">Late</th>
-        <th style="text-align:center">Absent</th>
-        <th>Attendance %</th>
-        <th style="text-align:center">Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for r in report %}
-      <tr>
-        <td class="text-muted">{{ loop.index }}</td>
-        <td>
-          <div class="student-cell">
-            <span class="s-name">{{ r.name }}</span>
-            <span class="s-id">{{ r.student_id }}</span>
-          </div>
-        </td>
-        <td><span class="dept-tag">{{ r.department }}</span></td>
-        <td>{{ r.year }}</td>
-        <td style="text-align:center;font-weight:700">{{ r.total }}</td>
-        <td style="text-align:center"><span class="badge badge-success">{{ r.present }}</span></td>
-        <td style="text-align:center"><span class="badge badge-warn">{{ r.late }}</span></td>
-        <td style="text-align:center"><span class="badge badge-danger">{{ r.absent }}</span></td>
-        <td>
-          <div class="pct-bar-wrap">
-            <div class="pct-bar" style="width:{{ r.percentage }}%;
-              background:{% if r.percentage>=85 %}#10b981{% elif r.percentage>=75 %}#3b82f6{% elif r.percentage>=60 %}#f59e0b{% else %}#ef4444{% endif %}">
-            </div>
-            <span class="pct-label {% if r.percentage<75 %}pct-low{% endif %}">{{ r.percentage }}%</span>
-          </div>
-          <span class="status-micro {% if r.status_label=='Excellent' %}exc{% elif r.status_label=='Good' %}good{% elif r.status_label=='Average' %}avg{% else %}low{% endif %}">
-            {{ r.status_label }}
-          </span>
-        </td>
-        <td style="text-align:center">
-          <a href="{{ url_for('student_attendance', sid=r.id) }}" class="btn-icon" title="View Details">🔍</a>
-        </td>
-      </tr>
-      {% else %}
-      <tr><td colspan="10" class="empty-cell">No records found.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
+    <label>
+      <span>Year</span>
+      <select name="year">
+        <option value="">All years</option>
+        {% for year in years %}
+        <option value="{{ year }}" {% if filters.year == year %}selected{% endif %}>{{ year }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <button class="btn btn-primary" type="submit">
+      <i class="fa-solid fa-filter"></i>
+      <span>Filter report</span>
+    </button>
+  </form>
+</section>
+
+<section class="panel">
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>Department</th>
+          <th>Year</th>
+          <th>Rate</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          <td>
+            {{ row.student.name }}
+            <span class="table-sub">{{ row.student.student_id }}</span>
+          </td>
+          <td>{{ row.student.department }}</td>
+          <td>{{ row.student.year }}</td>
+          <td>{{ row.summary.rate }}%</td>
+          <td class="actions-inline">
+            <a class="icon-btn" href="{{ url_for('student_attendance', student_id=row.student.id) }}">
+              <i class="fa-solid fa-eye"></i>
+            </a>
+            <a class="icon-btn" href="{{ url_for('attendance_pdf', student_id=row.student.id) }}">
+              <i class="fa-solid fa-file-pdf"></i>
+            </a>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="5" class="empty">No attendance data found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
 {% endblock %}
