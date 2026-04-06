@@ -103,7 +103,7 @@ def ensure_col(conn, table, sql):
 
 def migrate_users(conn):
     ensure_col(conn, "users", "full_name TEXT")
-    
+
     row = conn.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='users'").fetchone()
     if row and row["sql"] and "teacher" in row["sql"].lower():
         return
@@ -231,7 +231,7 @@ def init_db():
 
     if "teacher" not in usernames:
         conn.execute(
-            "INSERT INTO users (username,email,password,role) VALUES (?,?,?,?)",
+            "INSERT INTO users (username,email,password,role,full_name) VALUES (?,?,?,?,?)"
             ("teacher", "teacher@sims.edu", generate_password_hash("teacher123"), "teacher"),
         )
 
