@@ -685,8 +685,8 @@ def dashboard_ctx():
 
     recent_students = conn.execute(
         f"""
-        SELECT students.*, users.username AS teacher_username
-        FROM students
+        SELECT students.*, users.username AS teacher_name
+        FROM students   
         LEFT JOIN users ON users.id = students.assigned_teacher_id
         WHERE {where}
         ORDER BY datetime(students.created_at) DESC
