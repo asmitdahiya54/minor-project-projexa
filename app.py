@@ -232,7 +232,7 @@ def init_db():
     if "teacher" not in usernames:
         conn.execute(
             "INSERT INTO users (username,email,password,role,full_name) VALUES (?,?,?,?,?)"
-            ("teacher", "teacher@sims.edu", generate_password_hash("teacher123"), "teacher"),
+            ("teacher", "teacher@sims.edu", generate_password_hash("teacher123"), "teacher", "Rahul Sharma")
         )
 
     teacher = conn.execute("SELECT id FROM users WHERE username='teacher' LIMIT 1").fetchone()
