@@ -688,16 +688,16 @@ def dashboard_ctx():
     ).fetchone()
 
     recent_students = conn.execute(
-        f"""
-        SELECT students.*, users.full_name AS teacher_name
-        FROM students   
-        LEFT JOIN users ON users.id = students.assigned_teacher_id
-        WHERE {where}
-        ORDER BY datetime(students.created_at) DESC
-        LIMIT 6
-        """,
-        params,
-    ).fetchall()
+    f"""
+    SELECT students.*, users.full_name AS teacher_name
+    FROM students
+    LEFT JOIN users ON users.id = students.assigned_teacher_id
+    WHERE {where}
+    ORDER BY datetime(students.created_at) DESC
+    LIMIT 6
+    """,
+    params,
+).fetchall()
 
     return {
         "stats": {
