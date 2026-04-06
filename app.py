@@ -232,8 +232,8 @@ def init_db():
 
     if "teacher" not in usernames:
         conn.execute(
-            "INSERT INTO users (username,email,password,role,full_name) VALUES (?,?,?,?,?)"
-            ("teacher", "teacher@sims.edu", generate_password_hash("teacher123"), "teacher", "Rahul Sharma")
+        "INSERT INTO users (username,email,password,role,full_name) VALUES (?,?,?,?,?)",
+        ("teacher", "teacher@sims.edu", generate_password_hash("teacher123"), "teacher", "Rahul Sharma")
         )
         conn.execute("UPDATE users SET full_name='Rahul Sharma' WHERE username='teacher'")
 
@@ -368,7 +368,7 @@ def visible_clause(alias="students"):
 
 def teachers():
     return db().execute(
-        "SELECT id, username, email FROM users WHERE role='teacher' ORDER BY username"
+        "SELECT id, full_name FROM users WHERE role='teacher' ORDER BY full_name"
     ).fetchall()
 
 
@@ -421,7 +421,7 @@ def student_or_404(student_id):
     where, params = visible_clause("students")
     row = db().execute(
         f"""
-        SELECT students.*, users.full_name AS teacher_name, users.email AS teacher_email
+        SELECT students.*, users.full_name AS teacher_name
         FROM students
         LEFT JOIN users ON users.id = students.assigned_teacher_id
         WHERE students.id = ? AND {where}
@@ -454,7 +454,7 @@ def visible_students(filters=None):
 
     return db().execute(
         f"""
-        SELECT students.*, users.username AS teacher_username
+        SELECT students.*, users.full_name AS teacher_name
         FROM students
         LEFT JOIN users ON users.id = students.assigned_teacher_id
         WHERE {' AND '.join(clauses)}
