@@ -420,7 +420,7 @@ def student_or_404(student_id):
     where, params = visible_clause("students")
     row = db().execute(
         f"""
-        SELECT students.*, users.username AS teacher_username, users.email AS teacher_email
+        SELECT students.*, users.full_name AS teacher_name, users.email AS teacher_email
         FROM students
         LEFT JOIN users ON users.id = students.assigned_teacher_id
         WHERE students.id = ? AND {where}
