@@ -234,6 +234,7 @@ def init_db():
             "INSERT INTO users (username,email,password,role,full_name) VALUES (?,?,?,?,?)"
             ("teacher", "teacher@sims.edu", generate_password_hash("teacher123"), "teacher", "Rahul Sharma")
         )
+        conn.execute("UPDATE users SET full_name='Rahul Sharma' WHERE username='teacher'")
 
     teacher = conn.execute("SELECT id FROM users WHERE username='teacher' LIMIT 1").fetchone()
 
