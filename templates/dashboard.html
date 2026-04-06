@@ -73,7 +73,7 @@
             </td>
             <td>{{ student.department }}</td>
             <td>{{ student.year }}</td>
-            <td>{{ student.teacher_username or 'Unassigned' }}</td>
+            {{ student.teacher_name or 'Unassigned' }}
           </tr>
           {% else %}
           <tr>
