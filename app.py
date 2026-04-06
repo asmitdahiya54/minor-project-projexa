@@ -128,7 +128,8 @@ def migrate_users(conn):
         conn.execute("DROP TABLE users")
         conn.execute("ALTER TABLE users_new RENAME TO users")
     conn.execute("PRAGMA foreign_keys = ON")
-
+    
+    conn.execute("UPDATE users SET full_name='Rahul Sharma' WHERE username='teacher'")
 
 def init_db():
     Path(app.config["UPLOAD_FOLDER"]).mkdir(parents=True, exist_ok=True)
