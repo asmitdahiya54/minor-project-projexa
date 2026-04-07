@@ -230,10 +230,12 @@ def init_db():
             ("admin", "admin@sims.edu", generate_password_hash("admin123"), "admin"),
         )
 
-    if "teacher" not in usernames:
+    teacher_exists = conn.execute("SELECT 1 FROM users WHERE role='teacher'").fetchone()
+
+    if not teacher_exists:
         conn.execute(
-        "INSERT INTO users (username,email,password,role,full_name) VALUES (?,?,?,?,?)",
-        ("teacher", "teacher@sims.edu", generate_password_hash("teacher123"), "teacher", "Rahul Sharma")
+            "INSERT INTO users (username,email,password,role,full_name) VALUES (?,?,?,?,?)",
+            ("teacher", "teacher@sims.edu", generate_password_hash("teacher123"), "teacher", "Rahul Sharma")
         )
         conn.execute("UPDATE users SET full_name='Rahul Sharma' WHERE username='teacher'")
 
