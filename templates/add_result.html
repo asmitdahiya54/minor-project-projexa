@@ -34,4 +34,22 @@
         </select>
       </label>
 
+      <label>
+        <span>Exam type</span>
+        <select name="exam_type">
+          {% for exam in exam_types %}
+          <option value="{{ exam }}">{{ exam }}</option>
+          {% endfor %}
+        </select>
+      </label>
+
+      <label>
+        <span>Semester</span>
+        <select name="semester">
+          {% for sem in semesters %}
+          <option value="{{ sem }}">{{ sem }}</option>
+          {% endfor %}
+        </select>
+      </label>
+
       
