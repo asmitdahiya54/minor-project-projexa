@@ -11,3 +11,19 @@
   </div>
 </section>
 
+<section class="panel panel--form">
+  <form method="post" enctype="multipart/form-data" class="data-form js-ajax-form" data-redirect-on-success="true">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div class="form-grid">
+      <label>
+        <span>Student ID</span>
+        <input type="text" name="student_id" value="{{ form.get('student_id', '') }}" required>
+      </label>
+
+      <label>
+        <span>Full name</span>
+        <input type="text" name="name" value="{{ form.get('name', '') }}" required>
+      </label>
+
+      
