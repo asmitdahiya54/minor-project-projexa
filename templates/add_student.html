@@ -89,4 +89,20 @@
         <input type="text" name="address" value="{{ form.get('address', '') }}">
       </label>
 
+      <label>
+        <span>Assigned teacher</span>
+        <select name="assigned_teacher_id">
+          <option value="">Auto-assign by year</option>
+          {% for teacher in teachers %}
+          <option value="{{ teacher.id }}" {% if form.get('assigned_teacher_id') == teacher.id|string %}selected{% endif %}>{{ teacher.full_name }}</option>
+          {% endfor %}
+        </select>
+        <p class="form-note">Leave blank to let the system choose a default teacher based on the selected year.</p>
+      </label>
+
+      <label class="form-grid__full">
+        <span>Address</span>
+        <input type="text" name="address" value="{{ form.get('address', '') }}">
+      </label>
+
       
