@@ -41,4 +41,22 @@
         <input type="text" name="gender" value="{{ form.get('gender', '') }}" placeholder="Male, Female, Non-binary, Prefer not to say">
       </label>
 
+      <label>
+        <span>Department</span>
+        <select name="department" required>
+          {% for dept in departments %}
+          <option value="{{ dept }}" {% if form.get('department') == dept %}selected{% endif %}>{{ dept }}</option>
+          {% endfor %}
+        </select>
+      </label>
+
+      <label>
+        <span>Academic year</span>
+        <select name="year" required>
+          {% for year in years %}
+          <option value="{{ year }}" {% if form.get('year') == year %}selected{% endif %}>{{ year }}</option>
+          {% endfor %}
+        </select>
+      </label>
+
       
