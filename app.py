@@ -93,3 +93,39 @@ def close_db(_e):
 
 def col_exists(conn, table, column):
     return any(r["name"] == column for r in conn.execute(f"PRAGMA table_info({table})").fetchall())
+
+def ensure_col(conn, table, sql):
+    name = sql.split()[0]
+    if not col_exists(conn, table, name):
+        conn.execute(f"ALTER TABLE {table} ADD COLUMN {sql}")
+
+
+def migrate_users(conn):
+    ensure_col(conn, "users", "full_name TEXT")
+
+    row = conn.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='users'").fetchone()
+    if row and row["sql"] and "teacher" in row["sql"].lower():
+        return
+    conn.execute("PRAGMA foreign_keys = OFF")
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS users_new (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            email TEXT,
+            password TEXT NOT NULL,
+            role TEXT NOT NULL CHECK(role IN ('admin','teacher','student')),
+            student_id INTEGER,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(student_id) REFERENCES students(id)
+        )
+    """)
+    if row:
+        conn.execute("""
+            INSERT INTO users_new (id,username,email,password,role,student_id,created_at)
+            SELECT id,username,email,password,role,student_id,created_at FROM users
+        """)
+        conn.execute("DROP TABLE users")
+        conn.execute("ALTER TABLE users_new RENAME TO users")
+    conn.execute("PRAGMA foreign_keys = ON")
+
+    conn.execute("UPDATE users SET full_name='Rahul Sharma' WHERE username='teacher'")
