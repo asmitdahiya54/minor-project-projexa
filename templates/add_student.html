@@ -70,7 +70,7 @@
         <select name="assigned_teacher_id">
           <option value="">Select teacher</option>
           {% for teacher in teachers %}
-          <option value="{{ teacher.id }}">{{ teacher.username }}</option>
+          <option value="{{ teacher.id }}">{{ teacher.full_name }}</option>
           {% endfor %}
         </select>
       </label>
