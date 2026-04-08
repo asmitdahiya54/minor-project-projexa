@@ -105,4 +105,20 @@
         <input type="text" name="address" value="{{ form.get('address', '') }}">
       </label>
 
-      
+      <label class="form-grid__full">
+        <span>Profile image</span>
+        <input type="file" name="profile_image" accept=".png,.jpg,.jpeg,.webp">
+      </label>
+    </div>
+
+    <div class="form-actions">
+      <a class="btn btn-secondary" href="{{ url_for('view_students') }}">Cancel</a>
+      <button class="btn btn-primary" type="submit">
+        <i class="fa-solid fa-floppy-disk"></i>
+        <span>Save student</span>
+      </button>
+    </div>
+  </form>
+</section>
+{% endblock %}
+
