@@ -59,4 +59,18 @@
         </select>
       </label>
 
+      <label>
+        <span>Status</span>
+        <select name="status">
+          {% for status in statuses %}
+          <option value="{{ status }}" {% if form.get('status', 'Active') == status %}selected{% endif %}>{{ status }}</option>
+          {% endfor %}
+        </select>
+      </label>
+
+      <label>
+        <span>Enrollment date</span>
+        <input type="date" name="enroll_date" value="{{ form.get('enroll_date', '') }}">
+      </label>
+
       
