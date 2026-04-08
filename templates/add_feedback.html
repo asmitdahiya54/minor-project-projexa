@@ -26,4 +26,22 @@
       </label>
       {% endif %}
 
+      <label>
+        <span>Category</span>
+        <select name="category">
+          {% for category in categories %}
+          <option value="{{ category }}">{{ category }}</option>
+          {% endfor %}
+        </select>
+      </label>
+
+      <label>
+        <span>Rating</span>
+        <select name="rating">
+          {% for rating in [5,4,3,2,1] %}
+          <option value="{{ rating }}">{{ rating }}</option>
+          {% endfor %}
+        </select>
+      </label>
+
       
