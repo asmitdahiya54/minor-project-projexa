@@ -1,98 +1,13 @@
-{% extends "base.html" %}
-{% block title %}Add Student | {{ app_name }}{% endblock %}
+% extends "base.html" %}
+{% block title %}Create Student Record | {{ app_name }}{% endblock %}
 {% block page_heading %}Create Student Record{% endblock %}
 
 {% block content %}
-<section class="panel panel--form">
-  <form method="post" enctype="multipart/form-data" class="data-form js-ajax-form" data-redirect-on-success="true">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-
-    <div class="form-grid">
-      <label>
-        <span>Student ID</span>
-        <input type="text" name="student_id" value="{{ form.get('student_id', '') }}" required>
-      </label>
-
-      <label>
-        <span>Full name</span>
-        <input type="text" name="name" value="{{ form.get('name', '') }}" required>
-      </label>
-
-      <label>
-        <span>Email</span>
-        <input type="email" name="email" value="{{ form.get('email', '') }}">
-      </label>
-
-      <label>
-        <span>Date of birth</span>
-        <input type="date" name="dob" value="{{ form.get('dob', '') }}">
-      </label>
-
-      <label>
-        <span>Gender</span>
-        <input type="text" name="gender" value="{{ form.get('gender', '') }}">
-      </label>
-
-      <label>
-        <span>Department</span>
-        <select name="department" required>
-          {% for dept in departments %}
-          <option value="{{ dept }}">{{ dept }}</option>
-          {% endfor %}
-        </select>
-      </label>
-
-      <label>
-        <span>Academic year</span>
-        <select name="year" required>
-          {% for year in years %}
-          <option value="{{ year }}">{{ year }}</option>
-          {% endfor %}
-        </select>
-      </label>
-
-      <label>
-        <span>Status</span>
-        <select name="status">
-          {% for status in statuses %}
-          <option value="{{ status }}">{{ status }}</option>
-          {% endfor %}
-        </select>
-      </label>
-
-      <label>
-        <span>Enrollment date</span>
-        <input type="date" name="enroll_date" value="{{ form.get('enroll_date', '') }}">
-      </label>
-
-      <label>
-        <span>Assigned teacher</span>
-        <select name="assigned_teacher_id">
-          <option value="">Select teacher</option>
-          {% for teacher in teachers %}
-          <option value="{{ teacher.id }}">{{ teacher.full_name }}</option>
-          {% endfor %}
-        </select>
-      </label>
-
-      <label class="form-grid__full">
-        <span>Address</span>
-        <input type="text" name="address" value="{{ form.get('address', '') }}">
-      </label>
-
-      <label class="form-grid__full">
-        <span>Profile image</span>
-        <input type="file" name="profile_image" accept=".png,.jpg,.jpeg,.webp">
-      </label>
-    </div>
-
-    <div class="form-actions">
-      <a class="btn btn-secondary" href="{{ url_for('view_students') }}">Cancel</a>
-      <button class="btn btn-primary" type="submit">
-        <i class="fa-solid fa-floppy-disk"></i>
-        <span>Save student</span>
-      </button>
-    </div>
-  </form>
+<section class="hero-card">
+  <div class="hero-copy">
+    <span class="badge">Admissions and records</span>
+    <h2>Create a complete student profile in one flow.</h2>
+    <p>Capture identity, contact details, academic placement, status, teacher assignment, and optional profile image.</p>
+  </div>
 </section>
-{% endblock %}
+
