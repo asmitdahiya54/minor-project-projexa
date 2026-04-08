@@ -44,4 +44,19 @@
         </select>
       </label>
 
-      
+      <label class="form-grid__full">
+        <span>Message</span>
+        <textarea name="message" rows="5" required></textarea>
+      </label>
+    </div>
+
+    <div class="form-actions">
+      <a class="btn btn-secondary" href="{{ url_for('feedback') }}">Cancel</a>
+      <button class="btn btn-primary" type="submit">
+        <i class="fa-solid fa-paper-plane"></i>
+        <span>Send feedback</span>
+      </button>
+    </div>
+  </form>
+</section>
+{% endblock %}
