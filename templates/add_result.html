@@ -11,4 +11,27 @@
     </div>
   </div>
 
-  
+
+  <form method="post" class="data-form js-ajax-form" data-redirect-on-success="true">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div class="form-grid">
+      <label>
+        <span>Student</span>
+        <select name="student_id" required>
+          {% for student in students %}
+          <option value="{{ student.id }}" {% if selected_student == student.id %}selected{% endif %}>{{ student.name }} ({{ student.student_id }})</option>
+          {% endfor %}
+        </select>
+      </label>
+
+      <label>
+        <span>Subject</span>
+        <select name="subject">
+          {% for subject in subjects %}
+          <option value="{{ subject }}">{{ subject }}</option>
+          {% endfor %}
+        </select>
+      </label>
+
+      
