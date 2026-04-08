@@ -1,6 +1,12 @@
 {% extends "base.html" %}
 {% block title %}Add Feedback | {{ app_name }}{% endblock %}
 {% block page_heading %}Submit Feedback{% endblock %}
+
 {% block content %}
-<section class="panel panel--form"><form method="post" class="data-form js-ajax-form" data-redirect-on-success="true"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><div class="form-grid">{% if current_role != 'student' %}<label><span>Student</span><select name="student_id">{% for student in students %}<option value="{{ student.id }}">{{ student.name }} ({{ student.student_id }})</option>{% endfor %}</select></label>{% endif %}<label><span>Category</span><select name="category">{% for category in categories %}<option value="{{ category }}">{{ category }}</option>{% endfor %}</select></label><label><span>Rating</span><select name="rating">{% for rating in [5,4,3,2,1] %}<option value="{{ rating }}">{{ rating }}</option>{% endfor %}</select></label><label class="form-grid__full"><span>Message</span><textarea name="message" rows="5" required></textarea></label></div><div class="form-actions"><a class="btn btn-secondary" href="{{ url_for('feedback') }}">Cancel</a><button class="btn btn-primary" type="submit"><i class="fa-solid fa-paper-plane"></i><span>Send feedback</span></button></div></form></section>
-{% endblock %}
+<section class="panel panel--form narrow-panel">
+  <div class="panel__header">
+    <div>
+      <h3>Submit structured feedback</h3>
+      <p>Capture ratings and a clear message so administrators or teachers can act on it quickly.</p>
+    </div>
+  </div>
