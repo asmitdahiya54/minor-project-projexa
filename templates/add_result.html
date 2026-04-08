@@ -1,6 +1,14 @@
 {% extends "base.html" %}
 {% block title %}Add Result | {{ app_name }}{% endblock %}
 {% block page_heading %}Add Result{% endblock %}
+
 {% block content %}
-<section class="panel panel--form"><form method="post" class="data-form js-ajax-form" data-redirect-on-success="true"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><div class="form-grid"><label><span>Student</span><select name="student_id" required>{% for student in students %}<option value="{{ student.id }}" {% if selected_student == student.id %}selected{% endif %}>{{ student.name }} ({{ student.student_id }})</option>{% endfor %}</select></label><label><span>Subject</span><select name="subject">{% for subject in subjects %}<option value="{{ subject }}">{{ subject }}</option>{% endfor %}</select></label><label><span>Exam type</span><select name="exam_type">{% for exam in exam_types %}<option value="{{ exam }}">{{ exam }}</option>{% endfor %}</select></label><label><span>Semester</span><select name="semester">{% for sem in semesters %}<option value="{{ sem }}">{{ sem }}</option>{% endfor %}</select></label><label><span>Marks obtained</span><input type="number" name="marks_obtained" min="0" step="0.01" required></label><label><span>Maximum marks</span><input type="number" name="max_marks" min="1" step="0.01" value="100" required></label><label class="form-grid__full"><span>Remarks</span><input type="text" name="remarks"></label></div><div class="form-actions"><a class="btn btn-secondary" href="{{ url_for('results') }}">Cancel</a><button class="btn btn-primary" type="submit"><i class="fa-solid fa-floppy-disk"></i><span>Save result</span></button></div></form></section>
-{% endblock %}
+<section class="panel panel--form">
+  <div class="panel__header">
+    <div>
+      <h3>Record a new result</h3>
+      <p>Capture the subject, exam type, semester, score, and remarks in one submission.</p>
+    </div>
+  </div>
+
+  
