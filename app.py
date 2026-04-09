@@ -94,6 +94,7 @@ def close_db(_e):
 def col_exists(conn, table, column):
     return any(r["name"] == column for r in conn.execute(f"PRAGMA table_info({table})").fetchall())
 
+
 def ensure_col(conn, table, sql):
     name = sql.split()[0]
     if not col_exists(conn, table, name):
@@ -129,7 +130,8 @@ def migrate_users(conn):
     conn.execute("PRAGMA foreign_keys = ON")
 
     conn.execute("UPDATE users SET full_name='Rahul Sharma' WHERE username='teacher'")
-    
+
+
 def init_db():
     Path(app.config["UPLOAD_FOLDER"]).mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(app.config["DATABASE"])
@@ -222,7 +224,7 @@ def init_db():
         """, seed)
 
     usernames = {r["username"] for r in conn.execute("SELECT username FROM users").fetchall()}
-    
+
     if "admin" not in usernames:
         conn.execute(
             "INSERT INTO users (username,email,password,role) VALUES (?,?,?,?)",
@@ -247,9 +249,8 @@ def init_db():
             conn.execute(
                 "INSERT INTO users (username,email,password,role,student_id) VALUES (?,?,?,?,?)",
                 (s["student_id"], s["email"], generate_password_hash("student123"), "student", s["id"]),
-            )        
-            
-            
+            )
+
     if teacher:
         conn.execute(
             "UPDATE students SET assigned_teacher_id = COALESCE(assigned_teacher_id, ?)",
@@ -264,8 +265,9 @@ def wants_json():
     return (
         "application/json" in request.headers.get("Accept", "") or
         request.headers.get("X-Requested-With") == "XMLHttpRequest"
-    )                                     
-    
+    )
+
+
 def respond(ok, message, target, status=200, extra=None):
     payload = {"success": ok, "message": message, "redirect": target}
     if extra:
@@ -284,6 +286,7 @@ def csrf_token():
 
 app.jinja_env.globals["csrf_token"] = csrf_token
 
+
 @app.before_request
 def setup_req():
     session.permanent = True
@@ -300,7 +303,8 @@ def inject_globals():
         "app_name": "SIMS Pro",
         "global_notifications": build_notifications() if session.get("role") else [],
     }
-    
+
+
 def clean(value, max_len=255):
     value = (value or "").strip()
     return value[:max_len]
@@ -315,7 +319,8 @@ def to_int(value, default=None):
         return int(value)
     except Exception:
         return default
-    
+
+
 def to_float(value, default=None):
     try:
         return float(value)
@@ -348,4 +353,4 @@ def grade_color(grade):
         "B": "#f97316",
         "C": "#ef4444",
         "F": "#dc2626",
-    }.get(grade, "#64748b")            
+    }.get(grade, "#64748b")
