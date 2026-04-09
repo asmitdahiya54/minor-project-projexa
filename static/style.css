@@ -226,3 +226,18 @@ h4 {
   margin-bottom: 0.3rem;
   color: #ffffff;
 }
+.sidebar-panel p,
+.sidebar-footer p {
+  color: rgba(226, 232, 240, 0.72);
+  font-size: 0.92rem;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+}
+
+.nav-links {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 1rem;
+}
