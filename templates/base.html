@@ -1,113 +1,203 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-theme="light">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}SIMS{% endblock %} |  StudentInfoLite</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>{% block title %}{{ app_name }}{% endblock %}</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+  {% block head %}{% endblock %}
 </head>
+
 <body>
+  <div class="site-backdrop" aria-hidden="true"></div>
 
-<!-- Sidebar -->
-<aside class="sidebar">
-  <div class="sidebar-brand">
-    <div class="brand-title">🎓 SIMS</div>
-    <div class="brand-sub">Student Info System</div>
-  </div>
+  {% if session.get('user_id') %}
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div>
+        <div class="brand">
+          <div class="brand-mark">
+            <i class="fa-solid fa-layer-group"></i>
+          </div>
+          <div>
+            <div class="brand-title">{{ app_name }}</div>
+            <div class="brand-sub">Academic operations platform</div>
+          </div>
+        </div>
 
-  <nav class="nav-section">
-    <div class="nav-label">Overview</div>
-    <a href="{{ url_for('dashboard') }}"
-       class="nav-link {% if request.endpoint=='dashboard' %}active{% endif %}">
-      <span class="nav-icon">🏠</span> Dashboard
-    </a>
-  </nav>
+<div class="sidebar-panel">
+          <span class="sidebar-label">Workspace</span>
+          <strong>{{ current_role|title }} Console</strong>
+          <p>Student records, attendance, results, analytics, and secure collaboration in one place.</p>
+        </div>
 
-  <nav class="nav-section">
-    <div class="nav-label">Students</div>
-    <a href="{{ url_for('view_students') }}"
-       class="nav-link {% if request.endpoint in ['view_students','student_detail','edit_student'] %}active{% endif %}">
-      <span class="nav-icon">👥</span> All Students
-    </a>
-    <a href="{{ url_for('add_student') }}"
-       class="nav-link {% if request.endpoint=='add_student' %}active{% endif %}">
-      <span class="nav-icon">➕</span> Add Student
-    </a>
-  </nav>
+        <nav class="nav-links">
+          {% if current_role in ['admin','teacher'] %}
+          <a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Dashboard</span>
+          </a>
 
-  <nav class="nav-section">
-    <div class="nav-label">Attendance</div>
-    <a href="{{ url_for('attendance') }}"
-       class="nav-link {% if request.endpoint=='attendance' %}active{% endif %}">
-      <span class="nav-icon">📋</span> Mark Attendance
-    </a>
-    <a href="{{ url_for('attendance_report') }}"
-       class="nav-link {% if request.endpoint in ['attendance_report','student_attendance'] %}active{% endif %}">
-      <span class="nav-icon">📊</span> Attendance Report
-    </a>
-  </nav>
+          <a href="{{ url_for('view_students') }}" class="nav-link {% if request.endpoint in ['view_students','student_detail'] %}active{% endif %}">
+            <i class="fa-solid fa-users"></i>
+            <span>Students</span>
+          </a>
 
-  <nav class="nav-section">
-    <div class="nav-label">Results</div>
-    <a href="{{ url_for('results') }}"
-       class="nav-link {% if request.endpoint in ['results','student_results','edit_result'] %}active{% endif %}">
-      <span class="nav-icon">🎓</span> All Results
-    </a>
-    <a href="{{ url_for('add_result') }}"
-       class="nav-link {% if request.endpoint=='add_result' %}active{% endif %}">
-      <span class="nav-icon">➕</span> Add Result
-    </a>
-  </nav>
+          {% if current_role == 'admin' %}
+          <a href="{{ url_for('add_student') }}" class="nav-link {% if request.endpoint in ['add_student','edit_student'] %}active{% endif %}">
+            <i class="fa-solid fa-user-plus"></i>
+            <span>Manage Students</span>
+          </a>
+          {% endif %}
 
-  <nav class="nav-section">
-    <div class="nav-label">Feedback</div>
-    <a href="{{ url_for('feedback') }}"
-       class="nav-link {% if request.endpoint=='feedback' %}active{% endif %}">
-      <span class="nav-icon">💬</span> All Feedback
-    </a>
-    <a href="{{ url_for('add_feedback') }}"
-       class="nav-link {% if request.endpoint=='add_feedback' %}active{% endif %}">
-      <span class="nav-icon">➕</span> Submit Feedback
-    </a>
-  </nav>
+         <a href="{{ url_for('attendance') }}" class="nav-link {% if request.endpoint in ['attendance','attendance_report','student_attendance'] %}active{% endif %}">
+            <i class="fa-solid fa-calendar-check"></i>
+            <span>Attendance</span>
+          </a>
 
-  <nav class="nav-section">
-    <div class="nav-label">Analytics</div>
-    <a href="{{ url_for('charts') }}"
-       class="nav-link {% if request.endpoint=='charts' %}active{% endif %}">
-      <span class="nav-icon">📈</span> Charts
-    </a>
-  </nav>
-</aside>
+          <a href="{{ url_for('results') }}" class="nav-link {% if request.endpoint in ['results','add_result','edit_result','student_results'] %}active{% endif %}">
+            <i class="fa-solid fa-square-poll-vertical"></i>
+            <span>Results</span>
+          </a>
 
-  <!-- Main -->
-<div class="main-wrap">
-  <header class="topbar">
-    <span class="topbar-title">{% block topbar_title %}{% endblock %}</span>
-    <span class="topbar-date" id="topbarDate"></span>
-  </header>
+<a href="{{ url_for('feedback') }}" class="nav-link {% if request.endpoint in ['feedback','add_feedback'] %}active{% endif %}">
+            <i class="fa-solid fa-comments"></i>
+            <span>Feedback</span>
+          </a>
 
-  <main class="main-content">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    <div class="flash-list">
-      {% for cat, msg in messages %}
-      <div class="flash-msg {{ cat }}">
-        {% if cat=='success' %}✅{% else %}❌{% endif %} {{ msg }}
+          <a href="{{ url_for('charts') }}" class="nav-link {% if request.endpoint == 'charts' %}active{% endif %}">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>Analytics</span>
+          </a>  
+
+         {% else %}
+          <a href="{{ url_for('student_dashboard') }}" class="nav-link {% if request.endpoint == 'student_dashboard' %}active{% endif %}">
+            <i class="fa-solid fa-house"></i>
+            <span>My Dashboard</span>
+          </a>
+
+          <a href="{{ url_for('student_detail', student_id=session.get('student_db_id')) }}" class="nav-link {% if request.endpoint == 'student_detail' %}active{% endif %}">
+            <i class="fa-solid fa-id-card"></i>
+            <span>My Profile</span>
+          </a>
+
+          <a href="{{ url_for('student_attendance', student_id=session.get('student_db_id')) }}" class="nav-link {% if request.endpoint == 'student_attendance' %}active{% endif %}">
+            <i class="fa-solid fa-calendar-days"></i>
+            <span>Attendance</span>
+          </a>
+
+          <a href="{{ url_for('student_results', student_id=session.get('student_db_id')) }}" class="nav-link {% if request.endpoint == 'student_results' %}active{% endif %}">
+            <i class="fa-solid fa-file-lines"></i>
+            <span>Results</span>
+          </a>
+
+          <a href="{{ url_for('feedback') }}" class="nav-link {% if request.endpoint in ['feedback','add_feedback'] %}active{% endif %}">
+            <i class="fa-solid fa-message"></i>
+            <span>Feedback</span>
+          </a>
+          {% endif %}
+
+          <a href="{{ url_for('change_password') }}" class="nav-link {% if request.endpoint == 'change_password' %}active{% endif %}">
+            <i class="fa-solid fa-key"></i>
+            <span>Security</span>
+          </a>
+
+          <a href="{{ url_for('logout') }}" class="nav-link">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span>Logout</span>
+          </a>
+        </nav>
       </div>
-      {% endfor %}
+
+      <div class="sidebar-footer">
+        <span class="sidebar-label">Signed in as</span>
+        <strong>{{ session.get('display_name') }}</strong>
+        <p>{{ current_role|title }} access with role-based permissions.</p>
+      </div>
+    </aside>
+
+    <div class="main-shell">
+      <header class="topbar">
+        <div class="topbar-main">
+          <button class="icon-btn mobile-only" type="button" id="menuToggle" aria-label="Open navigation">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <div>
+            <p class="eyebrow">{{ current_role|title }} workspace</p>
+            <h1 class="page-heading">{% block page_heading %}{{ app_name }}{% endblock %}</h1>
+          </div>
+        </div>
+
+        <div class="topbar-actions">
+          <div class="topbar-chip">
+            <span class="topbar-chip__dot"></span>
+            <span>Secure session active</span>
+          </div>
+
+          <div class="notification-wrap">
+            <button class="icon-btn notification-btn" type="button" id="notificationToggle" aria-label="Open notifications">
+              <i class="fa-solid fa-bell"></i>
+              <span class="notification-count" id="notificationCount">0</span>
+            </button>
+
+            <div class="notification-panel" id="notificationPanel">
+              <div class="notification-panel__header">
+                <strong>Notifications</strong>
+                <button type="button" class="text-btn" id="clearNotifications">Clear</button>
+              </div>
+              <div id="notificationList" class="notification-list"></div>
+            </div>
+          </div>
+
+          <button class="icon-btn" type="button" id="themeToggle" aria-label="Toggle theme">
+            <i class="fa-solid fa-moon"></i>
+          </button>
+
+          <div class="user-pill">
+            <span class="user-pill__avatar">{{ (session.get('display_name') or 'U')[0] }}</span>
+            <div>
+              <div class="user-pill__name">{{ session.get('display_name') }}</div>
+              <div class="user-pill__role">{{ current_role|title }}</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="content">
+        {% if global_notifications %}
+        <script id="serverNotifications" type="application/json">
+          {{ global_notifications|tojson }}
+        </script>
+        {% endif %}
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+          <section class="flash-stack">
+            {% for category, message in messages %}
+            <div class="flash flash--{{ category }}">{{ message }}</div>
+            {% endfor %}
+          </section>
+          {% endif %}
+        {% endwith %}
+
+        <div id="toastContainer" class="toast-container"></div>
+        {% block content %}{% endblock %}
+      </main>
     </div>
-    {% endif %}
-    {% endwith %}
+  </div>
+  {% else %}
+  {% block auth_content %}{% endblock %}
+  {% endif %}
 
-    {% block content %}{% endblock %}
-  </main>
-</div>
-
-<script>
-  const d = new Date();
-  document.getElementById('topbarDate').textContent =
-    d.toLocaleDateString('en-IN', {weekday:'short',year:'numeric',month:'short',day:'numeric'});
-</script>
+  <script src="{{ url_for('static', filename='main.js') }}"></script>
+  {% block scripts %}{% endblock %}
 </body>
 </html>

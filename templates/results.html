@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Results | {{ app_name }}{% endblock %}
+{% block page_heading %}Results Registry{% endblock %}
+
+{% block content %}
+<section class="panel panel--form">
+  <div class="panel__header">
+    <h3>Results filters</h3>
+    <a class="btn btn-primary" href="{{ url_for('add_result') }}">
+      <i class="fa-solid fa-plus"></i>
+      <span>Add result</span>
+    </a>
+  </div>
+
+  <form method="get" class="filters-grid compact-grid">
+    <label>
+      <span>Department</span>
+      <select name="dept">
+        <option value="">All departments</option>
+        {% for dept in departments %}
+        <option value="{{ dept }}" {% if filters.dept == dept %}selected{% endif %}>{{ dept }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <label>
+      <span>Year</span>
+      <select name="year">
+        <option value="">All years</option>
+        {% for year in years %}
+        <option value="{{ year }}" {% if filters.year == year %}selected{% endif %}>{{ year }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <button class="btn btn-primary" type="submit">
+      <i class="fa-solid fa-filter"></i>
+      <span>Apply</span>
+    </button>
+  </form>
+</section>
+
+<section class="panel">
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>Subject</th>
+          <th>Semester</th>
+          <th>Score</th>
+          <th>Grade</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          <td>
+            {{ row.name }}
+            <span class="table-sub">{{ row.enrollment_no }}</span>
+          </td>
+          <td>{{ row.subject }}</td>
+          <td>{{ row.semester }}</td>
+          <td>{{ row.marks_obtained }} / {{ row.max_marks }}</td>
+          <td>{{ row.grade }}</td>
+          <td class="actions-inline">
+            <a class="icon-btn" href="{{ url_for('student_results', student_id=row.student_id) }}">
+              <i class="fa-solid fa-eye"></i>
+            </a>
+            <a class="icon-btn" href="{{ url_for('edit_result', result_id=row.id) }}">
+              <i class="fa-solid fa-pen"></i>
+            </a>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" class="empty">No results found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

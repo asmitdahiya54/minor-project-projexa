@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Analytics | {{ app_name }}{% endblock %}
+{% block page_heading %}Analytics & Charts{% endblock %}
+
+{% block content %}
+<section class="panel panel--form">
+  <form id="chartFilters" class="filters-grid compact-grid">
+    <label>
+      <span>Department</span>
+      <select name="dept">
+        <option value="">All departments</option>
+        {% for dept in departments %}
+        <option value="{{ dept }}">{{ dept }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <label>
+      <span>Year</span>
+      <select name="year">
+        <option value="">All years</option>
+        {% for year in years %}
+        <option value="{{ year }}">{{ year }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <button class="btn btn-primary" type="submit">
+      <i class="fa-solid fa-arrows-rotate"></i>
+      <span>Refresh charts</span>
+    </button>
+  </form>
+</section>
+
+<section class="panel-grid two-col charts-grid">
+  <article class="panel">
+    <div class="panel__header">
+      <h3>Attendance by student</h3>
+    </div>
+    <canvas id="attendanceChart"></canvas>
+  </article>
+
+  <article class="panel">
+    <div class="panel__header">
+      <h3>Average score by subject</h3>
+    </div>
+    <canvas id="resultsChart"></canvas>
+  </article>
+
+  <article class="panel">
+    <div class="panel__header">
+      <h3>Grade distribution</h3>
+    </div>
+    <canvas id="gradeChart"></canvas>
+  </article>
+
+    <article class="panel">
+    <div class="panel__header">
+      <h3>Feedback rating distribution</h3>
+    </div>
+    <canvas id="feedbackChart"></canvas>
+  </article>
+
+  <article class="panel">
+    <div class="panel__header">
+      <h3>Department split</h3>
+    </div>
+    <canvas id="deptChart"></canvas>
+  </article>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+

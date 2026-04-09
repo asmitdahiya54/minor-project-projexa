@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Sign In | {{ app_name }}{% endblock %}
+
+{% block auth_content %}
+<section class="auth-shell">
+  <div class="auth-panel auth-panel--hero">
+    <span class="eyebrow">Production-ready SIMS</span>
+    <h1>Operate your campus with a cleaner, faster workflow.</h1>
+    <p>Modern role-based access, responsive dashboards, dark mode, secure sessions, uploads, alerts, analytics, AJAX forms, and cleaner student operations in one place.</p>
+
+    <div class="auth-points">
+      <div>
+        <i class="fa-solid fa-shield-halved"></i>
+        <span>Safer authentication and CSRF protection</span>
+      </div>
+      <div>
+        <i class="fa-solid fa-chart-simple"></i>
+        <span>Real-time charts and notifications</span>
+      </div>
+      <div>
+        <i class="fa-solid fa-mobile-screen-button"></i>
+        <span>Responsive UI with theme persistence</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-panel auth-panel--form">
+    <span class="badge">Secure access</span>
+    <h2>Sign in</h2>
+    <p class="muted">Use your username or email and password.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="flash-stack">
+        {% for category, message in messages %}
+        <div class="flash flash--{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endwith %}
+
+    <form method="post" class="data-form js-ajax-form" data-redirect-on-success="true">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <label>
+        <span>Username or email</span>
+        <input type="text" name="username" placeholder="admin or student email" required>
+      </label>
+
+      <label>
+        <span>Password</span>
+        <input type="password" name="password" placeholder="Enter password" required>
+      </label>
+
+      <button class="btn btn-primary btn-block" type="submit">
+        <i class="fa-solid fa-right-to-bracket"></i>
+        <span>Sign in</span>
+      </button>
+    </form>
+
+    <div class="demo-credentials">
+      <p><strong>Demo accounts</strong></p>
+      <p>`admin / admin123`, `teacher / teacher123`, `student_id / student123`</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

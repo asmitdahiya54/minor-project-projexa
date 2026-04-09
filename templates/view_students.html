@@ -1,77 +1,112 @@
 {% extends "base.html" %}
-{% block title %}Students{% endblock %}
+{% block title %}Students | {{ app_name }}{% endblock %}
+{% block page_heading %}Students Directory{% endblock %}
+
 {% block content %}
-<div class="page-header">
-  <div>
-    <h1 class="page-title">👥 Students</h1>
-    <p class="page-sub">{{ students|length }} student{{ 's' if students|length != 1 }} found</p>
+<section class="panel">
+  <div class="panel__header">
+    <h3>Search and filters</h3>
+    <div class="actions-inline">
+      {% if current_role == 'admin' %}
+      <a class="btn btn-primary" href="{{ url_for('add_student') }}">
+        <i class="fa-solid fa-user-plus"></i>
+        <span>Add student</span>
+      </a>
+      {% endif %}
+
+      <a class="btn btn-secondary" href="{{ url_for('export_students', search=filters.search, dept=filters.dept, year=filters.year, status=filters.status) }}">
+        <i class="fa-solid fa-file-export"></i>
+        <span>Export CSV</span>
+      </a>
+    </div>
   </div>
-  <a href="{{ url_for('add_student') }}" class="btn btn-primary">➕ Add Student</a>
-</div>
 
-<div class="filter-bar" style="margin-bottom:1.5rem">
-  <form method="get" class="filter-form" id="ff">
-    <div class="filter-group">
-      <label>🔍 Search</label>
-      <input type="text" name="search" value="{{ filters.search }}" placeholder="Name or ID...">
-    </div>
-    <div class="filter-group">
-      <label>🏛 Department</label>
-      <select name="dept" onchange="ff.submit()">
-        <option value="">All</option>
-        {% for d in departments %}<option value="{{ d }}" {% if filters.dept==d %}selected{% endif %}>{{ d }}</option>{% endfor %}
-      </select>
-    </div>
-    <div class="filter-group">
-      <label>📅 Year</label>
-      <select name="year" onchange="ff.submit()">
-        <option value="">All</option>
-        {% for y in years %}<option value="{{ y }}" {% if filters.year==y %}selected{% endif %}>{{ y }}</option>{% endfor %}
-      </select>
-    </div>
-    <div class="filter-group">
-      <label>📌 Status</label>
-      <select name="status" onchange="ff.submit()">
-        <option value="">All</option>
-        {% for s in statuses %}<option value="{{ s }}" {% if filters.status==s %}selected{% endif %}>{{ s }}</option>{% endfor %}
-      </select>
-    </div>
-    <button type="submit" class="btn btn-outline">Search</button>
-    {% if filters.dept or filters.year or filters.status or filters.search %}
-    <a href="{{ url_for('view_students') }}" class="btn btn-outline">✕ Clear</a>
-    {% endif %}
-  </form>
-</div>
+  <form method="get" class="filters-grid">
+    <label class="search-field">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input
+        type="text"
+        name="search"
+        value="{{ filters.search }}"
+        placeholder="Search by name or student ID"
+        id="studentSearchInput"
+        autocomplete="off"
+      >
+    </label>
 
-<div class="table-wrap">
-  <table class="data-table">
-    <thead>
-      <tr><th>#</th><th>Student ID</th><th>Name</th><th>Email</th><th>Department</th><th>Year</th><th>Status</th><th>Actions</th></tr>
-    </thead>
-    <tbody>
-      {% for s in students %}
-      <tr>
-        <td class="text-muted">{{ loop.index }}</td>
-        <td><span class="sid-badge">{{ s.student_id }}</span></td>
-        <td style="font-weight:600">{{ s.name }}</td>
-        <td class="text-muted" style="font-size:.82rem">{{ s.email or '—' }}</td>
-        <td><span class="dept-tag">{{ s.department }}</span></td>
-        <td>{{ s.year }}</td>
-        <td><span class="status-chip s-{{ s.status|lower|replace(' ','-') }}">{{ s.status }}</span></td>
-        <td>
-          <div style="display:flex;gap:.35rem">
-            <a href="{{ url_for('student_detail', sid=s.id) }}" class="btn-icon" title="View">👁</a>
-            <a href="{{ url_for('edit_student', sid=s.id) }}" class="btn-icon" title="Edit">✏️</a>
-            <form method="post" action="{{ url_for('delete_student', sid=s.id) }}" onsubmit="return confirm('Delete {{ s.name }}?')">
-              <button type="submit" class="btn-icon" title="Delete">🗑</button>
-            </form>
-          </div>
-        </td>
-      </tr>
-      {% else %}
-      <tr><td colspan="8" class="empty-cell">No students found.</td></tr>
+    <div class="autocomplete-panel" id="studentAutocomplete"></div>
+
+    <select name="dept">
+      <option value="">All departments</option>
+      {% for dept in ['Computer Science','Information Technology','Electronics','Mechanical Engineering','Civil Engineering','Business Administration'] %}
+      <option value="{{ dept }}" {% if filters.dept == dept %}selected{% endif %}>{{ dept }}</option>
       {% endfor %}
-    </tbody>
-  </table>
-</div>
+    </select>
+
+    <select name="year">
+      <option value="">All years</option>
+      {% for year in ['First Year','Second Year','Third Year','Fourth Year'] %}
+      <option value="{{ year }}" {% if filters.year == year %}selected{% endif %}>{{ year }}</option>
+      {% endfor %}
+    </select>
+
+    <select name="status">
+      <option value="">All statuses</option>
+      {% for status in ['Active','On Leave','Graduated'] %}
+      <option value="{{ status }}" {% if filters.status == status %}selected{% endif %}>{{ status }}</option>
+      {% endfor %}
+    </select>
+
+    <button class="btn btn-primary" type="submit">
+      <i class="fa-solid fa-filter"></i>
+      <span>Apply</span>
+    </button>
+  </form>
+</section>
+
+<section class="panel">
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>Department</th>
+          <th>Year</th>
+          <th>Status</th>
+          <th>Assigned teacher</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for student in students %}
+        <tr>
+          <td>
+            <strong>{{ student.name }}</strong>
+            <span class="table-sub">{{ student.student_id }}</span>
+          </td>
+          <td>{{ student.department }}</td>
+          <td>{{ student.year }}</td>
+          <td>{{ student.status }}</td>
+          <td>{{ student.teacher_name or 'Unassigned' }}</td>
+          <td class="actions-inline">
+            <a class="icon-btn" href="{{ url_for('student_detail', student_id=student.id) }}">
+              <i class="fa-solid fa-eye"></i>
+            </a>
+
+            {% if current_role == 'admin' %}
+            <a class="icon-btn" href="{{ url_for('edit_student', student_id=student.id) }}">
+              <i class="fa-solid fa-pen"></i>
+            </a>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" class="empty">No students match your filters.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
 {% endblock %}
