@@ -156,3 +156,34 @@
               <div id="notificationList" class="notification-list"></div>
             </div>
           </div>
+
+          <button class="icon-btn" type="button" id="themeToggle" aria-label="Toggle theme">
+            <i class="fa-solid fa-moon"></i>
+          </button>
+
+          <div class="user-pill">
+            <span class="user-pill__avatar">{{ (session.get('display_name') or 'U')[0] }}</span>
+            <div>
+              <div class="user-pill__name">{{ session.get('display_name') }}</div>
+              <div class="user-pill__role">{{ current_role|title }}</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="content">
+        {% if global_notifications %}
+        <script id="serverNotifications" type="application/json">
+          {{ global_notifications|tojson }}
+        </script>
+        {% endif %}
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+          <section class="flash-stack">
+            {% for category, message in messages %}
+            <div class="flash flash--{{ category }}">{{ message }}</div>
+            {% endfor %}
+          </section>
+          {% endif %}
+        {% endwith %}
