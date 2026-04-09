@@ -40,3 +40,22 @@
         {% endfor %}
       </select>
     </label>
+
+    <label>
+      <span>Year</span>
+      <select name="year">
+        <option value="">All years</option>
+        {% for year in years %}
+        <option value="{{ year }}" {% if filters.year == year %}selected{% endif %}>{{ year }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <label>
+      <span>Subject</span>
+      <select name="subject">
+        {% for subject in subjects %}
+        <option value="{{ subject }}" {% if filters.subject == subject %}selected{% endif %}>{{ subject }}</option>
+        {% endfor %}
+      </select>
+    </label>
