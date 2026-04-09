@@ -221,4 +221,30 @@ def init_db():
             VALUES (?,?,?,?,?,?,?,?,?,?)
         """, seed)
 
-    usernames = {r["username"] for r in conn.execute("SELECT username FROM users").fetchall()}    
+    usernames = {r["username"] for r in conn.execute("SELECT username FROM users").fetchall()}
+    
+    if "admin" not in usernames:
+        conn.execute(
+            "INSERT INTO users (username,email,password,role) VALUES (?,?,?,?)",
+            ("admin", "admin@sims.edu", generate_password_hash("admin123"), "admin"),
+        )
+
+    if "teacher" not in usernames:
+        conn.execute(
+            "INSERT INTO users (username,email,password,role,full_name) VALUES (?,?,?,?,?)",
+            ("teacher", "teacher@sims.edu", generate_password_hash("teacher123"), "teacher", "Rahul Sharma")
+        )
+        conn.execute("UPDATE users SET full_name='Rahul Sharma' WHERE username='teacher'")
+
+    teacher = conn.execute("SELECT id FROM users WHERE username='teacher' LIMIT 1").fetchone()
+
+    for s in conn.execute("SELECT id,student_id,email FROM students").fetchall():
+        exists = conn.execute(
+            "SELECT 1 FROM users WHERE username=? LIMIT 1",
+            (s["student_id"],)
+        ).fetchone()
+        if not exists:
+            conn.execute(
+                "INSERT INTO users (username,email,password,role,student_id) VALUES (?,?,?,?,?)",
+                (s["student_id"], s["email"], generate_password_hash("student123"), "student", s["id"]),
+            )        
