@@ -77,3 +77,14 @@
             <i class="fa-solid fa-chart-pie"></i>
             <span>Analytics</span>
           </a>  
+
+         {% else %}
+          <a href="{{ url_for('student_dashboard') }}" class="nav-link {% if request.endpoint == 'student_dashboard' %}active{% endif %}">
+            <i class="fa-solid fa-house"></i>
+            <span>My Dashboard</span>
+          </a>
+
+          <a href="{{ url_for('student_detail', student_id=session.get('student_db_id')) }}" class="nav-link {% if request.endpoint == 'student_detail' %}active{% endif %}">
+            <i class="fa-solid fa-id-card"></i>
+            <span>My Profile</span>
+          </a>
