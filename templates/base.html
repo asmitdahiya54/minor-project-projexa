@@ -187,3 +187,17 @@
           </section>
           {% endif %}
         {% endwith %}
+
+        <div id="toastContainer" class="toast-container"></div>
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+  {% else %}
+  {% block auth_content %}{% endblock %}
+  {% endif %}
+
+  <script src="{{ url_for('static', filename='main.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
