@@ -88,3 +88,13 @@
             <i class="fa-solid fa-id-card"></i>
             <span>My Profile</span>
           </a>
+
+          <a href="{{ url_for('student_attendance', student_id=session.get('student_db_id')) }}" class="nav-link {% if request.endpoint == 'student_attendance' %}active{% endif %}">
+            <i class="fa-solid fa-calendar-days"></i>
+            <span>Attendance</span>
+          </a>
+
+          <a href="{{ url_for('student_results', student_id=session.get('student_db_id')) }}" class="nav-link {% if request.endpoint == 'student_results' %}active{% endif %}">
+            <i class="fa-solid fa-file-lines"></i>
+            <span>Results</span>
+          </a>
