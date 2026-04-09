@@ -248,3 +248,104 @@ def init_db():
                 "INSERT INTO users (username,email,password,role,student_id) VALUES (?,?,?,?,?)",
                 (s["student_id"], s["email"], generate_password_hash("student123"), "student", s["id"]),
             )        
+            
+            
+    if teacher:
+        conn.execute(
+            "UPDATE students SET assigned_teacher_id = COALESCE(assigned_teacher_id, ?)",
+            (teacher["id"],)
+        )
+
+    conn.commit()
+    conn.close()
+
+
+def wants_json():
+    return (
+        "application/json" in request.headers.get("Accept", "") or
+        request.headers.get("X-Requested-With") == "XMLHttpRequest"
+    )                                     
+    
+def respond(ok, message, target, status=200, extra=None):
+    payload = {"success": ok, "message": message, "redirect": target}
+    if extra:
+        payload.update(extra)
+    if wants_json():
+        return jsonify(payload), status
+    flash(message, "success" if ok else "error")
+    return redirect(target)
+
+
+def csrf_token():
+    if "_csrf_token" not in session:
+        session["_csrf_token"] = secrets.token_urlsafe(32)
+    return session["_csrf_token"]
+
+
+app.jinja_env.globals["csrf_token"] = csrf_token
+
+@app.before_request
+def setup_req():
+    session.permanent = True
+    if request.method in {"POST", "PUT", "PATCH", "DELETE"}:
+        token = request.form.get("csrf_token") or request.headers.get("X-CSRFToken")
+        if token != session.get("_csrf_token"):
+            abort(400, description="Invalid CSRF token.")
+
+
+@app.context_processor
+def inject_globals():
+    return {
+        "current_role": session.get("role"),
+        "app_name": "SIMS Pro",
+        "global_notifications": build_notifications() if session.get("role") else [],
+    }
+    
+def clean(value, max_len=255):
+    value = (value or "").strip()
+    return value[:max_len]
+
+
+def valid_email(value):
+    return not value or bool(re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", value))
+
+
+def to_int(value, default=None):
+    try:
+        return int(value)
+    except Exception:
+        return default
+    
+def to_float(value, default=None):
+    try:
+        return float(value)
+    except Exception:
+        return default
+
+
+def calc_grade(pct):
+    if pct >= 90:
+        return "O"
+    if pct >= 80:
+        return "A+"
+    if pct >= 70:
+        return "A"
+    if pct >= 60:
+        return "B+"
+    if pct >= 50:
+        return "B"
+    if pct >= 40:
+        return "C"
+    return "F"
+
+
+def grade_color(grade):
+    return {
+        "O": "#14b8a6",
+        "A+": "#3b82f6",
+        "A": "#6366f1",
+        "B+": "#f59e0b",
+        "B": "#f97316",
+        "C": "#ef4444",
+        "F": "#dc2626",
+    }.get(grade, "#64748b")            
