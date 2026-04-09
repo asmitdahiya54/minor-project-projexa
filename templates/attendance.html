@@ -30,3 +30,13 @@
       <span>Date</span>
       <input type="date" name="date" value="{{ filters.date }}">
     </label>
+
+    <label>
+      <span>Department</span>
+      <select name="dept">
+        <option value="">All departments</option>
+        {% for dept in departments %}
+        <option value="{{ dept }}" {% if filters.dept == dept %}selected{% endif %}>{{ dept }}</option>
+        {% endfor %}
+      </select>
+    </label>
