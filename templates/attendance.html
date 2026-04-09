@@ -66,3 +66,16 @@
     </button>
   </form>
 </section>
+
+<section class="panel">
+  <div class="panel__header">
+    <div>
+      <h3>Class roster</h3>
+      <p>{{ students|length }} student(s) ready for attendance marking.</p>
+    </div>
+  </div>
+
+  <form method="post" action="{{ url_for('mark_attendance') }}" class="js-ajax-form" data-redirect-on-success="true">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="date" value="{{ filters.date }}">
+    <input type="hidden" name="subject" value="{{ filters.subject }}">
