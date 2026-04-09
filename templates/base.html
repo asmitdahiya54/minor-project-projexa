@@ -98,3 +98,14 @@
             <i class="fa-solid fa-file-lines"></i>
             <span>Results</span>
           </a>
+
+          <a href="{{ url_for('feedback') }}" class="nav-link {% if request.endpoint in ['feedback','add_feedback'] %}active{% endif %}">
+            <i class="fa-solid fa-message"></i>
+            <span>Feedback</span>
+          </a>
+          {% endif %}
+
+          <a href="{{ url_for('change_password') }}" class="nav-link {% if request.endpoint == 'change_password' %}active{% endif %}">
+            <i class="fa-solid fa-key"></i>
+            <span>Security</span>
+          </a>
