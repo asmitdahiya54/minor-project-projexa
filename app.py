@@ -354,3 +354,28 @@ def grade_color(grade):
         "C": "#ef4444",
         "F": "#dc2626",
     }.get(grade, "#64748b")
+
+
+def visible_clause(alias="students"):
+    role = session.get("role")
+    if role == "admin":
+        return "1=1", []
+    if role == "teacher":
+        return f"{alias}.assigned_teacher_id = ?", [session["user_id"]]
+    if role == "student":
+        return f"{alias}.id = ?", [session["student_db_id"]]
+    return "1=0", []
+
+
+def teachers():
+    return db().execute(
+        """
+        SELECT
+            id,
+            username,
+            COALESCE(NULLIF(full_name, ''), username) AS full_name
+        FROM users
+        WHERE role='teacher'
+        ORDER BY COALESCE(NULLIF(full_name, ''), username) ASC
+        """
+    ).fetchall()
