@@ -119,3 +119,24 @@ select,
 textarea {
   font: inherit;
 }
+
+button {
+  cursor: pointer;
+}
+
+strong,
+h1,
+h2,
+h3,
+h4 {
+  color: var(--text);
+}
+
+.eyebrow,
+.sidebar-label {
+  margin: 0 0 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
