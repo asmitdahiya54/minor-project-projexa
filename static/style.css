@@ -67,3 +67,29 @@ body::after {
   pointer-events: none;
   z-index: 0;
 }
+
+body::before {
+  width: 320px;
+  height: 320px;
+  top: -120px;
+  right: -80px;
+  background: rgba(21, 94, 239, 0.08);
+}
+
+body::after {
+  width: 280px;
+  height: 280px;
+  bottom: -140px;
+  left: -60px;
+  background: rgba(122, 90, 248, 0.08);
+}
+
+.site-backdrop {
+  position: fixed;
+  inset: 0;
+  background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 34px 34px;
+  opacity: 0.18;
+  pointer-events: none;
+  z-index: 0;
+}
