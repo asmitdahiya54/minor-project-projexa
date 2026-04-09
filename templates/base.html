@@ -109,3 +109,17 @@
             <i class="fa-solid fa-key"></i>
             <span>Security</span>
           </a>
+
+          <a href="{{ url_for('logout') }}" class="nav-link">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span>Logout</span>
+          </a>
+        </nav>
+      </div>
+
+      <div class="sidebar-footer">
+        <span class="sidebar-label">Signed in as</span>
+        <strong>{{ session.get('display_name') }}</strong>
+        <p>{{ current_role|title }} access with role-based permissions.</p>
+      </div>
+    </aside>
