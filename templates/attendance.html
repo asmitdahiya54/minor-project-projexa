@@ -3,98 +3,16 @@
 {% block page_heading %}Attendance Management{% endblock %}
 
 {% block content %}
-<section class="panel panel--form">
-  <form method="get" class="filters-grid compact-grid">
-    <label>
-      <span>Date</span>
-      <input type="date" name="date" value="{{ filters.date }}">
-    </label>
-
-    <label>
-      <span>Department</span>
-      <select name="dept">
-        <option value="">All departments</option>
-        {% for dept in departments %}
-        <option value="{{ dept }}" {% if filters.dept == dept %}selected{% endif %}>{{ dept }}</option>
-        {% endfor %}
-      </select>
-    </label>
-
-    <label>
-      <span>Year</span>
-      <select name="year">
-        <option value="">All years</option>
-        {% for year in years %}
-        <option value="{{ year }}" {% if filters.year == year %}selected{% endif %}>{{ year }}</option>
-        {% endfor %}
-      </select>
-    </label>
-
-    <label>
-      <span>Subject</span>
-      <select name="subject">
-        {% for subject in subjects %}
-        <option value="{{ subject }}" {% if filters.subject == subject %}selected{% endif %}>{{ subject }}</option>
-        {% endfor %}
-      </select>
-    </label>
-
-    <button class="btn btn-primary" type="submit">
-      <i class="fa-solid fa-filter"></i>
-      <span>Load roster</span>
-    </button>
-  </form>
+<section class="hero-card">
+  <div class="hero-copy">
+    <span class="badge">Daily classroom tracking</span>
+    <h2>Mark attendance with a faster roster workflow.</h2>
+    <p>Load the correct cohort by date, department, year, and subject, then save attendance in one pass.</p>
+  </div>
+  <div class="hero-actions">
+    <a class="btn btn-secondary" href="{{ url_for('attendance_report') }}">
+      <i class="fa-solid fa-file-waveform"></i>
+      <span>Attendance reports</span>
+    </a>
+  </div>
 </section>
-
-<section class="panel">
-  <form method="post" action="{{ url_for('mark_attendance') }}" class="js-ajax-form" data-redirect-on-success="true">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <input type="hidden" name="date" value="{{ filters.date }}">
-    <input type="hidden" name="subject" value="{{ filters.subject }}">
-
-    <div class="table-wrap">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>Student</th>
-            <th>Present</th>
-            <th>Absent</th>
-            <th>Late</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for student in students %}
-          <tr>
-            <td>
-              <strong>{{ student.name }}</strong>
-              <span class="table-sub">{{ student.student_id }}</span>
-            </td>
-            <td>
-              <input type="radio" name="att_{{ student.id }}" value="Present" {% if current_records.get(student.id) == 'Present' %}checked{% endif %}>
-            </td>
-            <td>
-              <input type="radio" name="att_{{ student.id }}" value="Absent" {% if current_records.get(student.id) == 'Absent' %}checked{% endif %}>
-            </td>
-            <td>
-              <input type="radio" name="att_{{ student.id }}" value="Late" {% if current_records.get(student.id) == 'Late' %}checked{% endif %}>
-            </td>
-          </tr>
-          {% else %}
-          <tr>
-            <td colspan="4" class="empty">No active students found for these filters.</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-
-    <div class="form-actions">
-      <a class="btn btn-secondary" href="{{ url_for('attendance_report') }}">Attendance reports</a>
-      <button class="btn btn-primary" type="submit">
-        <i class="fa-solid fa-floppy-disk"></i>
-        <span>Save attendance</span>
-      </button>
-    </div>
-  </form>
-</section>
-{% endblock %}
