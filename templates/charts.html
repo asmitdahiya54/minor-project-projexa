@@ -15,4 +15,14 @@
       </select>
     </label>
 
+    <label>
+      <span>Year</span>
+      <select name="year">
+        <option value="">All years</option>
+        {% for year in years %}
+        <option value="{{ year }}">{{ year }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
     
