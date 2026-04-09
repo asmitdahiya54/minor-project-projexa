@@ -141,3 +141,18 @@
             <span class="topbar-chip__dot"></span>
             <span>Secure session active</span>
           </div>
+
+          <div class="notification-wrap">
+            <button class="icon-btn notification-btn" type="button" id="notificationToggle" aria-label="Open notifications">
+              <i class="fa-solid fa-bell"></i>
+              <span class="notification-count" id="notificationCount">0</span>
+            </button>
+
+            <div class="notification-panel" id="notificationPanel">
+              <div class="notification-panel__header">
+                <strong>Notifications</strong>
+                <button type="button" class="text-btn" id="clearNotifications">Clear</button>
+              </div>
+              <div id="notificationList" class="notification-list"></div>
+            </div>
+          </div>
