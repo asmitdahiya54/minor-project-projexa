@@ -56,3 +56,14 @@ body {
     var(--bg);
   color: var(--text);
 }
+
+body::before,
+body::after {
+  content: '';
+  position: fixed;
+  inset: auto;
+  border-radius: 50%;
+  filter: blur(18px);
+  pointer-events: none;
+  z-index: 0;
+}
