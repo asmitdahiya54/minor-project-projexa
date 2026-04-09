@@ -523,3 +523,71 @@ def recent_results(student_id=None, limit=5):
         """,
         params + [limit],
     ).fetchall()
+
+
+def build_notifications():
+    if not session.get("user_id"):
+        return []
+    conn = db()
+    role = session.get("role")
+    notes = []
+
+    if role == "student":
+        sid = session.get("student_db_id")
+        summary = attendance_summary(sid)
+        if summary["total"] and summary["rate"] < 75:
+            notes.append({
+                "type": "warning",
+                "title": "Low attendance alert",
+                "message": f"Your attendance is {summary['rate']}%. Aim for at least 75%.",
+            })
+        for r in conn.execute(
+            "SELECT subject, grade, created_at FROM results WHERE student_id=? ORDER BY datetime(created_at) DESC LIMIT 3",
+            (sid,),
+        ).fetchall():
+            notes.append({
+                "type": "info",
+                "title": "New result published",
+                "message": f"{r['subject']} graded {r['grade'] or 'Pending'} on {fmt_date(r['created_at'])}.",
+            })
+        return notes[:5]
+
+    where, params = visible_clause("students")
+    for r in conn.execute(
+        f"""
+        SELECT students.name,
+               ROUND(100.0 * SUM(CASE WHEN attendance.status='Present' THEN 1 ELSE 0 END) / NULLIF(COUNT(attendance.id),0), 1) rate
+        FROM students
+        LEFT JOIN attendance ON attendance.student_id = students.id
+        WHERE {where}
+        GROUP BY students.id, students.name
+        HAVING COUNT(attendance.id) > 0 AND rate < 75
+        ORDER BY rate ASC
+        LIMIT 4
+        """,
+        params,
+    ).fetchall():
+        notes.append({
+            "type": "warning",
+            "title": "Low attendance alert",
+            "message": f"{r['name']} is at {r['rate']}% attendance.",
+        })
+
+    for r in conn.execute(
+        f"""
+        SELECT students.name, results.subject, results.grade
+        FROM results
+        JOIN students ON students.id = results.student_id
+        WHERE {where}
+        ORDER BY datetime(results.created_at) DESC
+        LIMIT 4
+        """,
+        params,
+    ).fetchall():
+        notes.append({
+            "type": "info",
+            "title": "New result added",
+            "message": f"{r['subject']} for {r['name']} was recorded with grade {r['grade'] or 'Pending'}.",
+        })
+
+    return notes[:6]
