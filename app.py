@@ -439,3 +439,34 @@ def student_or_404(student_id):
     if not row:
         abort(404)
     return row
+
+
+def visible_students(filters=None):
+    filters = filters or {}
+    where, params = visible_clause("students")
+    clauses = [where]
+
+    if filters.get("search"):
+        t = f"%{filters['search']}%"
+        clauses.append("(students.name LIKE ? OR students.student_id LIKE ?)")
+        params += [t, t]
+    if filters.get("dept"):
+        clauses.append("students.department = ?")
+        params.append(filters["dept"])
+    if filters.get("year"):
+        clauses.append("students.year = ?")
+        params.append(filters["year"])
+    if filters.get("status"):
+        clauses.append("students.status = ?")
+        params.append(filters["status"])
+
+    return db().execute(
+        f"""
+        SELECT students.*, users.full_name AS teacher_name
+        FROM students
+        LEFT JOIN users ON users.id = students.assigned_teacher_id
+        WHERE {' AND '.join(clauses)}
+        ORDER BY students.created_at DESC, students.name ASC
+        """,
+        params,
+    ).fetchall()
