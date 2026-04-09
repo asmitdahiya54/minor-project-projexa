@@ -129,3 +129,96 @@ def migrate_users(conn):
     conn.execute("PRAGMA foreign_keys = ON")
 
     conn.execute("UPDATE users SET full_name='Rahul Sharma' WHERE username='teacher'")
+    
+def init_db():
+    Path(app.config["UPLOAD_FOLDER"]).mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(app.config["DATABASE"])
+    conn.row_factory = sqlite3.Row
+
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS students (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student_id TEXT UNIQUE NOT NULL,
+            name TEXT NOT NULL,
+            email TEXT,
+            dob TEXT,
+            gender TEXT,
+            department TEXT NOT NULL,
+            year TEXT NOT NULL,
+            status TEXT DEFAULT 'Active',
+            address TEXT,
+            enroll_date TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS attendance (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student_id INTEGER NOT NULL,
+            date TEXT NOT NULL,
+            status TEXT NOT NULL CHECK(status IN ('Present','Absent','Late')),
+            subject TEXT DEFAULT 'General',
+            remarks TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(student_id,date,subject),
+            FOREIGN KEY(student_id) REFERENCES students(id)
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS results (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student_id INTEGER NOT NULL,
+            subject TEXT NOT NULL,
+            marks_obtained REAL NOT NULL,
+            max_marks REAL NOT NULL DEFAULT 100,
+            exam_type TEXT DEFAULT 'Midterm',
+            semester TEXT NOT NULL,
+            grade TEXT,
+            remarks TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(student_id) REFERENCES students(id)
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS feedback (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student_id INTEGER NOT NULL,
+            message TEXT NOT NULL,
+            rating INTEGER NOT NULL CHECK(rating BETWEEN 1 AND 5),
+            category TEXT DEFAULT 'General',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(student_id) REFERENCES students(id)
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            email TEXT,
+            password TEXT NOT NULL,
+            role TEXT NOT NULL CHECK(role IN ('admin','teacher','student')),
+            student_id INTEGER,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(student_id) REFERENCES students(id)
+        )
+    """)
+
+    migrate_users(conn)
+    ensure_col(conn, "students", "profile_image TEXT")
+    ensure_col(conn, "students", "assigned_teacher_id INTEGER")
+
+    if conn.execute("SELECT COUNT(*) c FROM students").fetchone()["c"] == 0:
+        seed = [
+            ("CS2024001", "Asmit Dahiya", "asmit@example.com", "2003-05-12", "Male", "Computer Science", "Third Year", "Active", "Delhi", "2022-07-15"),
+            ("CS2024002", "Dev Narwal", "dev@example.com", "2004-02-18", "Male", "Computer Science", "Second Year", "Active", "Haryana", "2023-07-10"),
+            ("IT2024001", "Manish Chauhan", "manish@example.com", "2005-09-30", "Male", "Information Technology", "First Year", "Active", "Punjab", "2024-07-08"),
+            ("IT2024002", "Dikshit Kumar", "dikshit@example.com", "2004-11-22", "Male", "Information Technology", "Second Year", "Active", "Delhi", "2023-07-12"),
+            ("EC2024001", "Gourav Sharma", "gourav@example.com", "2005-03-05", "Male", "Electronics", "First Year", "Active", "Rajasthan", "2024-07-15"),
+            ("ME2024001", "Aditya Dangi", "aditya@example.com", "2005-07-19", "Male", "Mechanical Engineering", "First Year", "On Leave", "MP", "2024-07-14"),
+        ]
+        conn.executemany("""
+            INSERT INTO students (student_id,name,email,dob,gender,department,year,status,address,enroll_date)
+            VALUES (?,?,?,?,?,?,?,?,?,?)
+        """, seed)
+
+    usernames = {r["username"] for r in conn.execute("SELECT username FROM users").fetchall()}    
