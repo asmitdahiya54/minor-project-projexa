@@ -32,3 +32,16 @@
             <div class="brand-sub">Academic operations platform</div>
           </div>
         </div>
+
+<div class="sidebar-panel">
+          <span class="sidebar-label">Workspace</span>
+          <strong>{{ current_role|title }} Console</strong>
+          <p>Student records, attendance, results, analytics, and secure collaboration in one place.</p>
+        </div>
+
+        <nav class="nav-links">
+          {% if current_role in ['admin','teacher'] %}
+          <a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Dashboard</span>
+          </a>
