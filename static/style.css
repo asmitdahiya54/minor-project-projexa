@@ -241,3 +241,18 @@ h4 {
   gap: 0.35rem;
   margin-top: 1rem;
 }
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.9rem 1rem;
+  border-radius: 16px;
+  color: rgba(241, 245, 249, 0.78);
+  transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.nav-link i {
+  width: 1rem;
+  text-align: center;
+}
