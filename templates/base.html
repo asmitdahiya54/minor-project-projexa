@@ -123,3 +123,21 @@
         <p>{{ current_role|title }} access with role-based permissions.</p>
       </div>
     </aside>
+
+    <div class="main-shell">
+      <header class="topbar">
+        <div class="topbar-main">
+          <button class="icon-btn mobile-only" type="button" id="menuToggle" aria-label="Open navigation">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <div>
+            <p class="eyebrow">{{ current_role|title }} workspace</p>
+            <h1 class="page-heading">{% block page_heading %}{{ app_name }}{% endblock %}</h1>
+          </div>
+        </div>
+
+        <div class="topbar-actions">
+          <div class="topbar-chip">
+            <span class="topbar-chip__dot"></span>
+            <span>Secure session active</span>
+          </div>
