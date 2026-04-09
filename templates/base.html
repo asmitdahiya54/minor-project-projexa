@@ -15,3 +15,20 @@
 
   {% block head %}{% endblock %}
 </head>
+
+<body>
+  <div class="site-backdrop" aria-hidden="true"></div>
+
+  {% if session.get('user_id') %}
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div>
+        <div class="brand">
+          <div class="brand-mark">
+            <i class="fa-solid fa-layer-group"></i>
+          </div>
+          <div>
+            <div class="brand-title">{{ app_name }}</div>
+            <div class="brand-sub">Academic operations platform</div>
+          </div>
+        </div>
