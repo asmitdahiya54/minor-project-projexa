@@ -379,3 +379,25 @@ def teachers():
         ORDER BY COALESCE(NULLIF(full_name, ''), username) ASC
         """
     ).fetchall()
+
+def notify_email(to_email, subject, body):
+    host = os.environ.get("SMTP_HOST")
+    user = os.environ.get("SMTP_USERNAME")
+    pwd = os.environ.get("SMTP_PASSWORD")
+    port = to_int(os.environ.get("SMTP_PORT"), 587)
+    sender = os.environ.get("MAIL_SENDER", user)
+    if not all([to_email, host, user, pwd, sender]):
+        return False
+    msg = EmailMessage()
+    msg["Subject"] = subject
+    msg["From"] = sender
+    msg["To"] = to_email
+    msg.set_content(body)
+    try:
+        with smtplib.SMTP(host, port, timeout=15) as s:
+            s.starttls()
+            s.login(user, pwd)
+            s.send_message(msg)
+        return True
+    except Exception:
+        return False
