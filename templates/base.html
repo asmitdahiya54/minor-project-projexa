@@ -57,3 +57,13 @@
             <span>Manage Students</span>
           </a>
           {% endif %}
+
+         <a href="{{ url_for('attendance') }}" class="nav-link {% if request.endpoint in ['attendance','attendance_report','student_attendance'] %}active{% endif %}">
+            <i class="fa-solid fa-calendar-check"></i>
+            <span>Attendance</span>
+          </a>
+
+          <a href="{{ url_for('results') }}" class="nav-link {% if request.endpoint in ['results','add_result','edit_result','student_results'] %}active{% endif %}">
+            <i class="fa-solid fa-square-poll-vertical"></i>
+            <span>Results</span>
+          </a>
