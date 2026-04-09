@@ -271,3 +271,30 @@ h4 {
     linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(238, 244, 255, 0.68)),
     transparent;
 }
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.4rem 2rem;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  backdrop-filter: blur(18px);
+}
+
+.topbar-main,
+.topbar-actions,
+.actions-inline,
+.hero-actions,
+.form-actions,
+.profile-summary,
+.user-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+}
