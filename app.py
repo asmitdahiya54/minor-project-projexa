@@ -637,3 +637,128 @@ def student_payload(form, files, editing=False, current=None):
     }
 
     
+
+    errs = []
+    available_teachers = teachers()
+    teacher_ids = {teacher["id"] for teacher in available_teachers}
+
+    if editing and current:
+        data["student_id"] = current["student_id"]
+    if not editing and not data["student_id"]:
+        errs.append("Student ID is required.")
+    if not data["name"]:
+        errs.append("Student name is required.")
+    if data["department"] not in DEPARTMENTS:
+        errs.append("Select a valid department.")
+    if data["year"] not in YEARS:
+        errs.append("Select a valid academic year.")
+    if data["status"] not in STATUSES:
+        errs.append("Select a valid student status.")
+    if not valid_email(data["email"]):
+        errs.append("Enter a valid email address.")
+    if data["student_id"] and not re.fullmatch(r"[A-Z0-9-]+", data["student_id"]):
+        errs.append("Student ID should contain only letters, numbers, and hyphens.")
+    if data["assigned_teacher_id"] and data["assigned_teacher_id"] not in teacher_ids:
+        errs.append("Select a valid assigned teacher.")
+
+    if not data["assigned_teacher_id"] and available_teachers:
+        teacher_by_year = {
+            "First Year": available_teachers[0]["id"] if len(available_teachers) > 0 else None,
+            "Second Year": available_teachers[1]["id"] if len(available_teachers) > 1 else available_teachers[0]["id"],
+            "Third Year": available_teachers[2]["id"] if len(available_teachers) > 2 else available_teachers[-1]["id"],
+            "Fourth Year": available_teachers[3]["id"] if len(available_teachers) > 3 else available_teachers[-1]["id"],
+        }
+        data["assigned_teacher_id"] = teacher_by_year.get(data["year"])
+
+    try:
+        data["profile_image"] = save_image(files.get("profile_image"), current["profile_image"] if current else None)
+    except ValueError as exc:
+        errs.append(str(exc))
+
+    return data, errs
+
+
+def dashboard_ctx():
+    where, params = visible_clause("students")
+    conn = db()
+    totals = conn.execute(
+        f"""
+        SELECT
+            COUNT(*) total,
+            SUM(CASE WHEN status='Active' THEN 1 ELSE 0 END) active,
+            SUM(CASE WHEN status='On Leave' THEN 1 ELSE 0 END) leave_count,
+            SUM(CASE WHEN status='Graduated' THEN 1 ELSE 0 END) graduated
+        FROM students
+        WHERE {where}
+        """,
+        params,
+    ).fetchone()
+
+    feedback_avg = conn.execute(
+        f"""
+        SELECT ROUND(AVG(feedback.rating),1) avg_rating, COUNT(feedback.id) feedback_count
+        FROM feedback
+        JOIN students ON students.id = feedback.student_id
+        WHERE {where}
+        """,
+        params,
+    ).fetchone()
+
+
+    result_count = conn.execute(
+        f"""
+        SELECT COUNT(results.id) result_count
+        FROM results
+        JOIN students ON students.id = results.student_id
+        WHERE {where}
+        """,
+        params,
+    ).fetchone()
+
+    recent_students = conn.execute(
+        f"""
+        SELECT students.*, users.full_name AS teacher_name
+        FROM students
+        LEFT JOIN users ON users.id = students.assigned_teacher_id
+        WHERE {where}
+        ORDER BY datetime(students.created_at) DESC
+        LIMIT 6
+        """,
+        params,
+    ).fetchall()
+
+    return {
+        "stats": {
+            "total_students": totals["total"] or 0,
+            "active_students": totals["active"] or 0,
+            "leave_students": totals["leave_count"] or 0,
+            "graduated_students": totals["graduated"] or 0,
+            "result_count": result_count["result_count"] or 0,
+            "feedback_count": feedback_avg["feedback_count"] or 0,
+            "avg_rating": feedback_avg["avg_rating"] or 0,
+        },
+        "recent_students": recent_students,
+        "recent_results": recent_results(limit=6),
+        "dashboard_role_label": session.get("role", "").title(),
+    }
+
+
+def student_dash_ctx(student_id):
+    student = student_or_404(student_id)
+    conn = db()
+    results = conn.execute(
+        "SELECT * FROM results WHERE student_id=? ORDER BY datetime(created_at) DESC LIMIT 6",
+        (student_id,),
+    ).fetchall()
+    feedback_rows = conn.execute(
+        "SELECT * FROM feedback WHERE student_id=? ORDER BY datetime(created_at) DESC LIMIT 6",
+        (student_id,),
+    ).fetchall()
+    scores = [(r["marks_obtained"] / r["max_marks"]) * 10 for r in results if r["max_marks"]]
+    return {
+        "student": student,
+        "attendance_summary": attendance_summary(student_id),
+        "recent_results": results,
+        "feedback_entries": feedback_rows,
+        "cgpa_estimate": round(sum(scores) / len(scores), 2) if scores else 0.0,
+    }
