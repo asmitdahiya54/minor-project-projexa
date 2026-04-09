@@ -45,3 +45,15 @@
             <i class="fa-solid fa-chart-line"></i>
             <span>Dashboard</span>
           </a>
+
+          <a href="{{ url_for('view_students') }}" class="nav-link {% if request.endpoint in ['view_students','student_detail'] %}active{% endif %}">
+            <i class="fa-solid fa-users"></i>
+            <span>Students</span>
+          </a>
+
+          {% if current_role == 'admin' %}
+          <a href="{{ url_for('add_student') }}" class="nav-link {% if request.endpoint in ['add_student','edit_student'] %}active{% endif %}">
+            <i class="fa-solid fa-user-plus"></i>
+            <span>Manage Students</span>
+          </a>
+          {% endif %}
