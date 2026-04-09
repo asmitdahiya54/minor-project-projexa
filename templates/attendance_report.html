@@ -46,3 +46,52 @@
     </button>
   </form>
 </section>
+
+<section class="panel">
+  <div class="panel__header">
+    <div>
+      <h3>Attendance summary</h3>
+      <p>{{ rows|length }} student attendance record(s) matched your current filters.</p>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>Department</th>
+          <th>Year</th>
+          <th>Rate</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          <td>
+            <strong>{{ row.student.name }}</strong>
+            <span class="table-sub">{{ row.student.student_id }}</span>
+          </td>
+          <td>{{ row.student.department }}</td>
+          <td>{{ row.student.year }}</td>
+          <td><span class="grade-chip">{{ row.summary.rate }}%</span></td>
+          <td class="actions-inline">
+            <a class="icon-btn" href="{{ url_for('student_attendance', student_id=row.student.id) }}" aria-label="View attendance">
+              <i class="fa-solid fa-eye"></i>
+            </a>
+            <a class="icon-btn" href="{{ url_for('attendance_pdf', student_id=row.student.id) }}" aria-label="Download attendance PDF">
+              <i class="fa-solid fa-file-pdf"></i>
+            </a>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="5" class="empty">No attendance data found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
