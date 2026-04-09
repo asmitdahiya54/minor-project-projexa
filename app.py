@@ -601,3 +601,19 @@ def login_required(fn):
             return redirect(url_for("login"))
         return fn(*a, **kw)
     return wrap
+
+
+def roles_required(*roles):
+    def dec(fn):
+        @wraps(fn)
+        def wrap(*a, **kw):
+            if "user_id" not in session:
+                flash("Please log in to continue.", "error")
+                return redirect(url_for("login"))
+            if session.get("role") not in roles:
+                flash("You do not have access to that page.", "error")
+                return redirect(url_for("student_dashboard" if session.get("role") == "student" else "dashboard"))
+            return fn(*a, **kw)
+        return wrap
+    return dec
+
