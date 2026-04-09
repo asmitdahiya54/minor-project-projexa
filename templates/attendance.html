@@ -79,3 +79,38 @@
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <input type="hidden" name="date" value="{{ filters.date }}">
     <input type="hidden" name="subject" value="{{ filters.subject }}">
+
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Present</th>
+            <th>Absent</th>
+            <th>Late</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for student in students %}
+          <tr>
+            <td>
+              <div class="table-user">
+                <div class="table-user__avatar">{{ student.name[0] }}</div>
+                <div>
+                  <strong>{{ student.name }}</strong>
+                  <span class="table-sub">{{ student.student_id }}</span>
+                </div>
+              </div>
+            </td>
+            <td><input type="radio" name="att_{{ student.id }}" value="Present" {% if current_records.get(student.id) == 'Present' %}checked{% endif %}></td>
+            <td><input type="radio" name="att_{{ student.id }}" value="Absent" {% if current_records.get(student.id) == 'Absent' %}checked{% endif %}></td>
+            <td><input type="radio" name="att_{{ student.id }}" value="Late" {% if current_records.get(student.id) == 'Late' %}checked{% endif %}></td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="4" class="empty">No active students found for these filters.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
