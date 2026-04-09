@@ -29,3 +29,20 @@
         {% endfor %}
       </select>
     </label>
+
+    <label>
+      <span>Year</span>
+      <select name="year">
+        <option value="">All years</option>
+        {% for year in years %}
+        <option value="{{ year }}" {% if filters.year == year %}selected{% endif %}>{{ year }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <button class="btn btn-primary" type="submit">
+      <i class="fa-solid fa-filter"></i>
+      <span>Apply filters</span>
+    </button>
+  </form>
+</section>
