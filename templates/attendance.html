@@ -16,3 +16,17 @@
     </a>
   </div>
 </section>
+
+<section class="panel panel--form">
+  <div class="panel__header">
+    <div>
+      <h3>Roster filters</h3>
+      <p>Choose the class group and date you want to mark.</p>
+    </div>
+  </div>
+
+  <form method="get" class="filters-grid compact-grid">
+    <label>
+      <span>Date</span>
+      <input type="date" name="date" value="{{ filters.date }}">
+    </label>
