@@ -3,73 +3,10 @@
 {% block page_heading %}Attendance Report{% endblock %}
 
 {% block content %}
-<section class="panel panel--form">
-  <form method="get" class="filters-grid compact-grid">
-    <label>
-      <span>Department</span>
-      <select name="dept">
-        <option value="">All departments</option>
-        {% for dept in departments %}
-        <option value="{{ dept }}" {% if filters.dept == dept %}selected{% endif %}>{{ dept }}</option>
-        {% endfor %}
-      </select>
-    </label>
-
-    <label>
-      <span>Year</span>
-      <select name="year">
-        <option value="">All years</option>
-        {% for year in years %}
-        <option value="{{ year }}" {% if filters.year == year %}selected{% endif %}>{{ year }}</option>
-        {% endfor %}
-      </select>
-    </label>
-
-    <button class="btn btn-primary" type="submit">
-      <i class="fa-solid fa-filter"></i>
-      <span>Filter report</span>
-    </button>
-  </form>
-</section>
-
-<section class="panel">
-  <div class="table-wrap">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Student</th>
-          <th>Department</th>
-          <th>Year</th>
-          <th>Rate</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for row in rows %}
-        <tr>
-          <td>
-            {{ row.student.name }}
-            <span class="table-sub">{{ row.student.student_id }}</span>
-          </td>
-          <td>{{ row.student.department }}</td>
-          <td>{{ row.student.year }}</td>
-          <td>{{ row.summary.rate }}%</td>
-          <td class="actions-inline">
-            <a class="icon-btn" href="{{ url_for('student_attendance', student_id=row.student.id) }}">
-              <i class="fa-solid fa-eye"></i>
-            </a>
-            <a class="icon-btn" href="{{ url_for('attendance_pdf', student_id=row.student.id) }}">
-              <i class="fa-solid fa-file-pdf"></i>
-            </a>
-          </td>
-        </tr>
-        {% else %}
-        <tr>
-          <td colspan="5" class="empty">No attendance data found.</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+<section class="hero-card">
+  <div class="hero-copy">
+    <span class="badge">Attendance overview</span>
+    <h2>Review attendance performance across departments and years.</h2>
+    <p>Filter the attendance report, inspect each student’s rate, and generate PDF exports when needed.</p>
   </div>
 </section>
-{% endblock %}
