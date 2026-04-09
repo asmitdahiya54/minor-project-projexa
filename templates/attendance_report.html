@@ -10,3 +10,22 @@
     <p>Filter the attendance report, inspect each student’s rate, and generate PDF exports when needed.</p>
   </div>
 </section>
+
+<section class="panel panel--form">
+  <div class="panel__header">
+    <div>
+      <h3>Filter report</h3>
+      <p>Refine attendance insights by department and academic year.</p>
+    </div>
+  </div>
+
+  <form method="get" class="filters-grid compact-grid">
+    <label>
+      <span>Department</span>
+      <select name="dept">
+        <option value="">All departments</option>
+        {% for dept in departments %}
+        <option value="{{ dept }}" {% if filters.dept == dept %}selected{% endif %}>{{ dept }}</option>
+        {% endfor %}
+      </select>
+    </label>
