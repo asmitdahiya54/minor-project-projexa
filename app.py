@@ -591,3 +591,13 @@ def build_notifications():
         })
 
     return notes[:6]
+
+
+def login_required(fn):
+    @wraps(fn)
+    def wrap(*a, **kw):
+        if "user_id" not in session:
+            flash("Please log in to continue.", "error")
+            return redirect(url_for("login"))
+        return fn(*a, **kw)
+    return wrap
