@@ -417,3 +417,25 @@ def notify_email(to_email, subject, body):
         return True
     except Exception:
         return False
+    
+    def fmt_date(value):
+    try:
+        return datetime.fromisoformat(str(value)).strftime("%d %b %Y")
+    except Exception:
+        return str(value or "-")
+
+
+def student_or_404(student_id):
+    where, params = visible_clause("students")
+    row = db().execute(
+        f"""
+        SELECT students.*, users.full_name AS teacher_name
+        FROM students
+        LEFT JOIN users ON users.id = students.assigned_teacher_id
+        WHERE students.id = ? AND {where}
+        """,
+        [student_id] + params,
+    ).fetchone()
+    if not row:
+        abort(404)
+    return row
