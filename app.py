@@ -617,3 +617,20 @@ def roles_required(*roles):
         return wrap
     return dec
 
+
+def student_payload(form, files, editing=False, current=None):
+    data = {
+        "student_id": clean(form.get("student_id"), 32).upper(),
+        "name": clean(form.get("name"), 120),
+        "email": clean(form.get("email"), 120).lower(),
+        "dob": clean(form.get("dob"), 20),
+        "gender": clean(form.get("gender"), 20),
+        "department": clean(form.get("department"), 80),
+        "year": clean(form.get("year"), 40),
+        "status": clean(form.get("status"), 40) or "Active",
+        "address": clean(form.get("address"), 200),
+        "enroll_date": clean(form.get("enroll_date"), 20),
+        "assigned_teacher_id": to_int(form.get("assigned_teacher_id")),
+    }
+
+    
