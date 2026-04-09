@@ -380,6 +380,22 @@ def teachers():
         """
     ).fetchall()
 
+
+def save_image(fs, old=None):
+    if not fs or not fs.filename:
+        return old
+    ext = fs.filename.rsplit(".", 1)[-1].lower()
+    if ext not in ALLOWED_IMAGE_EXTENSIONS:
+        raise ValueError("Allowed image types are PNG, JPG, JPEG, and WEBP.")
+    name = secure_filename(f"{uuid.uuid4().hex}.{ext}")
+    fs.save(Path(app.config["UPLOAD_FOLDER"]) / name)
+    if old:
+        old_path = Path(app.config["UPLOAD_FOLDER"]) / old
+        if old_path.exists():
+            old_path.unlink()
+    return name
+
+
 def notify_email(to_email, subject, body):
     host = os.environ.get("SMTP_HOST")
     user = os.environ.get("SMTP_USERNAME")
