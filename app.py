@@ -633,4 +633,69 @@ def student_payload(form, files, editing=False, current=None):
         "assigned_teacher_id": to_int(form.get("assigned_teacher_id")),
     }
 
-    
+
+    errs = []
+    available_teachers = teachers()
+    teacher_ids = {teacher["id"] for teacher in available_teachers}
+
+    if editing and current:
+        data["student_id"] = current["student_id"]
+    if not editing and not data["student_id"]:
+        errs.append("Student ID is required.")
+    if not data["name"]:
+        errs.append("Student name is required.")
+    if data["department"] not in DEPARTMENTS:
+        errs.append("Select a valid department.")
+    if data["year"] not in YEARS:
+        errs.append("Select a valid academic year.")
+    if data["status"] not in STATUSES:
+        errs.append("Select a valid student status.")
+    if not valid_email(data["email"]):
+        errs.append("Enter a valid email address.")
+    if data["student_id"] and not re.fullmatch(r"[A-Z0-9-]+", data["student_id"]):
+        errs.append("Student ID should contain only letters, numbers, and hyphens.")
+    if data["assigned_teacher_id"] and data["assigned_teacher_id"] not in teacher_ids:
+        errs.append("Select a valid assigned teacher.")
+
+    if not data["assigned_teacher_id"] and available_teachers:
+        teacher_by_year = {
+            "First Year": available_teachers[0]["id"] if len(available_teachers) > 0 else None,
+            "Second Year": available_teachers[1]["id"] if len(available_teachers) > 1 else available_teachers[0]["id"],
+            "Third Year": available_teachers[2]["id"] if len(available_teachers) > 2 else available_teachers[-1]["id"],
+            "Fourth Year": available_teachers[3]["id"] if len(available_teachers) > 3 else available_teachers[-1]["id"],
+        }
+        data["assigned_teacher_id"] = teacher_by_year.get(data["year"])
+
+    try:
+        data["profile_image"] = save_image(files.get("profile_image"), current["profile_image"] if current else None)
+    except ValueError as exc:
+        errs.append(str(exc))
+
+    return data, errs
+
+
+def dashboard_ctx():
+    where, params = visible_clause("students")
+    conn = db()
+    totals = conn.execute(
+        f"""
+        SELECT
+            COUNT(*) total,
+            SUM(CASE WHEN status='Active' THEN 1 ELSE 0 END) active,
+            SUM(CASE WHEN status='On Leave' THEN 1 ELSE 0 END) leave_count,
+            SUM(CASE WHEN status='Graduated' THEN 1 ELSE 0 END) graduated
+        FROM students
+        WHERE {where}
+        """,
+        params,
+    ).fetchone()
+
+    feedback_avg = conn.execute(
+        f"""
+        SELECT ROUND(AVG(feedback.rating),1) avg_rating, COUNT(feedback.id) feedback_count
+        FROM feedback
+        JOIN students ON students.id = feedback.student_id
+        WHERE {where}
+        """,
+        params,
+    ).fetchone()
