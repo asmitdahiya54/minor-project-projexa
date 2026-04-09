@@ -67,3 +67,13 @@
             <i class="fa-solid fa-square-poll-vertical"></i>
             <span>Results</span>
           </a>
+
+<a href="{{ url_for('feedback') }}" class="nav-link {% if request.endpoint in ['feedback','add_feedback'] %}active{% endif %}">
+            <i class="fa-solid fa-comments"></i>
+            <span>Feedback</span>
+          </a>
+
+          <a href="{{ url_for('charts') }}" class="nav-link {% if request.endpoint == 'charts' %}active{% endif %}">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>Analytics</span>
+          </a>  
