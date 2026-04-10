@@ -1131,3 +1131,38 @@ def student_results(student_id):
     ).fetchall()
     return render_template("student_results.html", student=student, rows=rows, grade_color=grade_color)
 
+@app.route("/results/<int:result_id>/edit", methods=["GET", "POST"])
+@roles_required("admin", "teacher")
+def edit_result(result_id):
+    row = db().execute("SELECT * FROM results WHERE id=?", (result_id,)).fetchone()
+    if not row:
+        abort(404)
+    student = student_or_404(row["student_id"])
+
+    if request.method == "POST":
+        subject = clean(request.form.get("subject"), 80)
+        exam_type = clean(request.form.get("exam_type"), 40) or "Midterm"
+        semester = clean(request.form.get("semester"), 40)
+        marks = to_float(request.form.get("marks_obtained"))
+        max_marks = to_float(request.form.get("max_marks"), 100)
+        remarks = clean(request.form.get("remarks"), 200)
+
+        if subject not in SUBJECTS or semester not in SEMESTERS:
+            return respond(False, "Provide a valid subject and semester.", url_for("edit_result", result_id=result_id), 400)
+        if not max_marks or marks is None or marks < 0 or marks > max_marks:
+            return respond(False, "Marks must be between 0 and the maximum marks.", url_for("edit_result", result_id=result_id), 400)
+
+        grade = calc_grade((marks / max_marks) * 100)
+        db().execute(
+            """
+            UPDATE results
+            SET subject=?, exam_type=?, semester=?, marks_obtained=?, max_marks=?, grade=?, remarks=?
+            WHERE id=?
+            """,
+            (subject, exam_type, semester, marks, max_marks, grade, remarks, result_id),
+        )
+        db().commit()
+        return respond(True, f"Result updated with grade {grade}.", url_for("student_results", student_id=student["id"]))
+
+    return render_template("edit_result.html", result=row, student=student, subjects=SUBJECTS, exam_types=EXAM_TYPES, semesters=SEMESTERS)
+
