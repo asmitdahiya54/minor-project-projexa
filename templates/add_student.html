@@ -81,7 +81,7 @@
           <option value="{{ teacher.id }}" {% if form.get('assigned_teacher_id') == teacher.id|string %}selected{% endif %}>{{ teacher.full_name }}</option>
           {% endfor %}
         </select>
-        <p class="form-note">Leave blank to let the system choose a default teacher based on the selected year.</p>
+        <p class="form-note">Leave blank to automatically assign the year coordinator for the selected academic year.</p>
       </label>
 
       <label class="form-grid__full">

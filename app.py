@@ -57,6 +57,15 @@ FEEDBACK_CATEGORIES = [
 ]
 ALLOWED_IMAGE_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
 
+YEAR_TEACHER_SEEDS = [
+    ("teacher_first", "firstyear@sims.edu", "Rahul Sharma", "First Year"),
+    ("teacher_second", "secondyear@sims.edu", "Priya Verma", "Second Year"),
+    ("teacher_third", "thirdyear@sims.edu", "Amit Mehta", "Third Year"),
+    ("teacher_fourth", "fourthyear@sims.edu", "Neha Singh", "Fourth Year"),
+]
+
+YEAR_TEACHER_USERNAMES = {year: username for username, _email, _name, year in YEAR_TEACHER_SEEDS}
+
 
 def pick_database_path():
     preferred = Path(os.environ.get("SIMS_DB_PATH", app.config["DATABASE"]))
@@ -104,6 +113,18 @@ def ensure_col(conn, table, sql):
 def migrate_users(conn):
     ensure_col(conn, "users", "full_name TEXT")
 
+    legacy_teacher = conn.execute(
+        "SELECT id FROM users WHERE username='teacher' AND role='teacher' LIMIT 1"
+    ).fetchone()
+    first_year_exists = conn.execute(
+        "SELECT 1 FROM users WHERE username='teacher_first' LIMIT 1"
+    ).fetchone()
+    if legacy_teacher and not first_year_exists:
+        conn.execute(
+            "UPDATE users SET username=?, email=?, full_name=? WHERE id=?",
+            ('teacher_first', 'firstyear@sims.edu', 'Rahul Sharma', legacy_teacher['id']),
+        )
+
     row = conn.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='users'").fetchone()
     if row and row["sql"] and "teacher" in row["sql"].lower():
         return
@@ -129,7 +150,11 @@ def migrate_users(conn):
         conn.execute("ALTER TABLE users_new RENAME TO users")
     conn.execute("PRAGMA foreign_keys = ON")
 
-    conn.execute("UPDATE users SET full_name='Rahul Sharma' WHERE username='teacher'")
+    for username, email, full_name, _year in YEAR_TEACHER_SEEDS:
+        conn.execute(
+            "UPDATE users SET email=?, full_name=? WHERE username=? AND role='teacher'",
+            (email, full_name, username),
+        )
 
 
 def init_db():
@@ -231,14 +256,15 @@ def init_db():
             ("admin", "admin@sims.edu", generate_password_hash("admin123"), "admin"),
         )
 
-    if "teacher" not in usernames:
-        conn.execute(
-            "INSERT INTO users (username,email,password,role,full_name) VALUES (?,?,?,?,?)",
-            ("teacher", "teacher@sims.edu", generate_password_hash("teacher123"), "teacher", "Rahul Sharma")
-        )
-        conn.execute("UPDATE users SET full_name='Rahul Sharma' WHERE username='teacher'")
+    default_teacher_password = generate_password_hash("teacher123")
+    for username, email, full_name, _year in YEAR_TEACHER_SEEDS:
+        if username not in usernames:
+            conn.execute(
+                "INSERT INTO users (username,email,password,role,full_name) VALUES (?,?,?,?,?)",
+                (username, email, default_teacher_password, "teacher", full_name),
+            )
 
-    teacher = conn.execute("SELECT id FROM users WHERE username='teacher' LIMIT 1").fetchone()
+    year_teacher_ids = teacher_id_by_year(conn)
 
     for s in conn.execute("SELECT id,student_id,email FROM students").fetchall():
         exists = conn.execute(
@@ -251,11 +277,12 @@ def init_db():
                 (s["student_id"], s["email"], generate_password_hash("student123"), "student", s["id"]),
             )
 
-    if teacher:
-        conn.execute(
-            "UPDATE students SET assigned_teacher_id = COALESCE(assigned_teacher_id, ?)",
-            (teacher["id"],)
-        )
+    for year, teacher_id in year_teacher_ids.items():
+        if teacher_id:
+            conn.execute(
+                "UPDATE students SET assigned_teacher_id = ? WHERE year = ? AND (assigned_teacher_id IS NULL OR assigned_teacher_id NOT IN (SELECT id FROM users WHERE role='teacher' AND username != 'teacher'))",
+                (teacher_id, year),
+            )
 
     conn.commit()
     conn.close()
@@ -376,9 +403,25 @@ def teachers():
             COALESCE(NULLIF(full_name, ''), username) AS full_name
         FROM users
         WHERE role='teacher'
-        ORDER BY COALESCE(NULLIF(full_name, ''), username) ASC
+        ORDER BY CASE username
+            WHEN 'teacher_first' THEN 1
+            WHEN 'teacher_second' THEN 2
+            WHEN 'teacher_third' THEN 3
+            WHEN 'teacher_fourth' THEN 4
+            WHEN 'teacher' THEN 5
+            ELSE 99
+        END,
+        COALESCE(NULLIF(full_name, ''), username) ASC
         """
     ).fetchall()
+
+
+def teacher_id_by_year(conn):
+    rows = conn.execute(
+        "SELECT id, username FROM users WHERE role='teacher'"
+    ).fetchall()
+    by_username = {row["username"]: row["id"] for row in rows}
+    return {year: by_username.get(username) for year, username in YEAR_TEACHER_USERNAMES.items()}
 
 
 def save_image(fs, old=None):
@@ -658,13 +701,8 @@ def student_payload(form, files, editing=False, current=None):
         errs.append("Select a valid assigned teacher.")
 
     if not data["assigned_teacher_id"] and available_teachers:
-        teacher_by_year = {
-            "First Year": available_teachers[0]["id"] if len(available_teachers) > 0 else None,
-            "Second Year": available_teachers[1]["id"] if len(available_teachers) > 1 else available_teachers[0]["id"],
-            "Third Year": available_teachers[2]["id"] if len(available_teachers) > 2 else available_teachers[-1]["id"],
-            "Fourth Year": available_teachers[3]["id"] if len(available_teachers) > 3 else available_teachers[-1]["id"],
-        }
-        data["assigned_teacher_id"] = teacher_by_year.get(data["year"])
+        teacher_lookup = {teacher["username"]: teacher["id"] for teacher in available_teachers}
+        data["assigned_teacher_id"] = teacher_lookup.get(YEAR_TEACHER_USERNAMES.get(data["year"]))
 
     try:
         data["profile_image"] = save_image(files.get("profile_image"), current["profile_image"] if current else None)
@@ -672,7 +710,6 @@ def student_payload(form, files, editing=False, current=None):
         errs.append(str(exc))
 
     return data, errs
-
 
 def dashboard_ctx():
     where, params = visible_clause("students")
@@ -1061,7 +1098,6 @@ def delete_attendance(attendance_id):
         db().execute("DELETE FROM attendance WHERE id=?", (attendance_id,))
         db().commit()
     return respond(True, "Attendance record removed.", url_for("attendance_report"))
-
 
 @app.route("/results")
 @roles_required("admin", "teacher")
