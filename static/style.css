@@ -1055,6 +1055,27 @@ textarea {
   transform: translateY(-8px);
   transition: opacity 0.35s ease, transform 0.35s ease;
 }
+.form-note {
+  margin-top: 0.35rem;
+  font-size: 0.84rem;
+  color: var(--text-muted);
+}
+
+.keyline {
+  height: 1px;
+  background: var(--border);
+  margin: 0.4rem 0 0;
+}
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
 .toast.is-hiding {
   opacity: 0;
