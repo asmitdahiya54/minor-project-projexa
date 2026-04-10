@@ -17,3 +17,40 @@
   </div>
 </section>
 
+
+<section class="panel panel--form">
+  <div class="panel__header">
+    <div>
+      <h3>Results filters</h3>
+      <p>Filter the registry by department and academic year.</p>
+    </div>
+  </div>
+
+  <form method="get" class="filters-grid compact-grid">
+    <label>
+      <span>Department</span>
+      <select name="dept">
+        <option value="">All departments</option>
+        {% for dept in departments %}
+        <option value="{{ dept }}" {% if filters.dept == dept %}selected{% endif %}>{{ dept }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <label>
+      <span>Year</span>
+      <select name="year">
+        <option value="">All years</option>
+        {% for year in years %}
+        <option value="{{ year }}" {% if filters.year == year %}selected{% endif %}>{{ year }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <button class="btn btn-primary" type="submit">
+      <i class="fa-solid fa-filter"></i>
+      <span>Apply filters</span>
+    </button>
+  </form>
+</section>
+
