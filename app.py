@@ -973,3 +973,23 @@ def delete_student(student_id):
     conn.execute("DELETE FROM students WHERE id=?", (student_id,))
     conn.commit()
     return respond(True, f"{student['name']} was deleted successfully.", url_for("view_students"))
+
+@app.route("/attendance")
+@roles_required("admin", "teacher")
+def attendance():
+    filters = {
+        "date": clean(request.args.get("date"), 20) or date.today().isoformat(),
+        "dept": clean(request.args.get("dept"), 80),
+        "subject": clean(request.args.get("subject"), 80) or "General",
+        "year": clean(request.args.get("year"), 40),
+    }
+    students = visible_students({"dept": filters["dept"], "year": filters["year"], "status": "Active"})
+    current = {
+        r["student_id"]: r["status"]
+        for r in db().execute(
+            "SELECT student_id,status FROM attendance WHERE date=? AND subject=?",
+            (filters["date"], filters["subject"])
+        ).fetchall()
+    }
+    return render_template("attendance.html", students=students, current_records=current, filters=filters, departments=DEPARTMENTS, years=YEARS, subjects=SUBJECTS)
+
