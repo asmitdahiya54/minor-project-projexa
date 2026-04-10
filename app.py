@@ -960,3 +960,16 @@ def edit_student(student_id):
         return respond(True, f"{data['name']} updated successfully.", url_for("student_detail", student_id=student_id))
 
     return render_template("edit_student.html", student=student, teachers=teachers(), departments=DEPARTMENTS, years=YEARS, statuses=STATUSES)
+
+@app.route("/students/<int:student_id>/delete", methods=["POST"])
+@roles_required("admin")
+def delete_student(student_id):
+    student = student_or_404(student_id)
+    conn = db()
+    conn.execute("DELETE FROM users WHERE student_id=?", (student_id,))
+    conn.execute("DELETE FROM feedback WHERE student_id=?", (student_id,))
+    conn.execute("DELETE FROM results WHERE student_id=?", (student_id,))
+    conn.execute("DELETE FROM attendance WHERE student_id=?", (student_id,))
+    conn.execute("DELETE FROM students WHERE id=?", (student_id,))
+    conn.commit()
+    return respond(True, f"{student['name']} was deleted successfully.", url_for("view_students"))
