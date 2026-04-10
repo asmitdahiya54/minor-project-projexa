@@ -374,3 +374,4 @@ def grade_color(grade):
         "C": "#ef4444",
         "F": "#dc2626",
     }.get(grade, "#64748b")
+    
