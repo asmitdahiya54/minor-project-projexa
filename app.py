@@ -1051,3 +1051,28 @@ def delete_attendance(attendance_id):
         db().commit()
     return respond(True, "Attendance record removed.", url_for("attendance_report"))
 
+@app.route("/results")
+@roles_required("admin", "teacher")
+def results():
+    filters = {"dept": clean(request.args.get("dept"), 80), "year": clean(request.args.get("year"), 40)}
+    where, params = visible_clause("students")
+    clauses = [where]
+    if filters["dept"]:
+        clauses.append("students.department = ?")
+        params.append(filters["dept"])
+    if filters["year"]:
+        clauses.append("students.year = ?")
+        params.append(filters["year"])
+
+    rows = db().execute(
+        f"""
+        SELECT results.*, students.name, students.student_id AS enrollment_no, students.department, students.year
+        FROM results
+        JOIN students ON students.id = results.student_id
+        WHERE {' AND '.join(clauses)}
+        ORDER BY datetime(results.created_at) DESC
+        """,
+        params,
+    ).fetchall()
+    return render_template("results.html", rows=rows, filters=filters, departments=DEPARTMENTS, years=YEARS)
+
