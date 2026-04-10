@@ -1208,3 +1208,31 @@ def feedback():
 
     return render_template("feedback.html", rows=rows, students=students, categories=FEEDBACK_CATEGORIES)
 
+@app.route("/feedback/add", methods=["GET", "POST"])
+@login_required
+def add_feedback():
+    students = [student_or_404(session["student_db_id"])] if session.get("role") == "student" else visible_students({"status": "Active"})
+
+    if request.method == "POST":
+        sid = session.get("student_db_id") if session.get("role") == "student" else to_int(request.form.get("student_id"))
+        student = student_or_404(sid)
+        rating = to_int(request.form.get("rating"))
+        category = clean(request.form.get("category"), 80) or "General"
+        message = clean(request.form.get("message"), 500)
+
+        if not message:
+            return respond(False, "Feedback message cannot be empty.", url_for("add_feedback"), 400)
+        if rating not in {1, 2, 3, 4, 5}:
+            return respond(False, "Rating must be between 1 and 5.", url_for("add_feedback"), 400)
+        if category not in FEEDBACK_CATEGORIES:
+            return respond(False, "Select a valid feedback category.", url_for("add_feedback"), 400)
+
+        db().execute(
+            "INSERT INTO feedback (student_id,message,rating,category) VALUES (?,?,?,?)",
+            (student["id"], message, rating, category),
+        )
+        db().commit()
+        return respond(True, "Feedback submitted successfully.", url_for("student_dashboard" if session.get("role") == "student" else "feedback"))
+
+    return render_template("add_feedback.html", students=students, categories=FEEDBACK_CATEGORIES)
+
