@@ -1121,6 +1121,15 @@ textarea {
     align-items: stretch;
   }
 }
+@media (max-width: 680px) {
+  .form-grid,
+  .summary-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .data-table {
+    min-width: 640px;
+  }
 .toast.is-hiding {
   opacity: 0;
   transform: translateY(-8px);
