@@ -513,3 +513,22 @@ html[data-theme='dark'] .insight-card {
   border-bottom: 1px solid var(--border);
   vertical-align: top;
 }
+.data-table th {
+  text-align: left;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.data-table tbody tr:hover {
+  background: rgba(21, 94, 239, 0.03);
+}
+
+.table-sub {
+  display: block;
+  color: var(--text-soft);
+  font-size: 0.84rem;
+  margin-top: 0.24rem;
+}
