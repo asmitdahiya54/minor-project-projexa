@@ -802,3 +802,10 @@ def login():
         return respond(False, "Invalid username or password.", url_for("login"), 401)
 
     return render_template("login.html")
+
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    flash("You have been logged out securely.", "success")
+    return redirect(url_for("login"))
