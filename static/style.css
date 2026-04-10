@@ -938,6 +938,18 @@ textarea {
   display: flex;
   justify-content: flex-end;
 }
+.charts-grid canvas {
+  width: 100% !important;
+  height: 250px !important;
+  min-height: 250px;
+  max-height: 250px;
+}
+
+.summary-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+}
 .toast__icon {
   width: 36px;
   height: 36px;
