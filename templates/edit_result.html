@@ -10,3 +10,12 @@
       <p>Edit the published score while keeping the student link unchanged.</p>
     </div>
   </div>
+
+  <form method="post" class="data-form js-ajax-form" data-redirect-on-success="true">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div class="form-grid">
+      <label>
+        <span>Student</span>
+        <input type="text" value="{{ student.name }} ({{ student.student_id }})" disabled>
+      </label>
