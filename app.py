@@ -327,7 +327,7 @@ def setup_req():
 def inject_globals():
     return {
         "current_role": session.get("role"),
-        "app_name": "SIMS Pro",
+        "app_name": "SIMS",
         "global_notifications": build_notifications() if session.get("role") else [],
     }
 
