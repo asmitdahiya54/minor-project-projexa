@@ -1409,3 +1409,29 @@ def chart_feedback():
         "department_split": [dict(r) for r in dept],
     })
 
+@app.route("/change-password", methods=["GET", "POST"])
+@login_required
+def change_password():
+    if request.method == "POST":
+        current_password = request.form.get("current_password") or ""
+        password = request.form.get("password") or ""
+        confirm = request.form.get("confirm_password") or ""
+
+        user = db().execute("SELECT * FROM users WHERE id=?", (session["user_id"],)).fetchone()
+
+        if not current_password or not password or not confirm:
+            return respond(False, "All password fields are required.", url_for("change_password"), 400)
+        if not check_password_hash(user["password"], current_password):
+            return respond(False, "Current password is incorrect.", url_for("change_password"), 400)
+        if len(password) < 8:
+            return respond(False, "New password must be at least 8 characters long.", url_for("change_password"), 400)
+        if password != confirm:
+            return respond(False, "New password and confirmation do not match.", url_for("change_password"), 400)
+
+        db().execute("UPDATE users SET password=? WHERE id=?", (generate_password_hash(password), session["user_id"]))
+        db().commit()
+        return respond(True, "Password updated successfully.", url_for("dashboard"))
+
+    return render_template("change_passwo" \
+    "" \
+    "rd.html")
