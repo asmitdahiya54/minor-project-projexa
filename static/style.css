@@ -698,3 +698,16 @@ textarea {
   padding: 0.95rem 1rem;
   border-bottom: 1px solid var(--border);
 }
+.autocomplete-panel__menu a:last-child {
+  border-bottom: none;
+}
+
+.auth-shell {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 1.6rem;
+  gap: 1.3rem;
+}
