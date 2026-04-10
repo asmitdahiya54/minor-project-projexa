@@ -1118,3 +1118,16 @@ def add_result():
         return respond(True, f"Result added for {student['name']} with grade {grade}.", url_for("student_results", student_id=sid))
 
     return render_template("add_result.html", students=students, selected_student=selected_student, subjects=SUBJECTS, exam_types=EXAM_TYPES, semesters=SEMESTERS)
+
+@app.route("/results/student/<int:student_id>")
+@login_required
+def student_results(student_id):
+    student = student_or_404(student_id)
+    if session.get("role") == "student" and student_id != session.get("student_db_id"):
+        abort(403)
+    rows = db().execute(
+        "SELECT * FROM results WHERE student_id=? ORDER BY datetime(created_at) DESC",
+        (student_id,),
+    ).fetchall()
+    return render_template("student_results.html", student=student, rows=rows, grade_color=grade_color)
+
