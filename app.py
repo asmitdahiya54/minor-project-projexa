@@ -910,3 +910,374 @@ def add_student():
             return respond(False, "A student with that ID already exists.", url_for("add_student"), 400)
 
     return render_template("add_student.html", form={}, teachers=teachers(), departments=DEPARTMENTS, years=YEARS, statuses=STATUSES)
+@app.route("/students/<int:student_id>")
+@login_required
+def student_detail(student_id):
+    student = student_or_404(student_id)
+    if session.get("role") == "student" and student["id"] != session.get("student_db_id"):
+        abort(403)
+    results = db().execute(
+        "SELECT * FROM results WHERE student_id=? ORDER BY datetime(created_at) DESC LIMIT 5",
+        (student_id,),
+    ).fetchall()
+    feedback_rows = db().execute(
+        "SELECT * FROM feedback WHERE student_id=? ORDER BY datetime(created_at) DESC LIMIT 5",
+        (student_id,),
+    ).fetchall()
+    return render_template(
+        "student_detail.html",
+        student=student,
+        attendance_summary=attendance_summary(student_id),
+        results=results,
+        feedback_entries=feedback_rows,
+    )
+
+
+@app.route("/students/<int:student_id>/edit", methods=["GET", "POST"])
+@roles_required("admin")
+def edit_student(student_id):
+    student = student_or_404(student_id)
+    if request.method == "POST":
+        data, errs = student_payload(request.form, request.files, True, student)
+        if errs:
+            if wants_json():
+                return jsonify({"success": False, "message": " ".join(errs)}), 400
+            flash(" ".join(errs), "error")
+            return render_template("edit_student.html", student=student, teachers=teachers(), departments=DEPARTMENTS, years=YEARS, statuses=STATUSES)
+
+        db().execute(
+            """
+            UPDATE students
+            SET name=?, email=?, dob=?, gender=?, department=?, year=?, status=?, address=?, enroll_date=?, profile_image=?, assigned_teacher_id=?
+            WHERE id=?
+            """,
+            (
+                data["name"], data["email"], data["dob"], data["gender"], data["department"],
+                data["year"], data["status"], data["address"], data["enroll_date"],
+                data["profile_image"], data["assigned_teacher_id"], student_id
+            ),
+        )
+        db().execute("UPDATE users SET email=? WHERE student_id=? AND role='student'", (data["email"], student_id))
+        db().commit()
+        return respond(True, f"{data['name']} updated successfully.", url_for("student_detail", student_id=student_id))
+
+    return render_template("edit_student.html", student=student, teachers=teachers(), departments=DEPARTMENTS, years=YEARS, statuses=STATUSES)
+
+
+@app.route("/students/<int:student_id>/delete", methods=["POST"])
+@roles_required("admin")
+def delete_student(student_id):
+    student = student_or_404(student_id)
+    conn = db()
+    conn.execute("DELETE FROM users WHERE student_id=?", (student_id,))
+    conn.execute("DELETE FROM feedback WHERE student_id=?", (student_id,))
+    conn.execute("DELETE FROM results WHERE student_id=?", (student_id,))
+    conn.execute("DELETE FROM attendance WHERE student_id=?", (student_id,))
+    conn.execute("DELETE FROM students WHERE id=?", (student_id,))
+    conn.commit()
+    return respond(True, f"{student['name']} was deleted successfully.", url_for("view_students"))
+
+
+@app.route("/attendance")
+@roles_required("admin", "teacher")
+def attendance():
+    filters = {
+        "date": clean(request.args.get("date"), 20) or date.today().isoformat(),
+        "dept": clean(request.args.get("dept"), 80),
+        "subject": clean(request.args.get("subject"), 80) or "General",
+        "year": clean(request.args.get("year"), 40),
+    }
+    students = visible_students({"dept": filters["dept"], "year": filters["year"], "status": "Active"})
+    current = {
+        r["student_id"]: r["status"]
+        for r in db().execute(
+            "SELECT student_id,status FROM attendance WHERE date=? AND subject=?",
+            (filters["date"], filters["subject"])
+        ).fetchall()
+    }
+    return render_template("attendance.html", students=students, current_records=current, filters=filters, departments=DEPARTMENTS, years=YEARS, subjects=SUBJECTS)
+
+
+@app.route("/attendance/mark", methods=["POST"])
+@roles_required("admin", "teacher")
+def mark_attendance():
+    att_date = clean(request.form.get("date"), 20) or date.today().isoformat()
+    subject = clean(request.form.get("subject"), 80) or "General"
+    conn = db()
+    saved = 0
+
+    students = visible_students({"status": "Active"})
+    for student in students:
+        value = clean(request.form.get(f"att_{student['id']}"), 20)
+        if value not in {"Present", "Absent", "Late"}:
+            continue
+        student_or_404(student["id"])
+        conn.execute(
+            """
+            INSERT INTO attendance (student_id,date,status,subject)
+            VALUES (?,?,?,?)
+            ON CONFLICT(student_id,date,subject)
+            DO UPDATE SET status=excluded.status
+            """,
+            (student["id"], att_date, value, subject),
+        )
+        saved += 1
+
+    conn.commit()
+    return respond(True, f"Attendance saved for {saved} student(s).", url_for("attendance", date=att_date, subject=subject))
+
+
+@app.route("/attendance/report")
+@roles_required("admin", "teacher")
+def attendance_report():
+    filters = {"dept": clean(request.args.get("dept"), 80), "year": clean(request.args.get("year"), 40)}
+    students = visible_students({"dept": filters["dept"], "year": filters["year"]})
+    rows = [{"student": s, "summary": attendance_summary(s["id"])} for s in students]
+    return render_template("attendance_report.html", rows=rows, filters=filters, departments=DEPARTMENTS, years=YEARS)
+
+
+@app.route("/attendance/student/<int:student_id>")
+@login_required
+def student_attendance(student_id):
+    student = student_or_404(student_id)
+    if session.get("role") == "student" and student_id != session.get("student_db_id"):
+        abort(403)
+    rows = db().execute(
+        "SELECT * FROM attendance WHERE student_id=? ORDER BY date DESC, subject ASC",
+        (student_id,),
+    ).fetchall()
+    return render_template("student_attendance.html", student=student, rows=rows, attendance_summary=attendance_summary(student_id))
+
+
+@app.route("/attendance/<int:attendance_id>/delete", methods=["POST"])
+@roles_required("admin", "teacher")
+def delete_attendance(attendance_id):
+    row = db().execute("SELECT * FROM attendance WHERE id=?", (attendance_id,)).fetchone()
+    if row:
+        student_or_404(row["student_id"])
+        db().execute("DELETE FROM attendance WHERE id=?", (attendance_id,))
+        db().commit()
+    return respond(True, "Attendance record removed.", url_for("attendance_report"))
+
+
+@app.route("/results")
+@roles_required("admin", "teacher")
+def results():
+    filters = {"dept": clean(request.args.get("dept"), 80), "year": clean(request.args.get("year"), 40)}
+    where, params = visible_clause("students")
+    clauses = [where]
+    if filters["dept"]:
+        clauses.append("students.department = ?")
+        params.append(filters["dept"])
+    if filters["year"]:
+        clauses.append("students.year = ?")
+        params.append(filters["year"])
+
+    rows = db().execute(
+        f"""
+        SELECT results.*, students.name, students.student_id AS enrollment_no, students.department, students.year
+        FROM results
+        JOIN students ON students.id = results.student_id
+        WHERE {' AND '.join(clauses)}
+        ORDER BY datetime(results.created_at) DESC
+        """,
+        params,
+    ).fetchall()
+    return render_template("results.html", rows=rows, filters=filters, departments=DEPARTMENTS, years=YEARS)
+
+
+@app.route("/results/add", methods=["GET", "POST"])
+@roles_required("admin", "teacher")
+def add_result():
+    students = visible_students({"status": "Active"})
+    selected_student = to_int(request.args.get("student_id")) or to_int(request.form.get("student_id"))
+
+    if request.method == "POST":
+        sid = to_int(request.form.get("student_id"))
+        subject = clean(request.form.get("subject"), 80)
+        exam_type = clean(request.form.get("exam_type"), 40) or "Midterm"
+        semester = clean(request.form.get("semester"), 40)
+        marks = to_float(request.form.get("marks_obtained"))
+        max_marks = to_float(request.form.get("max_marks"), 100)
+        remarks = clean(request.form.get("remarks"), 200)
+
+        if not sid or subject not in SUBJECTS or semester not in SEMESTERS:
+            return respond(False, "Provide a valid student, subject, and semester.", url_for("add_result"), 400)
+        if not max_marks or marks is None or marks < 0 or marks > max_marks:
+            return respond(False, "Marks must be between 0 and the maximum marks.", url_for("add_result"), 400)
+
+        student = student_or_404(sid)
+        grade = calc_grade((marks / max_marks) * 100)
+        conn = db()
+        cur = conn.execute(
+            """
+            INSERT INTO results (student_id,subject,marks_obtained,max_marks,exam_type,semester,grade,remarks)
+            VALUES (?,?,?,?,?,?,?,?)
+            """,
+            (sid, subject, marks, max_marks, exam_type, semester, grade, remarks),
+        )
+        conn.commit()
+        row = conn.execute("SELECT * FROM results WHERE id=?", (cur.lastrowid,)).fetchone()
+
+        notify_email(
+            student["email"],
+            "New result published",
+            f"Hello {student['name']},\n\nYour result for {row['subject']} has been published.\nScore: {row['marks_obtained']} / {row['max_marks']}\nGrade: {row['grade']}\n\nRegards,\nSIMS Pro"
+        )
+
+        return respond(True, f"Result added for {student['name']} with grade {grade}.", url_for("student_results", student_id=sid))
+
+    return render_template("add_result.html", students=students, selected_student=selected_student, subjects=SUBJECTS, exam_types=EXAM_TYPES, semesters=SEMESTERS)
+
+
+@app.route("/results/student/<int:student_id>")
+@login_required
+def student_results(student_id):
+    student = student_or_404(student_id)
+    if session.get("role") == "student" and student_id != session.get("student_db_id"):
+        abort(403)
+    rows = db().execute(
+        "SELECT * FROM results WHERE student_id=? ORDER BY datetime(created_at) DESC",
+        (student_id,),
+    ).fetchall()
+    return render_template("student_results.html", student=student, rows=rows, grade_color=grade_color)
+
+
+@app.route("/results/<int:result_id>/edit", methods=["GET", "POST"])
+@roles_required("admin", "teacher")
+def edit_result(result_id):
+    row = db().execute("SELECT * FROM results WHERE id=?", (result_id,)).fetchone()
+    if not row:
+        abort(404)
+    student = student_or_404(row["student_id"])
+
+    if request.method == "POST":
+        subject = clean(request.form.get("subject"), 80)
+        exam_type = clean(request.form.get("exam_type"), 40) or "Midterm"
+        semester = clean(request.form.get("semester"), 40)
+        marks = to_float(request.form.get("marks_obtained"))
+        max_marks = to_float(request.form.get("max_marks"), 100)
+        remarks = clean(request.form.get("remarks"), 200)
+
+        if subject not in SUBJECTS or semester not in SEMESTERS:
+            return respond(False, "Provide a valid subject and semester.", url_for("edit_result", result_id=result_id), 400)
+        if not max_marks or marks is None or marks < 0 or marks > max_marks:
+            return respond(False, "Marks must be between 0 and the maximum marks.", url_for("edit_result", result_id=result_id), 400)
+
+        grade = calc_grade((marks / max_marks) * 100)
+        db().execute(
+            """
+            UPDATE results
+            SET subject=?, exam_type=?, semester=?, marks_obtained=?, max_marks=?, grade=?, remarks=?
+            WHERE id=?
+            """,
+            (subject, exam_type, semester, marks, max_marks, grade, remarks, result_id),
+        )
+        db().commit()
+        return respond(True, f"Result updated with grade {grade}.", url_for("student_results", student_id=student["id"]))
+
+    return render_template("edit_result.html", result=row, student=student, subjects=SUBJECTS, exam_types=EXAM_TYPES, semesters=SEMESTERS)
+
+
+@app.route("/results/<int:result_id>/delete", methods=["POST"])
+@roles_required("admin", "teacher")
+def delete_result(result_id):
+    row = db().execute("SELECT * FROM results WHERE id=?", (result_id,)).fetchone()
+    if row:
+        student = student_or_404(row["student_id"])
+        db().execute("DELETE FROM results WHERE id=?", (result_id,))
+        db().commit()
+        return respond(True, "Result deleted successfully.", url_for("student_results", student_id=student["id"]))
+    return respond(True, "Result deleted successfully.", url_for("results"))
+
+
+@app.route("/feedback")
+@login_required
+def feedback():
+    if session.get("role") == "student":
+        rows = db().execute(
+            """
+            SELECT feedback.*, students.name, students.student_id AS enrollment_no
+            FROM feedback
+            JOIN students ON students.id = feedback.student_id
+            WHERE students.id=?
+            ORDER BY datetime(feedback.created_at) DESC
+            """,
+            (session["student_db_id"],),
+        ).fetchall()
+        students = [student_or_404(session["student_db_id"])]
+    else:
+        where, params = visible_clause("students")
+        rows = db().execute(
+            f"""
+            SELECT feedback.*, students.name, students.student_id AS enrollment_no
+            FROM feedback
+            JOIN students ON students.id = feedback.student_id
+            WHERE {where}
+            ORDER BY datetime(feedback.created_at) DESC
+            """,
+            params,
+        ).fetchall()
+        students = visible_students({"status": "Active"})
+
+    return render_template("feedback.html", rows=rows, students=students, categories=FEEDBACK_CATEGORIES)
+
+
+@app.route("/feedback/add", methods=["GET", "POST"])
+@login_required
+def add_feedback():
+    students = [student_or_404(session["student_db_id"])] if session.get("role") == "student" else visible_students({"status": "Active"})
+
+    if request.method == "POST":
+        sid = session.get("student_db_id") if session.get("role") == "student" else to_int(request.form.get("student_id"))
+        student = student_or_404(sid)
+        rating = to_int(request.form.get("rating"))
+        category = clean(request.form.get("category"), 80) or "General"
+        message = clean(request.form.get("message"), 500)
+
+        if not message:
+            return respond(False, "Feedback message cannot be empty.", url_for("add_feedback"), 400)
+        if rating not in {1, 2, 3, 4, 5}:
+            return respond(False, "Rating must be between 1 and 5.", url_for("add_feedback"), 400)
+        if category not in FEEDBACK_CATEGORIES:
+            return respond(False, "Select a valid feedback category.", url_for("add_feedback"), 400)
+
+        db().execute(
+            "INSERT INTO feedback (student_id,message,rating,category) VALUES (?,?,?,?)",
+            (student["id"], message, rating, category),
+        )
+        db().commit()
+        return respond(True, "Feedback submitted successfully.", url_for("student_dashboard" if session.get("role") == "student" else "feedback"))
+
+    return render_template("add_feedback.html", students=students, categories=FEEDBACK_CATEGORIES)
+
+
+@app.route("/feedback/<int:feedback_id>/delete", methods=["POST"])
+@roles_required("admin", "teacher")
+def delete_feedback(feedback_id):
+    row = db().execute("SELECT * FROM feedback WHERE id=?", (feedback_id,)).fetchone()
+    if row:
+        student_or_404(row["student_id"])
+        db().execute("DELETE FROM feedback WHERE id=?", (feedback_id,))
+        db().commit()
+    return respond(True, "Feedback removed.", url_for("feedback"))
+
+
+@app.route("/charts")
+@roles_required("admin", "teacher")
+def charts():
+    return render_template("charts.html", departments=DEPARTMENTS, years=YEARS)
+
+
+def chart_where():
+    where, params = visible_clause("students")
+    clauses = [where]
+    dept = clean(request.args.get("dept"), 80)
+    year = clean(request.args.get("year"), 40)
+    if dept:
+        clauses.append("students.department = ?")
+        params.append(dept)
+    if year:
+        clauses.append("students.year = ?")
+        params.append(year)
+    return " AND ".join(clauses), params
