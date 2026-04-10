@@ -1,36 +1,33 @@
 {% extends "base.html" %}
 {% block title %}Student Profile | {{ app_name }}{% endblock %}
 {% block page_heading %}Student Profile{% endblock %}
+
 {% block content %}
 <section class="profile-hero">
-  <div class="profile-summary">
-    {% if student.profile_image %}<img src="{{ url_for('static', filename='uploads/' ~ student.profile_image) }}" alt="{{ student.name }}" class="profile-image">{% else %}<div class="profile-image profile-image--fallback">{{ student.name[0] }}</div>{% endif %}
+  <div class="hero-copy profile-summary">
+    {% if student.profile_image %}
+    <img src="{{ url_for('static', filename='uploads/' ~ student.profile_image) }}" alt="{{ student.name }}" class="profile-image">
+    {% else %}
+    <div class="profile-image profile-image--fallback">{{ student.name[0] }}</div>
+    {% endif %}
     <div>
       <span class="badge">{{ student.student_id }}</span>
       <h2>{{ student.name }}</h2>
-      <p>{{ student.department }} • {{ student.year }} • {{ student.status }}</p>
+      <p>{{ student.department }} &middot; {{ student.year }} &middot; {{ student.status }}</p>
       <p class="muted">{{ student.email or 'No email added' }}</p>
     </div>
   </div>
   <div class="hero-actions">
-    {% if current_role == 'admin' %}<a class="btn btn-secondary" href="{{ url_for('edit_student', student_id=student.id) }}"><i class="fa-solid fa-pen"></i><span>Edit</span></a>{% endif %}
-    <a class="btn btn-primary" href="{{ url_for('report_card_pdf', student_id=student.id) }}"><i class="fa-solid fa-file-pdf"></i><span>Report card PDF</span></a>
+    {% if current_role == 'admin' %}
+    <a class="btn btn-secondary" href="{{ url_for('edit_student', student_id=student.id) }}">
+      <i class="fa-solid fa-pen"></i>
+      <span>Edit profile</span>
+    </a>
+    {% endif %}
+    <a class="btn btn-primary" href="{{ url_for('report_card_pdf', student_id=student.id) }}">
+      <i class="fa-solid fa-file-pdf"></i>
+      <span>Report card PDF</span>
+    </a>
   </div>
 </section>
-<section class="stat-grid">
-  <article class="stat-card"><span>Attendance</span><strong>{{ attendance_summary.rate }}%</strong></article>
-  <article class="stat-card"><span>Present</span><strong>{{ attendance_summary.present }}</strong></article>
-  <article class="stat-card"><span>Absent</span><strong>{{ attendance_summary.absent }}</strong></article>
-  <article class="stat-card"><span>Late</span><strong>{{ attendance_summary.late }}</strong></article>
-</section>
-<section class="panel-grid two-col">
-  <article class="panel"><div class="panel__header"><h3>Recent results</h3><a href="{{ url_for('student_results', student_id=student.id) }}">Open all</a></div><div class="result-list">{% for row in results %}<article class="result-item"><div><strong>{{ row.subject }}</strong><p>{{ row.semester }} • {{ row.marks_obtained }} / {{ row.max_marks }}</p></div><div class="grade-chip">{{ row.grade }}</div></article>{% else %}<p class="empty">No results yet.</p>{% endfor %}</div></article>
-  <article class="panel"><div class="panel__header"><h3>Recent feedback</h3><a href="{{ url_for('feedback') }}">Open feedback</a></div><div class="result-list">{% for entry in feedback_entries %}<article class="result-item"><div><strong>{{ entry.category }}</strong><p>{{ entry.message }}</p></div><div class="grade-chip">{{ entry.rating }}/5</div></article>{% else %}<p class="empty">No feedback yet.</p>{% endfor %}</div></article>
-</section>
-{% if current_role == 'admin' %}
-<form method="post" action="{{ url_for('delete_student', student_id=student.id) }}" class="danger-zone" onsubmit="return confirm('Delete this student record?');">
-  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-  <button class="btn btn-danger" type="submit"><i class="fa-solid fa-trash"></i><span>Delete student</span></button>
-</form>
-{% endif %}
-{% endblock %}
+
