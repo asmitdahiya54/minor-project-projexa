@@ -385,3 +385,27 @@ h4 {
     radial-gradient(circle at top right, rgba(122, 90, 248, 0.13), transparent 28%),
     linear-gradient(135deg, color-mix(in srgb, var(--bg-strong) 92%, white), color-mix(in srgb, var(--bg-soft) 78%, white));
 }
+.hero-card::after,
+.profile-hero::after {
+  content: '';
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  right: -60px;
+  bottom: -90px;
+  border-radius: 50%;
+  background: rgba(21, 94, 239, 0.08);
+}
+
+.hero-card h2,
+.profile-hero h2,
+.panel h3,
+.auth-panel h2 {
+  margin: 0 0 0.45rem;
+}
+
+.hero-copy,
+.hero-metrics {
+  position: relative;
+  z-index: 1;
+}
