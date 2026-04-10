@@ -856,3 +856,19 @@ def student_search_api():
         params + [f"%{q}%", f"%{q}%"],
     ).fetchall()
     return jsonify({"items": [dict(r) for r in rows]})
+
+@app.route("/export_students")
+@roles_required("admin", "teacher")
+def export_students():
+    filters = {
+        "search": clean(request.args.get("search"), 100),
+        "dept": clean(request.args.get("dept"), 80),
+        "year": clean(request.args.get("year"), 40),
+        "status": clean(request.args.get("status"), 40),
+    }
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["Student ID", "Name", "Email", "Department", "Year", "Status"])
+    for r in visible_students(filters):
+        writer.writerow([r["student_id"], r["name"], r["email"], r["department"], r["year"], r["status"]])
+    return Response(output.getvalue(), mimetype="text/csv", headers={"Content-Disposition": "attachment; filename=students_export.csv"})
