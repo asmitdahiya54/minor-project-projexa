@@ -1104,6 +1104,23 @@ textarea {
   .sidebar.is-open {
     left: 0;
   }
+  .mobile-only {
+    display: inline-grid;
+  }
+
+  .content,
+  .topbar,
+  .auth-shell {
+    padding: 1.2rem;
+  }
+
+  .hero-card,
+  .profile-hero,
+  .topbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
 .toast.is-hiding {
   opacity: 0;
   transform: translateY(-8px);
