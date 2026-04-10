@@ -1246,3 +1246,8 @@ def delete_feedback(feedback_id):
         db().commit()
     return respond(True, "Feedback removed.", url_for("feedback"))
 
+@app.route("/charts")
+@roles_required("admin", "teacher")
+def charts():
+    return render_template("charts.html", departments=DEPARTMENTS, years=YEARS)
+
