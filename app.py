@@ -1491,4 +1491,16 @@ def report_card_pdf(student_id):
         return redirect(url_for("student_results", student_id=student_id))
     return send_file(pdf, as_attachment=True, download_name=f"{student['student_id']}_report_card.pdf")
 
-    
+    @app.route("/attendance/student/<int:student_id>/report.pdf")
+@login_required
+def attendance_pdf(student_id):
+    student = student_or_404(student_id)
+    if session.get("role") == "student" and student_id != session.get("student_db_id"):
+        abort(403)
+    rows = db().execute("SELECT * FROM attendance WHERE student_id=? ORDER BY date DESC", (student_id,)).fetchall()
+    pdf = report_pdf(student, rows, "attendance")
+    if pdf is None:
+        flash("PDF export requires the reportlab package. Add it from requirements.txt.", "error")
+        return redirect(url_for("student_attendance", student_id=student_id))
+    return send_file(pdf, as_attachment=True, download_name=f"{student['student_id']}_attendance_report.pdf")
+
