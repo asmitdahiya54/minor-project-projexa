@@ -481,3 +481,18 @@ html[data-theme='dark'] .insight-card {
 .panel {
   padding: 1.35rem;
 }
+.panel--form {
+  padding: 1.5rem;
+}
+
+.panel__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.panel__header p {
+  font-size: 0.95rem;
+}
