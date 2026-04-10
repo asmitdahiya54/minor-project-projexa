@@ -89,3 +89,39 @@
       </div>
       <a href="{{ url_for('view_students') }}">View all</a>
     </div>
+
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Department</th>
+            <th>Year</th>
+            <th>Teacher</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for student in recent_students %}
+          <tr>
+            <td>
+              <div class="table-user">
+                <div class="table-user__avatar">{{ student.name[0] }}</div>
+                <div>
+                  <a href="{{ url_for('student_detail', student_id=student.id) }}"><strong>{{ student.name }}</strong></a>
+                  <span class="table-sub">{{ student.student_id }}</span>
+                </div>
+              </div>
+            </td>
+            <td>{{ student.department }}</td>
+            <td>{{ student.year }}</td>
+            <td>{{ student.teacher_name or 'Unassigned' }}</td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="4" class="empty">No students available yet.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
