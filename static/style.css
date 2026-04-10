@@ -744,3 +744,18 @@ textarea {
   gap: 1rem;
   background: rgba(255,255,255,0.72);
 }
+.auth-panel--compact {
+  width: min(100%, 460px);
+  padding: 2.15rem;
+  border-radius: 30px;
+}
+
+html[data-theme='dark'] .auth-panel--form {
+  background: rgba(9, 19, 35, 0.82);
+}
+
+.login-portal {
+  width: min(100%, 460px);
+  display: grid;
+  gap: 1rem;
+}
