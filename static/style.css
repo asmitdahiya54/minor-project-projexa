@@ -967,6 +967,22 @@ textarea {
   color: var(--primary);
   flex-shrink: 0;
 }
+.notification-count {
+  position: absolute;
+  top: -6px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--danger);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
 
 .toast.is-hiding {
   opacity: 0;
