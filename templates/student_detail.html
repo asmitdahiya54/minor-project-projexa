@@ -103,3 +103,14 @@
   </article>
 </section>
 
+{% if current_role == 'admin' %}
+<form method="post" action="{{ url_for('delete_student', student_id=student.id) }}" class="danger-zone" onsubmit="return confirm('Delete this student record?');">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <button class="btn btn-danger" type="submit">
+    <i class="fa-solid fa-trash"></i>
+    <span>Delete student</span>
+  </button>
+</form>
+{% endif %}
+{% endblock %}
+
