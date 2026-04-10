@@ -837,3 +837,22 @@ def view_students():
         filters=filters,
         teachers=teachers(),
     )
+
+@app.route("/api/students/search")
+@roles_required("admin", "teacher")
+def student_search_api():
+    q = clean(request.args.get("q"), 100)
+    if len(q) < 2:
+        return jsonify({"items": []})
+    where, params = visible_clause("students")
+    rows = db().execute(
+        f"""
+        SELECT students.id, students.name, students.student_id, students.department, students.year
+        FROM students
+        WHERE {where} AND (students.name LIKE ? OR students.student_id LIKE ?)
+        ORDER BY students.name ASC
+        LIMIT 6
+        """,
+        params + [f"%{q}%", f"%{q}%"],
+    ).fetchall()
+    return jsonify({"items": [dict(r) for r in rows]})
