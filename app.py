@@ -908,3 +908,25 @@ def add_student():
             return respond(False, "A student with that ID already exists.", url_for("add_student"), 400)
 
     return render_template("add_student.html", form={}, teachers=teachers(), departments=DEPARTMENTS, years=YEARS, statuses=STATUSES)
+
+@app.route("/students/<int:student_id>")
+@login_required
+def student_detail(student_id):
+    student = student_or_404(student_id)
+    if session.get("role") == "student" and student["id"] != session.get("student_db_id"):
+        abort(403)
+    results = db().execute(
+        "SELECT * FROM results WHERE student_id=? ORDER BY datetime(created_at) DESC LIMIT 5",
+        (student_id,),
+    ).fetchall()
+    feedback_rows = db().execute(
+        "SELECT * FROM feedback WHERE student_id=? ORDER BY datetime(created_at) DESC LIMIT 5",
+        (student_id,),
+    ).fetchall()
+    return render_template(
+        "student_detail.html",
+        student=student,
+        attendance_summary=attendance_summary(student_id),
+        results=results,
+        feedback_entries=feedback_rows,
+    )
