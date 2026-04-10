@@ -1325,3 +1325,87 @@ def chart_results():
     ).fetchall()
     return jsonify({"subject_average": [dict(r) for r in avg_rows], "grade_distribution": [dict(r) for r in dist]})
 
+@app.route("/api/charts/feedback")
+@roles_required("admin", "teacher")
+def chart_feedback():
+    where, params = chart_where()
+    dist = db().execute(
+        f"""
+        SELECT feedback.rating, COUNT(feedback.id) AS total
+        FROM feedback
+        JOIN students ON students.id = feedback.student_id
+        WHERE {where}
+        GROUP BY feedback.rating
+        ORDER BY feedback.rating ASC
+        """,
+        params,
+    ).fetchall()
+    cat = db().execute(
+        f"""
+        SELECT feedback.category, ROUND(AVG(feedback.rating), 1) AS average_rating
+        FROM feedback
+        JOIN students ON students.id = feedback.student_id
+        WHERE {where}
+        GROUP BY feedback.category
+        ORDER BY average_rating DESC
+        """,
+        params,
+    ).fetchall()
+    dept = db().execute(
+        f"""
+        SELECT students.department, COUNT(students.id) AS total
+        FROM students
+        WHERE {where}
+        GROUP BY students.department
+        ORDER BY total DESC
+        """,
+        params,
+    ).fetchall()
+    return jsonify({
+        "rating_distribution": [dict(r) for r in dist],
+        "category_breakdown": [dict(r) for r in cat],
+        "department_split": [dict(r) for r in dept],
+    })
+
+@app.route("/api/charts/feedback")
+@roles_required("admin", "teacher")
+def chart_feedback():
+    where, params = chart_where()
+    dist = db().execute(
+        f"""
+        SELECT feedback.rating, COUNT(feedback.id) AS total
+        FROM feedback
+        JOIN students ON students.id = feedback.student_id
+        WHERE {where}
+        GROUP BY feedback.rating
+        ORDER BY feedback.rating ASC
+        """,
+        params,
+    ).fetchall()
+    cat = db().execute(
+        f"""
+        SELECT feedback.category, ROUND(AVG(feedback.rating), 1) AS average_rating
+        FROM feedback
+        JOIN students ON students.id = feedback.student_id
+        WHERE {where}
+        GROUP BY feedback.category
+        ORDER BY average_rating DESC
+        """,
+        params,
+    ).fetchall()
+    dept = db().execute(
+        f"""
+        SELECT students.department, COUNT(students.id) AS total
+        FROM students
+        WHERE {where}
+        GROUP BY students.department
+        ORDER BY total DESC
+        """,
+        params,
+    ).fetchall()
+    return jsonify({
+        "rating_distribution": [dict(r) for r in dist],
+        "category_breakdown": [dict(r) for r in cat],
+        "department_split": [dict(r) for r in dept],
+    })
+
