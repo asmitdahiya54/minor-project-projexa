@@ -1002,6 +1002,16 @@ textarea {
   display: none;
   z-index: 50;
 }
+.notification-panel.is-open {
+  display: block;
+}
+
+.notification-panel__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.85rem;
+}
 
 .toast.is-hiding {
   opacity: 0;
