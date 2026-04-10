@@ -1029,3 +1029,15 @@ def attendance_report():
     rows = [{"student": s, "summary": attendance_summary(s["id"])} for s in students]
     return render_template("attendance_report.html", rows=rows, filters=filters, departments=DEPARTMENTS, years=YEARS)
 
+@app.route("/attendance/student/<int:student_id>")
+@login_required
+def student_attendance(student_id):
+    student = student_or_404(student_id)
+    if session.get("role") == "student" and student_id != session.get("student_db_id"):
+        abort(403)
+    rows = db().execute(
+        "SELECT * FROM attendance WHERE student_id=? ORDER BY date DESC, subject ASC",
+        (student_id,),
+    ).fetchall()
+    return render_template("student_attendance.html", student=student, rows=rows, attendance_summary=attendance_summary(student_id))
+
