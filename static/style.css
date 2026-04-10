@@ -569,3 +569,24 @@ html[data-theme='dark'] .insight-card {
   background: rgba(85, 99, 122, 0.12);
   color: var(--text-soft);
 }
+.empty {
+  text-align: center;
+  color: var(--text-soft);
+  padding: 1.4rem !important;
+}
+
+.result-list {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.result-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--bg-strong) 88%, var(--primary-soft));
+}
