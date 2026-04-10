@@ -762,3 +762,50 @@ def student_dash_ctx(student_id):
         "feedback_entries": feedback_rows,
         "cgpa_estimate": round(sum(scores) / len(scores), 2) if scores else 0.0,
     }
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if "user_id" in session:
+        return redirect(url_for("student_dashboard" if session["role"] == "student" else "dashboard"))
+
+    if request.method == "POST":
+        username = clean(request.form.get("username"), 120)
+        password = request.form.get("password") or ""
+
+        if not username or not password:
+            return respond(False, "Username and password are required.", url_for("login"), 400)
+
+        user = db().execute(
+            "SELECT * FROM users WHERE username=? OR email=?",
+            (username, username.lower())
+        ).fetchone()
+
+        if user and check_password_hash(user["password"], password):
+            session.clear()
+            session["_csrf_token"] = secrets.token_urlsafe(32)
+            session["user_id"] = user["id"]
+            session["username"] = user["username"]
+            session["role"] = user["role"]
+            session["student_db_id"] = user["student_id"]
+
+            if user["role"] == "student" and user["student_id"]:
+                s = db().execute("SELECT name FROM students WHERE id=?", (user["student_id"],)).fetchone()
+                session["display_name"] = s["name"] if s else user["username"]
+            else:
+                session["display_name"] = clean(user["full_name"], 120) or user["username"].title()
+
+            return respond(
+                True,
+                f"Welcome back, {session['display_name']}.",
+                url_for("student_dashboard" if user["role"] == "student" else "dashboard")
+            )
+
+        return respond(False, "Invalid username or password.", url_for("login"), 401)
+
+    return render_template("login.html")
+
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    flash("You have been logged out securely.", "success")
+    return redirect(url_for("login"))
