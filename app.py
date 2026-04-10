@@ -816,3 +816,8 @@ def dashboard():
     if session.get("role") == "student":
         return redirect(url_for("student_dashboard"))
     return render_template("dashboard.html", **dashboard_ctx())
+
+@app.route("/student/dashboard")
+@roles_required("student")
+def student_dashboard():
+    return render_template("student_dashboard.html", **student_dash_ctx(session["student_db_id"]))
