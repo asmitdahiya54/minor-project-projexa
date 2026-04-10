@@ -609,3 +609,17 @@ html[data-theme='dark'] .insight-card {
   color: #ffffff;
   font-weight: 800;
 }
+.filters-grid,
+.form-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.filters-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: end;
+}
+
+.compact-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
