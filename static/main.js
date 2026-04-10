@@ -1,6 +1,14 @@
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 const csrfToken = () => document.querySelector('meta[name="csrf-token"]')?.content || '';
+const escapeHtml = (value = '') =>
+  String(value).replace(/[&<>"']/g, (char) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  }[char]));
 
 function initTheme() {
   const toggle = $('#themeToggle');
@@ -29,6 +37,16 @@ function initSidebar() {
   const trigger = $('#menuToggle');
   if (sidebar && trigger) {
     trigger.addEventListener('click', () => sidebar.classList.toggle('is-open'));
+    document.addEventListener('click', (event) => {
+      if (
+        window.innerWidth <= 900 &&
+        sidebar.classList.contains('is-open') &&
+        !sidebar.contains(event.target) &&
+        !trigger.contains(event.target)
+      ) {
+        sidebar.classList.remove('is-open');
+      }
+    });
   }
 }
 
@@ -61,7 +79,7 @@ function initAjaxForms() {
           headers: {
             'X-Requested-With': 'XMLHttpRequest',
             'X-CSRFToken': csrfToken(),
-            'Accept': 'application/json',
+            Accept: 'application/json',
           },
           body: formData,
         });
@@ -112,8 +130,8 @@ function initAutocomplete() {
             .map(
               (item) => `
               <a href="/students/${item.id}">
-                <strong>${item.name}</strong>
-                <div class="table-sub">${item.student_id} • ${item.department} • ${item.year}</div>
+                <strong>${escapeHtml(item.name)}</strong>
+                <div class="table-sub">${escapeHtml(item.student_id)} &middot; ${escapeHtml(item.department)} &middot; ${escapeHtml(item.year)}</div>
               </a>
             `
             )
@@ -153,10 +171,11 @@ function initCharts() {
 
   const load = async () => {
     const filters = Object.fromEntries(new FormData(filterForm).entries());
-
-    const attendance = await fetchChartData('/api/charts/attendance', filters);
-    const results = await fetchChartData('/api/charts/results', filters);
-    const feedback = await fetchChartData('/api/charts/feedback', filters);
+    const [attendance, results, feedback] = await Promise.all([
+      fetchChartData('/api/charts/attendance', filters),
+      fetchChartData('/api/charts/results', filters),
+      fetchChartData('/api/charts/feedback', filters),
+    ]);
 
     const common = {
       responsive: true,
@@ -164,121 +183,87 @@ function initCharts() {
       animation: { duration: 1000, easing: 'easeOutQuart' },
     };
 
-    renderChart(
-      $('#attendanceChart'),
-      {
-        type: 'bar',
-        data: {
-          labels: attendance.attendance_by_student.map((row) => row.name),
-          datasets: [
-            {
-              label: 'Attendance %',
-              data: attendance.attendance_by_student.map((row) => row.attendance_rate),
-              backgroundColor: '#2563eb',
-              borderRadius: 10,
-            },
-          ],
-        },
-        options: { ...common, scales: { y: { beginAtZero: true, max: 100 } } },
+    renderChart($('#attendanceChart'), {
+      type: 'bar',
+      data: {
+        labels: attendance.attendance_by_student.map((row) => row.name),
+        datasets: [{
+          label: 'Attendance %',
+          data: attendance.attendance_by_student.map((row) => row.attendance_rate),
+          backgroundColor: '#155eef',
+          borderRadius: 999,
+          maxBarThickness: 28,
+        }],
       },
-      cache
-    );
+      options: { ...common, scales: { y: { beginAtZero: true, max: 100 } } },
+    }, cache);
 
-    renderChart(
-      $('#attendanceTrendChart'),
-      {
-        type: 'line',
-        data: {
-          labels: attendance.attendance_trend.map((row) => row.date),
-          datasets: [
-            {
-              label: 'Present count',
-              data: attendance.attendance_trend.map((row) => row.present_count),
-              borderColor: '#059669',
-              backgroundColor: 'rgba(5,150,105,0.15)',
-              fill: true,
-              tension: 0.35,
-            },
-          ],
-        },
-        options: common,
+    renderChart($('#attendanceTrendChart'), {
+      type: 'line',
+      data: {
+        labels: attendance.attendance_trend.map((row) => row.date),
+        datasets: [{
+          label: 'Present count',
+          data: attendance.attendance_trend.map((row) => row.present_count),
+          borderColor: '#0f9f76',
+          backgroundColor: 'rgba(15,159,118,0.16)',
+          fill: true,
+          tension: 0.35,
+        }],
       },
-      cache
-    );
+      options: common,
+    }, cache);
 
-    renderChart(
-      $('#resultsChart'),
-      {
-        type: 'bar',
-        data: {
-          labels: results.subject_average.map((row) => row.subject),
-          datasets: [
-            {
-              label: 'Average %',
-              data: results.subject_average.map((row) => row.average_score),
-              backgroundColor: '#7c3aed',
-              borderRadius: 10,
-            },
-          ],
-        },
-        options: { ...common, scales: { y: { beginAtZero: true, max: 100 } } },
+    renderChart($('#resultsChart'), {
+      type: 'bar',
+      data: {
+        labels: results.subject_average.map((row) => row.subject),
+        datasets: [{
+          label: 'Average %',
+          data: results.subject_average.map((row) => row.average_score),
+          backgroundColor: '#7a5af8',
+          borderRadius: 999,
+          maxBarThickness: 28,
+        }],
       },
-      cache
-    );
+      options: { ...common, scales: { y: { beginAtZero: true, max: 100 } } },
+    }, cache);
 
-    renderChart(
-      $('#gradeChart'),
-      {
-        type: 'doughnut',
-        data: {
-          labels: results.grade_distribution.map((row) => row.grade),
-          datasets: [
-            {
-              data: results.grade_distribution.map((row) => row.total),
-              backgroundColor: ['#14b8a6', '#3b82f6', '#6366f1', '#f59e0b', '#f97316', '#ef4444', '#dc2626'],
-            },
-          ],
-        },
-        options: common,
+    renderChart($('#gradeChart'), {
+      type: 'doughnut',
+      data: {
+        labels: results.grade_distribution.map((row) => row.grade),
+        datasets: [{
+          data: results.grade_distribution.map((row) => row.total),
+          backgroundColor: ['#12b76a', '#155eef', '#7a5af8', '#f79009', '#f04438', '#ef6820', '#b42318'],
+        }],
       },
-      cache
-    );
+      options: common,
+    }, cache);
 
-    renderChart(
-      $('#feedbackChart'),
-      {
-        type: 'polarArea',
-        data: {
-          labels: feedback.rating_distribution.map((row) => `${row.rating} stars`),
-          datasets: [
-            {
-              data: feedback.rating_distribution.map((row) => row.total),
-              backgroundColor: ['#2563eb', '#0ea5e9', '#14b8a6', '#f59e0b', '#ef4444'],
-            },
-          ],
-        },
-        options: common,
+    renderChart($('#feedbackChart'), {
+      type: 'polarArea',
+      data: {
+        labels: feedback.rating_distribution.map((row) => `${row.rating} stars`),
+        datasets: [{
+          data: feedback.rating_distribution.map((row) => row.total),
+          backgroundColor: ['#155eef', '#0ba5ec', '#12b76a', '#f79009', '#f04438'],
+        }],
       },
-      cache
-    );
+      options: common,
+    }, cache);
 
-    renderChart(
-      $('#deptChart'),
-      {
-        type: 'pie',
-        data: {
-          labels: feedback.department_split.map((row) => row.department),
-          datasets: [
-            {
-              data: feedback.department_split.map((row) => row.total),
-              backgroundColor: ['#2563eb', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#14b8a6'],
-            },
-          ],
-        },
-        options: common,
+    renderChart($('#deptChart'), {
+      type: 'pie',
+      data: {
+        labels: feedback.department_split.map((row) => row.department),
+        datasets: [{
+          data: feedback.department_split.map((row) => row.total),
+          backgroundColor: ['#155eef', '#7a5af8', '#12b76a', '#f79009', '#f04438', '#0ba5ec'],
+        }],
       },
-      cache
-    );
+      options: common,
+    }, cache);
   };
 
   filterForm.addEventListener('submit', (event) => {
@@ -289,16 +274,6 @@ function initCharts() {
   load();
 }
 
-function initAutoDismissNotices() {
-  document.querySelectorAll('.auto-dismiss-stack .notice').forEach((notice, index) => {
-    setTimeout(() => {
-      notice.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-      notice.style.opacity = '0';
-      notice.style.transform = 'translateY(-8px)';
-      setTimeout(() => notice.remove(), 400);
-    }, 4000 + index * 500);
-  });
-}
 function getStoredNotifications() {
   try {
     return JSON.parse(localStorage.getItem('app_notifications') || '[]');
@@ -325,8 +300,8 @@ function updateNotificationUI() {
     listEl.innerHTML = items.length
       ? items.map((item) => `
           <article class="notification-item">
-            <strong>${item.title}</strong>
-            <p>${item.message}</p>
+            <strong>${escapeHtml(item.title)}</strong>
+            <p>${escapeHtml(item.message)}</p>
           </article>
         `).join('')
       : '<p class="empty">No notifications yet.</p>';
@@ -344,8 +319,8 @@ function showToastNotification(item) {
       <i class="fa-solid ${item.type === 'warning' ? 'fa-triangle-exclamation' : 'fa-circle-info'}"></i>
     </div>
     <div>
-      <strong>${item.title}</strong>
-      <p>${item.message}</p>
+      <strong>${escapeHtml(item.title)}</strong>
+      <p>${escapeHtml(item.message)}</p>
     </div>
   `;
 
