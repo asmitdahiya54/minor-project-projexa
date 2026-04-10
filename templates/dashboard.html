@@ -134,3 +134,23 @@
       </div>
       <a href="{{ url_for('results') }}">Open results</a>
     </div>
+
+    <div class="result-list">
+      {% for result in recent_results %}
+      <article class="result-item">
+        <div>
+          <strong>{{ result.subject }}</strong>
+          <div class="result-item__meta">
+            <span class="badge">{{ result.grade or 'Pending' }}</span>
+            <p>{{ result.name }} &middot; {{ result.enrollment_no }}</p>
+          </div>
+        </div>
+        <div class="grade-chip">{{ result.grade or '-' }}</div>
+      </article>
+      {% else %}
+      <p class="empty">No result records found.</p>
+      {% endfor %}
+    </div>
+  </article>
+</section>
+{% endblock %}
