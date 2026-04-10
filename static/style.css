@@ -726,3 +726,21 @@ textarea {
 .auth-panel--hero .eyebrow {
   color: rgba(255, 255, 255, 0.78);
 }
+.auth-points {
+  display: grid;
+  gap: 0.95rem;
+  margin-top: 1.5rem;
+}
+
+.auth-points div {
+  display: flex;
+  gap: 0.8rem;
+  align-items: flex-start;
+}
+
+.auth-panel--form {
+  display: grid;
+  align-content: center;
+  gap: 1rem;
+  background: rgba(255,255,255,0.72);
+}
