@@ -590,3 +590,22 @@ html[data-theme='dark'] .insight-card {
   border-radius: 18px;
   background: color-mix(in srgb, var(--bg-strong) 88%, var(--primary-soft));
 }
+.result-item__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+  margin-top: 0.4rem;
+}
+
+.grade-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 56px;
+  padding: 0.48rem 0.82rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--primary), #7a5af8);
+  color: #ffffff;
+  font-weight: 800;
+}
