@@ -60,3 +60,15 @@
     <strong>{{ stats.result_count }}</strong>
   </article>
 </section>
+
+<section class="quick-grid">
+  <article class="quick-card">
+    <span>Student records</span>
+    <strong>{{ recent_students|length }}</strong>
+    <p>Recently created profiles visible to your current role.</p>
+  </article>
+  <article class="quick-card">
+    <span>Academic activity</span>
+    <strong>{{ recent_results|length }}</strong>
+    <p>Most recent marks published across your accessible student list.</p>
+  </article>
