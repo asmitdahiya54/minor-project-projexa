@@ -717,3 +717,29 @@ def dashboard_ctx():
         """,
         params,
     ).fetchone()
+    recent_students = conn.execute(
+        f"""
+        SELECT students.*, users.full_name AS teacher_name
+        FROM students
+        LEFT JOIN users ON users.id = students.assigned_teacher_id
+        WHERE {where}
+        ORDER BY datetime(students.created_at) DESC
+        LIMIT 6
+        """,
+        params,
+    ).fetchall()
+
+    return {
+        "stats": {
+            "total_students": totals["total"] or 0,
+            "active_students": totals["active"] or 0,
+            "leave_students": totals["leave_count"] or 0,
+            "graduated_students": totals["graduated"] or 0,
+            "result_count": result_count["result_count"] or 0,
+            "feedback_count": feedback_avg["feedback_count"] or 0,
+            "avg_rating": feedback_avg["avg_rating"] or 0,
+        },
+        "recent_students": recent_students,
+        "recent_results": recent_results(limit=6),
+        "dashboard_role_label": session.get("role", "").title(),
+    }
