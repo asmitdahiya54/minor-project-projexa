@@ -465,3 +465,19 @@ html[data-theme='dark'] .insight-card {
 .insights-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
+.stat-card {
+  padding: 1.25rem;
+}
+
+.panel-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.panel-grid.two-col {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.panel {
+  padding: 1.35rem;
+}
