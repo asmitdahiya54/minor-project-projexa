@@ -77,3 +77,65 @@
   </form>
 </section>
 
+<section class="panel">
+  <div class="panel__header">
+    <div>
+      <h3>Directory view</h3>
+      <p>{{ students|length }} student record(s) matched your current filters.</p>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>Department</th>
+          <th>Year</th>
+          <th>Status</th>
+          <th>Assigned teacher</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for student in students %}
+        <tr>
+          <td>
+            <div class="table-user">
+              <div class="table-user__avatar">{{ student.name[0] }}</div>
+              <div>
+                <strong>{{ student.name }}</strong>
+                <span class="table-sub">{{ student.student_id }}</span>
+              </div>
+            </div>
+          </td>
+          <td>{{ student.department }}</td>
+          <td>{{ student.year }}</td>
+          <td>
+            <span class="status-pill {% if student.status == 'On Leave' %}status-pill--leave{% elif student.status == 'Graduated' %}status-pill--grad{% endif %}">
+              {{ student.status }}
+            </span>
+          </td>
+          <td>{{ student.teacher_name or 'Unassigned' }}</td>
+          <td class="actions-inline">
+            <a class="icon-btn" href="{{ url_for('student_detail', student_id=student.id) }}" aria-label="View student">
+              <i class="fa-solid fa-eye"></i>
+            </a>
+            {% if current_role == 'admin' %}
+            <a class="icon-btn" href="{{ url_for('edit_student', student_id=student.id) }}" aria-label="Edit student">
+              <i class="fa-solid fa-pen"></i>
+            </a>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" class="empty">No students match your filters.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
+
