@@ -50,3 +50,67 @@
   </article>
 </section>
 
+<section class="panel-grid two-col">
+  <article class="panel">
+    <div class="panel__header">
+      <div>
+        <h3>Recent results</h3>
+        <p>Your latest published academic performance.</p>
+      </div>
+      <a href="{{ url_for('student_results', student_id=student.id) }}">Open all</a>
+    </div>
+
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Subject</th>
+            <th>Semester</th>
+            <th>Score</th>
+            <th>Grade</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in recent_results %}
+          <tr>
+            <td>{{ row.subject }}</td>
+            <td>{{ row.semester }}</td>
+            <td>{{ row.marks_obtained }} / {{ row.max_marks }}</td>
+            <td><span class="grade-chip">{{ row.grade }}</span></td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="4" class="empty">No results available yet.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+
+  <article class="panel">
+    <div class="panel__header">
+      <div>
+        <h3>Feedback history</h3>
+        <p>Recent submissions sent through the feedback center.</p>
+      </div>
+      <a href="{{ url_for('add_feedback') }}">Submit new</a>
+    </div>
+
+    <div class="result-list">
+      {% for entry in feedback_entries %}
+      <article class="result-item">
+        <div>
+          <strong>{{ entry.category }}</strong>
+          <p>{{ entry.message }}</p>
+        </div>
+        <div class="grade-chip">{{ entry.rating }}/5</div>
+      </article>
+      {% else %}
+      <p class="empty">No feedback submitted yet.</p>
+      {% endfor %}
+    </div>
+  </article>
+</section>
+{% endblock %}
+
