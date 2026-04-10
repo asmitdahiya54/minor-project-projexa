@@ -893,6 +893,24 @@ textarea {
 .btn-block {
   width: 100%;
 }
+.profile-summary {
+  align-items: center;
+}
+
+.profile-image {
+  width: 92px;
+  height: 92px;
+  border-radius: 28px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.notice-stack,
+.flash-stack {
+  display: grid;
+  gap: 0.85rem;
+}
 .toast__icon {
   width: 36px;
   height: 36px;
