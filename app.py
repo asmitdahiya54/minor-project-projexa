@@ -511,3 +511,29 @@ def attendance_summary(student_id):
         "late": row["late"] or 0,
         "rate": rate,
     }
+def recent_results(student_id=None, limit=5):
+    if student_id:
+        return db().execute(
+            """
+            SELECT results.*, students.name, students.student_id AS enrollment_no
+            FROM results
+            JOIN students ON students.id = results.student_id
+            WHERE students.id=?
+            ORDER BY datetime(results.created_at) DESC
+            LIMIT ?
+            """,
+            (student_id, limit),
+        ).fetchall()
+
+    where, params = visible_clause("students")
+    return db().execute(
+        f"""
+        SELECT results.*, students.name, students.student_id AS enrollment_no
+        FROM results
+        JOIN students ON students.id = results.student_id
+        WHERE {where}
+        ORDER BY datetime(results.created_at) DESC
+        LIMIT ?
+        """,
+        params + [limit],
+    ).fetchall()
