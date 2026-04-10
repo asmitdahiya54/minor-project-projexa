@@ -1041,3 +1041,13 @@ def student_attendance(student_id):
     ).fetchall()
     return render_template("student_attendance.html", student=student, rows=rows, attendance_summary=attendance_summary(student_id))
 
+@app.route("/attendance/<int:attendance_id>/delete", methods=["POST"])
+@roles_required("admin", "teacher")
+def delete_attendance(attendance_id):
+    row = db().execute("SELECT * FROM attendance WHERE id=?", (attendance_id,)).fetchone()
+    if row:
+        student_or_404(row["student_id"])
+        db().execute("DELETE FROM attendance WHERE id=?", (attendance_id,))
+        db().commit()
+    return respond(True, "Attendance record removed.", url_for("attendance_report"))
+
