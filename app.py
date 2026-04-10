@@ -1521,3 +1521,18 @@ def forbidden(_):
         return redirect(url_for("student_dashboard" if session.get("role") == "student" else "dashboard"))
     return redirect(url_for("login"))
 
+@app.errorhandler(404)
+def not_found(_):
+    flash("The requested resource could not be found.", "error")
+    if session.get("user_id"):
+        return redirect(url_for("student_dashboard" if session.get("role") == "student" else "dashboard"))
+    return redirect(url_for("login"))
+
+
+init_db()
+
+
+if __name__ == "__main__":
+    app.run(debug=False)
+
+    
