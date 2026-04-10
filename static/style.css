@@ -983,6 +983,25 @@ textarea {
   align-items: center;
   justify-content: center;
 }
+.notification-count.is-visible {
+  display: inline-flex;
+}
+
+.notification-panel {
+  position: absolute;
+  top: 56px;
+  right: 0;
+  width: 360px;
+  max-height: 420px;
+  overflow: auto;
+  background: var(--bg-strong);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  padding: 1rem;
+  display: none;
+  z-index: 50;
+}
 
 .toast.is-hiding {
   opacity: 0;
