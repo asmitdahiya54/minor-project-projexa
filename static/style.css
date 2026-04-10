@@ -879,7 +879,20 @@ textarea {
 .toast--info {
   border-color: rgba(37, 99, 235, 0.25);
 }
+.btn-secondary {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--text);
+}
 
+.btn-danger {
+  background: linear-gradient(135deg, #f04438, #d92d20);
+  color: #ffffff;
+}
+
+.btn-block {
+  width: 100%;
+}
 .toast__icon {
   width: 36px;
   height: 36px;
