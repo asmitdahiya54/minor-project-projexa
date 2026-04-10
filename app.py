@@ -131,8 +131,12 @@ def migrate_users(conn):
 
     conn.execute("UPDATE users SET full_name='Rahul Sharma' WHERE username='teacher'")
 
+<<<<<<< HEAD
 
 def init_db():
+=======
+    def init_db():
+>>>>>>> 3d1e01b (update css)
     Path(app.config["UPLOAD_FOLDER"]).mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(app.config["DATABASE"])
     conn.row_factory = sqlite3.Row
@@ -251,7 +255,37 @@ def init_db():
                 (s["student_id"], s["email"], generate_password_hash("student123"), "student", s["id"]),
             )
 
+<<<<<<< HEAD
     if teacher:
+=======
+            if "admin" not in usernames:
+        conn.execute(
+            "INSERT INTO users (username,email,password,role) VALUES (?,?,?,?)",
+            ("admin", "admin@sims.edu", generate_password_hash("admin123"), "admin"),
+        )
+
+    if "teacher" not in usernames:
+        conn.execute(
+            "INSERT INTO users (username,email,password,role,full_name) VALUES (?,?,?,?,?)",
+            ("teacher", "teacher@sims.edu", generate_password_hash("teacher123"), "teacher", "Rahul Sharma")
+        )
+        conn.execute("UPDATE users SET full_name='Rahul Sharma' WHERE username='teacher'")
+
+    teacher = conn.execute("SELECT id FROM users WHERE username='teacher' LIMIT 1").fetchone()
+
+    for s in conn.execute("SELECT id,student_id,email FROM students").fetchall():
+        exists = conn.execute(
+            "SELECT 1 FROM users WHERE username=? LIMIT 1",
+            (s["student_id"],)
+        ).fetchone()
+        if not exists:
+            conn.execute(
+                "INSERT INTO users (username,email,password,role,student_id) VALUES (?,?,?,?,?)",
+                (s["student_id"], s["email"], generate_password_hash("student123"), "student", s["id"]),
+            )
+
+            if teacher:
+>>>>>>> 3d1e01b (update css)
         conn.execute(
             "UPDATE students SET assigned_teacher_id = COALESCE(assigned_teacher_id, ?)",
             (teacher["id"],)
@@ -267,7 +301,10 @@ def wants_json():
         request.headers.get("X-Requested-With") == "XMLHttpRequest"
     )
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 3d1e01b (update css)
 def respond(ok, message, target, status=200, extra=None):
     payload = {"success": ok, "message": message, "redirect": target}
     if extra:
@@ -286,7 +323,10 @@ def csrf_token():
 
 app.jinja_env.globals["csrf_token"] = csrf_token
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 3d1e01b (update css)
 @app.before_request
 def setup_req():
     session.permanent = True
@@ -304,7 +344,10 @@ def inject_globals():
         "global_notifications": build_notifications() if session.get("role") else [],
     }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 3d1e01b (update css)
 def clean(value, max_len=255):
     value = (value or "").strip()
     return value[:max_len]
@@ -319,9 +362,14 @@ def to_int(value, default=None):
         return int(value)
     except Exception:
         return default
+<<<<<<< HEAD
 
 
 def to_float(value, default=None):
+=======
+    
+    def to_float(value, default=None):
+>>>>>>> 3d1e01b (update css)
     try:
         return float(value)
     except Exception:
@@ -353,6 +401,7 @@ def grade_color(grade):
         "B": "#f97316",
         "C": "#ef4444",
         "F": "#dc2626",
+<<<<<<< HEAD
     }.get(grade, "#64748b")
     
     
@@ -1536,3 +1585,6 @@ if __name__ == "__main__":
     app.run(debug=False)
 
     
+=======
+    }.get(grade, "#64748b")
+>>>>>>> 3d1e01b (update css)
