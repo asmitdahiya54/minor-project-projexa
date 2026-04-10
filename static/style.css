@@ -925,6 +925,19 @@ textarea {
 .flash--error {
   border-color: rgba(217, 45, 32, 0.18);
 }
+.notice--info,
+.flash--success {
+  border-color: rgba(21, 94, 239, 0.16);
+}
+
+.narrow-panel {
+  max-width: 560px;
+}
+
+.danger-zone {
+  display: flex;
+  justify-content: flex-end;
+}
 .toast__icon {
   width: 36px;
   height: 36px;
