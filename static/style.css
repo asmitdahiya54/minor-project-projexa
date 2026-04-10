@@ -496,3 +496,20 @@ html[data-theme='dark'] .insight-card {
 .panel__header p {
   font-size: 0.95rem;
 }
+.table-wrap {
+  overflow: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 760px;
+}
+
+.data-table th,
+.data-table td {
+  padding: 1rem 0.8rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
