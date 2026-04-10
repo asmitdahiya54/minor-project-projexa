@@ -1023,6 +1023,12 @@ textarea {
   border-radius: 16px;
   background: var(--bg-soft);
 }
+.text-btn {
+  border: none;
+  background: transparent;
+  color: var(--primary);
+  font-weight: 800;
+}
 
 .toast.is-hiding {
   opacity: 0;
