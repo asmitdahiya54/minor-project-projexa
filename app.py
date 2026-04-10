@@ -1478,3 +1478,17 @@ def report_pdf(student, rows, report_type="results"):
     buf.seek(0)
     return buf
 
+@app.route("/students/<int:student_id>/report-card.pdf")
+@login_required
+def report_card_pdf(student_id):
+    student = student_or_404(student_id)
+    if session.get("role") == "student" and student_id != session.get("student_db_id"):
+        abort(403)
+    rows = db().execute("SELECT * FROM results WHERE student_id=? ORDER BY semester, subject", (student_id,)).fetchall()
+    pdf = report_pdf(student, rows, "results")
+    if pdf is None:
+        flash("PDF export requires the reportlab package. Add it from requirements.txt.", "error")
+        return redirect(url_for("student_results", student_id=student_id))
+    return send_file(pdf, as_attachment=True, download_name=f"{student['student_id']}_report_card.pdf")
+
+    
