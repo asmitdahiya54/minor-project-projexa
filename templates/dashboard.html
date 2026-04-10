@@ -1,3 +1,16 @@
 {% extends "base.html" %}
 {% block title %}Dashboard | {{ app_name }}{% endblock %}
 {% block page_heading %}Operations Dashboard{% endblock %}
+{% block content %}
+<section class="hero-card">
+  <div class="hero-copy">
+    <span class="badge">{{ dashboard_role_label }} control center</span>
+    <h2>Run student operations with a clearer, faster workflow.</h2>
+    <p>Monitor enrollment health, academic performance, attendance coverage, and feedback quality from one executive view.</p>
+    <div class="hero-actions">
+      {% if current_role == 'admin' %}
+      <a class="btn btn-primary" href="{{ url_for('add_student') }}">
+        <i class="fa-solid fa-user-plus"></i>
+        <span>Add student</span>
+      </a>
+      {% endif %}
