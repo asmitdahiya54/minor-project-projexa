@@ -1297,3 +1297,31 @@ def chart_attendance():
     ).fetchall()
     return jsonify({"attendance_by_student": [dict(r) for r in bars], "attendance_trend": [dict(r) for r in reversed(trend)]})
 
+@app.route("/api/charts/results")
+@roles_required("admin", "teacher")
+def chart_results():
+    where, params = chart_where()
+    avg_rows = db().execute(
+        f"""
+        SELECT results.subject, ROUND(AVG((results.marks_obtained / results.max_marks) * 100), 1) AS average_score
+        FROM results
+        JOIN students ON students.id = results.student_id
+        WHERE {where}
+        GROUP BY results.subject
+        ORDER BY average_score DESC
+        """,
+        params,
+    ).fetchall()
+    dist = db().execute(
+        f"""
+        SELECT results.grade, COUNT(results.id) AS total
+        FROM results
+        JOIN students ON students.id = results.student_id
+        WHERE {where}
+        GROUP BY results.grade
+        ORDER BY results.grade ASC
+        """,
+        params,
+    ).fetchall()
+    return jsonify({"subject_average": [dict(r) for r in avg_rows], "grade_distribution": [dict(r) for r in dist]})
+
