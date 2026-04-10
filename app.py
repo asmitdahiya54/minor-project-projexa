@@ -511,3 +511,136 @@ def attendance_summary(student_id):
         "late": row["late"] or 0,
         "rate": rate,
     }
+def recent_results(student_id=None, limit=5):
+    if student_id:
+        return db().execute(
+            """
+            SELECT results.*, students.name, students.student_id AS enrollment_no
+            FROM results
+            JOIN students ON students.id = results.student_id
+            WHERE students.id=?
+            ORDER BY datetime(results.created_at) DESC
+            LIMIT ?
+            """,
+            (student_id, limit),
+        ).fetchall()
+
+    where, params = visible_clause("students")
+    return db().execute(
+        f"""
+        SELECT results.*, students.name, students.student_id AS enrollment_no
+        FROM results
+        JOIN students ON students.id = results.student_id
+        WHERE {where}
+        ORDER BY datetime(results.created_at) DESC
+        LIMIT ?
+        """,
+        params + [limit],
+    ).fetchall()
+def build_notifications():
+    if not session.get("user_id"):
+        return []
+    conn = db()
+    role = session.get("role")
+    notes = []
+
+    if role == "student":
+        sid = session.get("student_db_id")
+        summary = attendance_summary(sid)
+        if summary["total"] and summary["rate"] < 75:
+            notes.append({
+                "type": "warning",
+                "title": "Low attendance alert",
+                "message": f"Your attendance is {summary['rate']}%. Aim for at least 75%.",
+            })
+        for r in conn.execute(
+            "SELECT subject, grade, created_at FROM results WHERE student_id=? ORDER BY datetime(created_at) DESC LIMIT 3",
+            (sid,),
+        ).fetchall():
+            notes.append({
+                "type": "info",
+                "title": "New result published",
+                "message": f"{r['subject']} graded {r['grade'] or 'Pending'} on {fmt_date(r['created_at'])}.",
+            })
+        return notes[:5]
+
+    where, params = visible_clause("students")
+    for r in conn.execute(
+        f"""
+        SELECT students.name,
+               ROUND(100.0 * SUM(CASE WHEN attendance.status='Present' THEN 1 ELSE 0 END) / NULLIF(COUNT(attendance.id),0), 1) rate
+        FROM students
+        LEFT JOIN attendance ON attendance.student_id = students.id
+        WHERE {where}
+        GROUP BY students.id, students.name
+        HAVING COUNT(attendance.id) > 0 AND rate < 75
+        ORDER BY rate ASC
+        LIMIT 4
+        """,
+        params,
+    ).fetchall():
+        notes.append({
+            "type": "warning",
+            "title": "Low attendance alert",
+            "message": f"{r['name']} is at {r['rate']}% attendance.",
+        })
+
+    for r in conn.execute(
+        f"""
+        SELECT students.name, results.subject, results.grade
+        FROM results
+        JOIN students ON students.id = results.student_id
+        WHERE {where}
+        ORDER BY datetime(results.created_at) DESC
+        LIMIT 4
+        """,
+        params,
+    ).fetchall():
+        notes.append({
+            "type": "info",
+            "title": "New result added",
+            "message": f"{r['subject']} for {r['name']} was recorded with grade {r['grade'] or 'Pending'}.",
+        })
+
+    return notes[:6]
+
+
+def login_required(fn):
+    @wraps(fn)
+    def wrap(*a, **kw):
+        if "user_id" not in session:
+            flash("Please log in to continue.", "error")
+            return redirect(url_for("login"))
+        return fn(*a, **kw)
+    return wrap
+
+
+def roles_required(*roles):
+    def dec(fn):
+        @wraps(fn)
+        def wrap(*a, **kw):
+            if "user_id" not in session:
+                flash("Please log in to continue.", "error")
+                return redirect(url_for("login"))
+            if session.get("role") not in roles:
+                flash("You do not have access to that page.", "error")
+                return redirect(url_for("student_dashboard" if session.get("role") == "student" else "dashboard"))
+            return fn(*a, **kw)
+        return wrap
+    return dec
+
+
+def student_payload(form, files, editing=False, current=None):
+    data = {
+        "student_id": clean(form.get("student_id"), 32).upper(),
+        "name": clean(form.get("name"), 120),
+        "email": clean(form.get("email"), 120).lower(),
+        "dob": clean(form.get("dob"), 20),
+        "gender": clean(form.get("gender"), 20),
+        "department": clean(form.get("department"), 80),
+        "year": clean(form.get("year"), 40),
+        "status": clean(form.get("status"), 40) or "Active",
+        "address": clean(form.get("address"), 200),
+        "enroll_date": clean(form.get("enroll_date"), 20),
+        "assigned_teacher_id": to_int(form.get("assigned_teacher_id")),
+    }
