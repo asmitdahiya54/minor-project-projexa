@@ -409,3 +409,18 @@ h4 {
   position: relative;
   z-index: 1;
 }
+.hero-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+  min-width: min(440px, 100%);
+}
+
+.hero-metric,
+.quick-card,
+.insight-card {
+  padding: 1rem 1.05rem;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.58);
+}
