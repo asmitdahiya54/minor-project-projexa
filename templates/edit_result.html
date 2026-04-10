@@ -55,3 +55,20 @@
           {% endfor %}
         </select>
       </label>
+
+      <label class="form-grid__full">
+        <span>Remarks</span>
+        <input type="text" name="remarks" value="{{ result.remarks or '' }}">
+      </label>
+    </div>
+
+    <div class="form-actions">
+      <a class="btn btn-secondary" href="{{ url_for('student_results', student_id=student.id) }}">Cancel</a>
+      <button class="btn btn-primary" type="submit">
+        <i class="fa-solid fa-floppy-disk"></i>
+        <span>Update result</span>
+      </button>
+    </div>
+  </form>
+</section>
+{% endblock %}
