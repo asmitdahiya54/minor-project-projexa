@@ -1504,3 +1504,13 @@ def attendance_pdf(student_id):
         return redirect(url_for("student_attendance", student_id=student_id))
     return send_file(pdf, as_attachment=True, download_name=f"{student['student_id']}_attendance_report.pdf")
 
+@app.errorhandler(400)
+def bad_request(error):
+    message = getattr(error, "description", "The request could not be processed.")
+    if wants_json():
+        return jsonify({"success": False, "message": message}), 400
+    flash(message, "error")
+    if session.get("user_id"):
+        return redirect(url_for("student_dashboard" if session.get("role") == "student" else "dashboard"))
+    return redirect(url_for("login"))
+
