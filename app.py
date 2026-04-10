@@ -809,3 +809,10 @@ def logout():
     session.clear()
     flash("You have been logged out securely.", "success")
     return redirect(url_for("login"))
+
+@app.route("/")
+@login_required
+def dashboard():
+    if session.get("role") == "student":
+        return redirect(url_for("student_dashboard"))
+    return render_template("dashboard.html", **dashboard_ctx())
