@@ -374,4 +374,117 @@ def grade_color(grade):
         "C": "#ef4444",
         "F": "#dc2626",
     }.get(grade, "#64748b")
-    
+
+def visible_clause(alias="students"):
+    role = session.get("role")
+    if role == "admin":
+        return "1=1", []
+    if role == "teacher":
+        return f"{alias}.assigned_teacher_id = ?", [session["user_id"]]
+    if role == "student":
+        return f"{alias}.id = ?", [session["student_db_id"]]
+    return "1=0", []
+
+
+def teachers():
+    return db().execute(
+        """
+        SELECT
+            id,
+            username,
+            COALESCE(NULLIF(full_name, ''), username) AS full_name
+        FROM users
+        WHERE role='teacher'
+        ORDER BY COALESCE(NULLIF(full_name, ''), username) ASC
+        """
+    ).fetchall()
+
+
+def save_image(fs, old=None):
+    if not fs or not fs.filename:
+        return old
+    ext = fs.filename.rsplit(".", 1)[-1].lower()
+    if ext not in ALLOWED_IMAGE_EXTENSIONS:
+        raise ValueError("Allowed image types are PNG, JPG, JPEG, and WEBP.")
+    name = secure_filename(f"{uuid.uuid4().hex}.{ext}")
+    fs.save(Path(app.config["UPLOAD_FOLDER"]) / name)
+    if old:
+        old_path = Path(app.config["UPLOAD_FOLDER"]) / old
+        if old_path.exists():
+            old_path.unlink()
+    return name
+
+
+def notify_email(to_email, subject, body):
+    host = os.environ.get("SMTP_HOST")
+    user = os.environ.get("SMTP_USERNAME")
+    pwd = os.environ.get("SMTP_PASSWORD")
+    port = to_int(os.environ.get("SMTP_PORT"), 587)
+    sender = os.environ.get("MAIL_SENDER", user)
+    if not all([to_email, host, user, pwd, sender]):
+        return False
+    msg = EmailMessage()
+    msg["Subject"] = subject
+    msg["From"] = sender
+    msg["To"] = to_email
+    msg.set_content(body)
+    try:
+        with smtplib.SMTP(host, port, timeout=15) as s:
+            s.starttls()
+            s.login(user, pwd)
+            s.send_message(msg)
+        return True
+    except Exception:
+        return False
+
+
+def fmt_date(value):
+    try:
+        return datetime.fromisoformat(str(value)).strftime("%d %b %Y")
+    except Exception:
+        return str(value or "-")
+
+
+def student_or_404(student_id):
+    where, params = visible_clause("students")
+    row = db().execute(
+        f"""
+        SELECT students.*, users.full_name AS teacher_name
+        FROM students
+        LEFT JOIN users ON users.id = students.assigned_teacher_id
+        WHERE students.id = ? AND {where}
+        """,
+        [student_id] + params,
+    ).fetchone()
+    if not row:
+        abort(404)
+    return row
+def visible_students(filters=None):
+    filters = filters or {}
+    where, params = visible_clause("students")
+    clauses = [where]
+
+    if filters.get("search"):
+        t = f"%{filters['search']}%"
+        clauses.append("(students.name LIKE ? OR students.student_id LIKE ?)")
+        params += [t, t]
+    if filters.get("dept"):
+        clauses.append("students.department = ?")
+        params.append(filters["dept"])
+    if filters.get("year"):
+        clauses.append("students.year = ?")
+        params.append(filters["year"])
+    if filters.get("status"):
+        clauses.append("students.status = ?")
+        params.append(filters["status"])
+
+    return db().execute(
+        f"""
+        SELECT students.*, users.full_name AS teacher_name
+        FROM students
+        LEFT JOIN users ON users.id = students.assigned_teacher_id
+        WHERE {' AND '.join(clauses)}
+        ORDER BY students.created_at DESC, students.name ASC
+        """,
+        params,
+    ).fetchall()
