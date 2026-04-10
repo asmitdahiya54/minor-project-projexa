@@ -993,3 +993,31 @@ def attendance():
     }
     return render_template("attendance.html", students=students, current_records=current, filters=filters, departments=DEPARTMENTS, years=YEARS, subjects=SUBJECTS)
 
+@app.route("/attendance/mark", methods=["POST"])
+@roles_required("admin", "teacher")
+def mark_attendance():
+    att_date = clean(request.form.get("date"), 20) or date.today().isoformat()
+    subject = clean(request.form.get("subject"), 80) or "General"
+    conn = db()
+    saved = 0
+
+    students = visible_students({"status": "Active"})
+    for student in students:
+        value = clean(request.form.get(f"att_{student['id']}"), 20)
+        if value not in {"Present", "Absent", "Late"}:
+            continue
+        student_or_404(student["id"])
+        conn.execute(
+            """
+            INSERT INTO attendance (student_id,date,status,subject)
+            VALUES (?,?,?,?)
+            ON CONFLICT(student_id,date,subject)
+            DO UPDATE SET status=excluded.status
+            """,
+            (student["id"], att_date, value, subject),
+        )
+        saved += 1
+
+    conn.commit()
+    return respond(True, f"Attendance saved for {saved} student(s).", url_for("attendance", date=att_date, subject=subject))
+
