@@ -323,3 +323,11 @@ h4 {
   color: #ffffff;
   font-weight: 800;
 }
+.user-pill__name {
+  font-weight: 800;
+}
+
+.user-pill__role {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
