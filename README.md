@@ -1,42 +1,131 @@
-# Student Information Management System(SIMS)
+# SIMS
 
-## Project Description
-This project is a web-based Student Information Management System developed using Flask and SQLite.
-The system allows administrators to manage student records efficiently through a clean and user-friendly web interface.
+## Student Information Management System
 
-The application provides features for adding, viewing, editing, and deleting student information, along with a dashboard that displays statistics about student records.
+SIMS is a web-based Student Information Management System developed using Flask and SQLite. It helps administrators, teachers, and students manage academic records through a secure, modern, and role-based platform.
 
-## Objectives
-- To understand the fundamentals of web application development
-- To build a CRUD (Create, Read, Update, Delete) system
-- To design a clean and responsive user interface
-- To store and manage data using SQLite database
-- To gain hands-on experience with GitHub collaboration
-
-## Technologies Used
-- Python (Flask) – Backend logic
-  SQLite – Database
-  HTML (Jinja Templates) – Web pages
-  CSS – Styling 
-  JavaScript – Small UI actions
+The system includes student profile management, attendance tracking, results management, feedback collection, analytics dashboards, PDF report generation, and authentication features.
 
 ## Features
-- Dashboard with student statistics
-- Add new student records
-- View and search student records
-- Filter students by department, year, and status
-- Edit student information
-- Delete student records
-- View detailed student information  
 
-## Team
-- Team Leader: Asmit 
-- Team Members:
-  - Dev Narwal
-  - Manish Chauhan
-  - Dikshit
-  - Gourav
-  - Aditya Dangi
+- Role-based login for admin, teacher, and student
+- Student record management
+- Add, view, edit, and delete student profiles
+- Profile image upload support
+- Attendance management with date and subject tracking
+- Attendance reports and PDF export
+- Results management and academic record tracking
+- Report card PDF generation
+- Feedback submission and review
+- Dashboard with activity summaries
+- Analytics charts for attendance, results, and feedback
+- Password change feature
+- CSRF protection and session security
+- Responsive UI
 
-## Status
-Project initiated. Development in progress.
+## Technologies Used
+
+- Python
+- Flask
+- SQLite
+- HTML
+- CSS
+- JavaScript
+- Jinja2
+- ReportLab
+
+## Project Structure
+
+
+minor-project-projexa/
+│
+├── app.py
+├── requirements.txt
+├── README.md
+├── .env.example
+├── .gitignore
+├── Procfile
+├── sims.db
+│
+├── static/
+│   ├── style.css
+│   ├── main.js
+│   └── uploads/
+│
+└── templates/
+    ├── base.html
+    ├── login.html
+    ├── dashboard.html
+    ├── student_dashboard.html
+    ├── view_students.html
+    ├── student_detail.html
+    ├── add_student.html
+    ├── edit_student.html
+    ├── attendance.html
+    ├── attendance_report.html
+    ├── student_attendance.html
+    ├── results.html
+    ├── add_result.html
+    ├── edit_result.html
+    ├── student_results.html
+    ├── feedback.html
+    ├── add_feedback.html
+    ├── charts.html
+    └── change_password.html
+
+
+User Roles
+|
+├── Admin
+|     ├──Manage students
+|     ├──View dashboards
+|     ├──Manage attendance
+|     ├──Manage results
+|     ├──Review feedback
+|     └──Access analytics
+|
+├── Teacher
+|       ├──View assigned students
+|       ├──Manage attendance
+|       ├──Add and update results
+|       ├──Review feedback
+|       └──Access analytics for assigned students
+| 
+|
+└── Student
+      ├──View personal dashboard
+      ├──Check attendance
+      ├──Check results
+      ├──Submit feedback
+      └──Download reports
+
+
+Default Login Credentials
+
+Admin
+. Username: admin
+. Password: admin123
+
+Teachers
+. Username: teacher_first
+Password: teacher123
+
+. Username: teacher_second
+Password: teacher123
+
+. Username: teacher_third
+Password: teacher123
+
+. Username: teacher_fourth
+Password: teacher123
+
+Students
+
+. Username: student ID
+  Password: student123
+
+Examples:
+
+. CS2024001 / student123
+. CS2024002 / student123
+. IT2024001 / student123
