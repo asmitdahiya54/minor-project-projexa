@@ -39,3 +39,18 @@
   <article class="stat-card"><span>Late</span><strong>{{ attendance_summary.late }}</strong></article>
 </section>
 
+<section class="summary-strip">
+  <article class="insight-card">
+    <span>Date of birth</span>
+    <strong>{{ student.dob or '-' }}</strong>
+  </article>
+  <article class="insight-card">
+    <span>Enrollment date</span>
+    <strong>{{ student.enroll_date or '-' }}</strong>
+  </article>
+  <article class="insight-card">
+    <span>Address</span>
+    <strong>{{ student.address or '-' }}</strong>
+  </article>
+</section>
+
