@@ -622,4 +622,17 @@ html[data-theme='dark'] .insight-card {
 
 .compact-grid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
+}.form-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.form-grid__full {
+  grid-column: 1 / -1;
+}
+
+label {
+  display: grid;
+  gap: 0.48rem;
+  font-weight: 700;
+  color: var(--text);
 }
