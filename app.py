@@ -1251,3 +1251,16 @@ def delete_feedback(feedback_id):
 def charts():
     return render_template("charts.html", departments=DEPARTMENTS, years=YEARS)
 
+def chart_where():
+    where, params = visible_clause("students")
+    clauses = [where]
+    dept = clean(request.args.get("dept"), 80)
+    year = clean(request.args.get("year"), 40)
+    if dept:
+        clauses.append("students.department = ?")
+        params.append(dept)
+    if year:
+        clauses.append("students.year = ?")
+        params.append(year)
+    return " AND ".join(clauses), params
+
