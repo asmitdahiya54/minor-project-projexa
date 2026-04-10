@@ -488,3 +488,26 @@ def visible_students(filters=None):
         """,
         params,
     ).fetchall()
+def attendance_summary(student_id):
+    row = db().execute(
+        """
+        SELECT
+            COUNT(*) total,
+            SUM(CASE WHEN status='Present' THEN 1 ELSE 0 END) present,
+            SUM(CASE WHEN status='Absent' THEN 1 ELSE 0 END) absent,
+            SUM(CASE WHEN status='Late' THEN 1 ELSE 0 END) late
+        FROM attendance
+        WHERE student_id=?
+        """,
+        (student_id,),
+    ).fetchone()
+    total = row["total"] or 0
+    present = row["present"] or 0
+    rate = round((present / total) * 100, 1) if total else 0
+    return {
+        "total": total,
+        "present": present,
+        "absent": row["absent"] or 0,
+        "late": row["late"] or 0,
+        "rate": rate,
+    }
