@@ -182,3 +182,119 @@ h4 {
   scrollbar-width: thin;
   scrollbar-color: rgba(110, 168, 254, 0.35) transparent;
 }
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.95rem;
+  margin-bottom: 1.5rem;
+}
+
+.brand-mark,
+.notice__icon,
+.toast__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, rgba(110, 168, 254, 0.24), rgba(122, 90, 248, 0.28));
+  color: #f8fbff;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+}
+
+.brand-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+.brand-sub {
+  color: rgba(241, 245, 249, 0.65);
+  font-size: 0.9rem;
+}
+
+.sidebar-panel,
+.sidebar-footer {
+  padding: 1rem 1.05rem;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 18px;
+  background: rgba(255,255,255,0.04);
+}
+
+.sidebar-panel strong,
+.sidebar-footer strong {
+  display: block;
+  margin-bottom: 0.3rem;
+  color: #ffffff;
+}
+.sidebar-panel p,
+.sidebar-footer p {
+  color: rgba(226, 232, 240, 0.72);
+  font-size: 0.92rem;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+}
+
+.nav-links {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 1rem;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.9rem 1rem;
+  border-radius: 16px;
+  color: rgba(241, 245, 249, 0.78);
+  transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.nav-link i {
+  width: 1rem;
+  text-align: center;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  background: linear-gradient(135deg, rgba(255,255,255,0.09), rgba(110, 168, 254, 0.13));
+  color: #ffffff;
+  transform: translateX(2px);
+}
+
+.main-shell {
+  min-width: 0;
+  min-height: 100vh;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(238, 244, 255, 0.68)),
+    transparent;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.4rem 2rem;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  backdrop-filter: blur(18px);
+}
+
+.topbar-main,
+.topbar-actions,
+.actions-inline,
+.hero-actions,
+.form-actions,
+.profile-summary,
+.user-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+}
