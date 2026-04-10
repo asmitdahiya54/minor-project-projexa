@@ -32,3 +32,21 @@
   </div>
 </section>
 
+<section class="quick-grid">
+  <article class="quick-card">
+    <span>Total classes tracked</span>
+    <strong>{{ attendance_summary.total }}</strong>
+    <p>Attendance entries currently available in your record.</p>
+  </article>
+  <article class="quick-card">
+    <span>Present days</span>
+    <strong>{{ attendance_summary.present }}</strong>
+    <p>Sessions marked present across all recorded subjects.</p>
+  </article>
+  <article class="quick-card">
+    <span>Feedback submissions</span>
+    <strong>{{ feedback_entries|length }}</strong>
+    <p>Your most recent student feedback entries in the platform.</p>
+  </article>
+</section>
+
