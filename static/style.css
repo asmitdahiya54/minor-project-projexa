@@ -356,3 +356,32 @@ h4 {
   align-content: start;
   min-height: calc(100vh - 90px);
 }
+.panel,
+.hero-card,
+.profile-hero,
+.auth-panel,
+.stat-card,
+.notice,
+.flash,
+.insight-card,
+.quick-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(20px);
+}
+
+.hero-card,
+.profile-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 1.7rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 1.25rem;
+  align-items: center;
+  background:
+    radial-gradient(circle at top right, rgba(122, 90, 248, 0.13), transparent 28%),
+    linear-gradient(135deg, color-mix(in srgb, var(--bg-strong) 92%, white), color-mix(in srgb, var(--bg-soft) 78%, white));
+}
