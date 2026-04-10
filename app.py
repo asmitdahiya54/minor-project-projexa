@@ -743,3 +743,22 @@ def dashboard_ctx():
         "recent_results": recent_results(limit=6),
         "dashboard_role_label": session.get("role", "").title(),
     }
+def student_dash_ctx(student_id):
+    student = student_or_404(student_id)
+    conn = db()
+    results = conn.execute(
+        "SELECT * FROM results WHERE student_id=? ORDER BY datetime(created_at) DESC LIMIT 6",
+        (student_id,),
+    ).fetchall()
+    feedback_rows = conn.execute(
+        "SELECT * FROM feedback WHERE student_id=? ORDER BY datetime(created_at) DESC LIMIT 6",
+        (student_id,),
+    ).fetchall()
+    scores = [(r["marks_obtained"] / r["max_marks"]) * 10 for r in results if r["max_marks"]]
+    return {
+        "student": student,
+        "attendance_summary": attendance_summary(student_id),
+        "recent_results": results,
+        "feedback_entries": feedback_rows,
+        "cgpa_estimate": round(sum(scores) / len(scores), 2) if scores else 0.0,
+    }
