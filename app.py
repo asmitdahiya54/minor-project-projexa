@@ -1514,3 +1514,10 @@ def bad_request(error):
         return redirect(url_for("student_dashboard" if session.get("role") == "student" else "dashboard"))
     return redirect(url_for("login"))
 
+@app.errorhandler(403)
+def forbidden(_):
+    flash("You do not have permission to access that resource.", "error")
+    if session.get("user_id"):
+        return redirect(url_for("student_dashboard" if session.get("role") == "student" else "dashboard"))
+    return redirect(url_for("login"))
+
