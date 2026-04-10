@@ -838,3 +838,75 @@ def view_students():
         filters=filters,
         teachers=teachers(),
     )
+@app.route("/api/students/search")
+@roles_required("admin", "teacher")
+def student_search_api():
+    q = clean(request.args.get("q"), 100)
+    if len(q) < 2:
+        return jsonify({"items": []})
+    where, params = visible_clause("students")
+    rows = db().execute(
+        f"""
+        SELECT students.id, students.name, students.student_id, students.department, students.year
+        FROM students
+        WHERE {where} AND (students.name LIKE ? OR students.student_id LIKE ?)
+        ORDER BY students.name ASC
+        LIMIT 6
+        """,
+        params + [f"%{q}%", f"%{q}%"],
+    ).fetchall()
+    return jsonify({"items": [dict(r) for r in rows]})
+
+
+@app.route("/export_students")
+@roles_required("admin", "teacher")
+def export_students():
+    filters = {
+        "search": clean(request.args.get("search"), 100),
+        "dept": clean(request.args.get("dept"), 80),
+        "year": clean(request.args.get("year"), 40),
+        "status": clean(request.args.get("status"), 40),
+    }
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["Student ID", "Name", "Email", "Department", "Year", "Status"])
+    for r in visible_students(filters):
+        writer.writerow([r["student_id"], r["name"], r["email"], r["department"], r["year"], r["status"]])
+    return Response(output.getvalue(), mimetype="text/csv", headers={"Content-Disposition": "attachment; filename=students_export.csv"})
+
+
+@app.route("/students/add", methods=["GET", "POST"])
+@roles_required("admin")
+def add_student():
+    if request.method == "POST":
+        data, errs = student_payload(request.form, request.files)
+        if errs:
+            if wants_json():
+                return jsonify({"success": False, "message": " ".join(errs)}), 400
+            flash(" ".join(errs), "error")
+            return render_template("add_student.html", form=request.form, teachers=teachers(), departments=DEPARTMENTS, years=YEARS, statuses=STATUSES)
+
+        try:
+            conn = db()
+            cur = conn.execute(
+                """
+                INSERT INTO students (
+                    student_id,name,email,dob,gender,department,year,status,address,enroll_date,profile_image,assigned_teacher_id
+                ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+                """,
+                (
+                    data["student_id"], data["name"], data["email"], data["dob"], data["gender"],
+                    data["department"], data["year"], data["status"], data["address"],
+                    data["enroll_date"], data["profile_image"], data["assigned_teacher_id"]
+                ),
+            )
+            conn.execute(
+                "INSERT INTO users (username,email,password,role,student_id) VALUES (?, ?, ?, 'student', ?)",
+                (data["student_id"], data["email"], generate_password_hash("student123"), cur.lastrowid),
+            )
+            conn.commit()
+            return respond(True, f"{data['name']} added successfully. Default student password is student123.", url_for("view_students"))
+        except sqlite3.IntegrityError:
+            return respond(False, "A student with that ID already exists.", url_for("add_student"), 400)
+
+    return render_template("add_student.html", form={}, teachers=teachers(), departments=DEPARTMENTS, years=YEARS, statuses=STATUSES)
