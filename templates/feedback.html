@@ -24,3 +24,30 @@
       <p>{{ rows|length }} feedback item(s) available in the current view.</p>
     </div>
   </div>
+
+  <div class="result-list">
+    {% for row in rows %}
+    <article class="result-item">
+      <div>
+        <strong>{{ row.name }} &middot; {{ row.category }}</strong>
+        <p>{{ row.message }}</p>
+      </div>
+      <div class="actions-inline">
+        <span class="grade-chip">{{ row.rating }}/5</span>
+        {% if current_role in ['admin','teacher'] %}
+        <form method="post" action="{{ url_for('delete_feedback', feedback_id=row.id) }}" onsubmit="return confirm('Delete this feedback?');">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="icon-btn" type="submit" aria-label="Delete feedback">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </form>
+        {% endif %}
+      </div>
+    </article>
+    {% else %}
+    <p class="empty">No feedback available.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
+
