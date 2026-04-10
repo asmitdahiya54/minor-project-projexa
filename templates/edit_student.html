@@ -1,100 +1,13 @@
-{% extends "base.html" %}
+% extends "base.html" %}
 {% block title %}Edit Student | {{ app_name }}{% endblock %}
 {% block page_heading %}Edit Student{% endblock %}
 
 {% block content %}
-<section class="panel panel--form">
-  <form method="post" enctype="multipart/form-data" class="data-form js-ajax-form" data-redirect-on-success="true">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-
-    <div class="form-grid">
-      <label>
-        <span>Student ID</span>
-        <input type="text" value="{{ student.student_id }}" disabled>
-      </label>
-
-      <label>
-        <span>Full name</span>
-        <input type="text" name="name" value="{{ student.name }}" required>
-      </label>
-
-      <label>
-        <span>Email</span>
-        <input type="email" name="email" value="{{ student.email or '' }}">
-      </label>
-
-      <label>
-        <span>Date of birth</span>
-        <input type="date" name="dob" value="{{ student.dob or '' }}">
-      </label>
-
-      <label>
-        <span>Gender</span>
-        <input type="text" name="gender" value="{{ student.gender or '' }}">
-      </label>
-
-      <label>
-        <span>Department</span>
-        <select name="department">
-          {% for dept in departments %}
-          <option value="{{ dept }}" {% if student.department == dept %}selected{% endif %}>{{ dept }}</option>
-          {% endfor %}
-        </select>
-      </label>
-
-      <label>
-        <span>Academic year</span>
-        <select name="year">
-          {% for year in years %}
-          <option value="{{ year }}" {% if student.year == year %}selected{% endif %}>{{ year }}</option>
-          {% endfor %}
-        </select>
-      </label>
-
-      <label>
-        <span>Status</span>
-        <select name="status">
-          {% for status in statuses %}
-          <option value="{{ status }}" {% if student.status == status %}selected{% endif %}>{{ status }}</option>
-          {% endfor %}
-        </select>
-      </label>
-
-      <label>
-        <span>Enrollment date</span>
-        <input type="date" name="enroll_date" value="{{ student.enroll_date or '' }}">
-      </label>
-
-      <label>
-        <span>Assigned teacher</span>
-        <select name="assigned_teacher_id">
-          <option value="">Select teacher</option>
-          {% for teacher in teachers %}
-          <option value="{{ teacher.id }}" {% if student.assigned_teacher_id == teacher.id %}selected{% endif %}>
-            {{ teacher.username }}
-          </option>
-          {% endfor %}
-        </select>
-      </label>
-
-      <label class="form-grid__full">
-        <span>Address</span>
-        <input type="text" name="address" value="{{ student.address or '' }}">
-      </label>
-
-      <label class="form-grid__full">
-        <span>Profile image</span>
-        <input type="file" name="profile_image" accept=".png,.jpg,.jpeg,.webp">
-      </label>
-    </div>
-
-    <div class="form-actions">
-      <a class="btn btn-secondary" href="{{ url_for('student_detail', student_id=student.id) }}">Cancel</a>
-      <button class="btn btn-primary" type="submit">
-        <i class="fa-solid fa-floppy-disk"></i>
-        <span>Update student</span>
-      </button>
-    </div>
-  </form>
+<section class="hero-card">
+  <div class="hero-copy">
+    <span class="badge">Profile maintenance</span>
+    <h2>Update the student record without losing consistency.</h2>
+    <p>Edit demographic details, academic placement, status, and teacher assignment from one form.</p>
+  </div>
 </section>
-{% endblock %}
+
