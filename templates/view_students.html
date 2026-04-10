@@ -23,3 +23,57 @@
   </div>
 </section>
 
+<section class="panel panel--form">
+  <div class="panel__header">
+    <div>
+      <h3>Search and filters</h3>
+      <p>Filter by identity, cohort, and enrollment status.</p>
+    </div>
+  </div>
+
+  <form method="get" class="filters-grid">
+    <label class="search-field">
+      <span>Search</span>
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" name="search" value="{{ filters.search }}" placeholder="Search by name or student ID" id="studentSearchInput" autocomplete="off">
+    </label>
+
+    <div class="autocomplete-panel" id="studentAutocomplete"></div>
+
+    <label>
+      <span>Department</span>
+      <select name="dept">
+        <option value="">All departments</option>
+        {% for dept in ['Computer Science','Information Technology','Electronics','Mechanical Engineering','Civil Engineering','Business Administration'] %}
+        <option value="{{ dept }}" {% if filters.dept == dept %}selected{% endif %}>{{ dept }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <label>
+      <span>Year</span>
+      <select name="year">
+        <option value="">All years</option>
+        {% for year in ['First Year','Second Year','Third Year','Fourth Year'] %}
+        <option value="{{ year }}" {% if filters.year == year %}selected{% endif %}>{{ year }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <label>
+      <span>Status</span>
+      <select name="status">
+        <option value="">All statuses</option>
+        {% for status in ['Active','On Leave','Graduated'] %}
+        <option value="{{ status }}" {% if filters.status == status %}selected{% endif %}>{{ status }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <button class="btn btn-primary" type="submit">
+      <i class="fa-solid fa-filter"></i>
+      <span>Apply filters</span>
+    </button>
+  </form>
+</section>
+
