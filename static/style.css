@@ -950,6 +950,13 @@ textarea {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.9rem;
 }
+.notification-wrap {
+  position: relative;
+}
+
+.notification-btn {
+  position: relative;
+}
 .toast__icon {
   width: 36px;
   height: 36px;
