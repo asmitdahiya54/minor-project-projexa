@@ -1236,3 +1236,13 @@ def add_feedback():
 
     return render_template("add_feedback.html", students=students, categories=FEEDBACK_CATEGORIES)
 
+@app.route("/feedback/<int:feedback_id>/delete", methods=["POST"])
+@roles_required("admin", "teacher")
+def delete_feedback(feedback_id):
+    row = db().execute("SELECT * FROM feedback WHERE id=?", (feedback_id,)).fetchone()
+    if row:
+        student_or_404(row["student_id"])
+        db().execute("DELETE FROM feedback WHERE id=?", (feedback_id,))
+        db().commit()
+    return respond(True, "Feedback removed.", url_for("feedback"))
+
