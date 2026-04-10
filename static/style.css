@@ -911,6 +911,20 @@ textarea {
   display: grid;
   gap: 0.85rem;
 }
+.notice,
+.flash {
+  padding: 1rem 1.1rem;
+}
+
+.notice {
+  display: flex;
+  gap: 0.9rem;
+}
+
+.notice--warning,
+.flash--error {
+  border-color: rgba(217, 45, 32, 0.18);
+}
 .toast__icon {
   width: 36px;
   height: 36px;
