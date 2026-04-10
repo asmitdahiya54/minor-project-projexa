@@ -19,3 +19,12 @@
         <span>Student</span>
         <input type="text" value="{{ student.name }} ({{ student.student_id }})" disabled>
       </label>
+
+      <label>
+        <span>Subject</span>
+        <select name="subject">
+          {% for subject in subjects %}
+          <option value="{{ subject }}" {% if result.subject == subject %}selected{% endif %}>{{ subject }}</option>
+          {% endfor %}
+        </select>
+      </label>
