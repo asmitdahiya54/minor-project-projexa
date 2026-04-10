@@ -1138,6 +1138,10 @@ textarea {
     width: 100%;
     padding: 1.4rem;
   }
+  .login-panel__head h2 {
+    font-size: 1.8rem;
+  }
+}
 .toast.is-hiding {
   opacity: 0;
   transform: translateY(-8px);
