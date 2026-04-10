@@ -331,3 +331,28 @@ h4 {
   color: var(--text-muted);
   font-size: 0.82rem;
 }
+.icon-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text);
+  display: grid;
+  place-items: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.mobile-only {
+  display: none;
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  padding: 2rem;
+  display: grid;
+  gap: 1.5rem;
+  align-content: start;
+  min-height: calc(100vh - 90px);
+}
