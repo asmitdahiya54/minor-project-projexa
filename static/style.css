@@ -424,3 +424,17 @@ h4 {
   border: 1px solid var(--border);
   background: rgba(255,255,255,0.58);
 }
+html[data-theme='dark'] .hero-metric,
+html[data-theme='dark'] .quick-card,
+html[data-theme='dark'] .insight-card {
+  background: rgba(8, 19, 37, 0.72);
+}
+
+.hero-metric span,
+.quick-card span,
+.insight-card span,
+.stat-card span {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
