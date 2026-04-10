@@ -825,6 +825,15 @@ textarea {
   display: block;
   margin-bottom: 0.75rem;
 }
+.demo-credentials__grid {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.demo-credentials__grid div {
+  display: grid;
+  gap: 0.2rem;
+}
 .toast--info {
   border-color: rgba(37, 99, 235, 0.25);
 }
