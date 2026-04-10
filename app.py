@@ -1264,3 +1264,36 @@ def chart_where():
         params.append(year)
     return " AND ".join(clauses), params
 
+@app.route("/api/charts/attendance")
+@roles_required("admin", "teacher")
+def chart_attendance():
+    where, params = chart_where()
+    bars = db().execute(
+        f"""
+        SELECT students.name,
+               ROUND(100.0 * SUM(CASE WHEN attendance.status='Present' THEN 1 ELSE 0 END) / NULLIF(COUNT(attendance.id),0), 1) AS attendance_rate
+        FROM students
+        LEFT JOIN attendance ON attendance.student_id = students.id
+        WHERE {where}
+        GROUP BY students.id, students.name
+        HAVING COUNT(attendance.id) > 0
+        ORDER BY attendance_rate ASC
+        """,
+        params,
+    ).fetchall()
+    trend = db().execute(
+        f"""
+        SELECT attendance.date,
+               SUM(CASE WHEN attendance.status='Present' THEN 1 ELSE 0 END) AS present_count,
+               COUNT(attendance.id) AS total_count
+        FROM attendance
+        JOIN students ON students.id = attendance.student_id
+        WHERE {where}
+        GROUP BY attendance.date
+        ORDER BY attendance.date DESC
+        LIMIT 10
+        """,
+        params,
+    ).fetchall()
+    return jsonify({"attendance_by_student": [dict(r) for r in bars], "attendance_trend": [dict(r) for r in reversed(trend)]})
+
