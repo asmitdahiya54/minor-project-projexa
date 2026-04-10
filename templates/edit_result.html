@@ -28,3 +28,12 @@
           {% endfor %}
         </select>
       </label>
+
+      <label>
+        <span>Exam type</span>
+        <select name="exam_type">
+          {% for exam in exam_types %}
+          <option value="{{ exam }}" {% if result.exam_type == exam %}selected{% endif %}>{{ exam }}</option>
+          {% endfor %}
+        </select>
+      </label>
