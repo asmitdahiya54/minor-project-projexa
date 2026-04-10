@@ -1130,6 +1130,14 @@ textarea {
   .data-table {
     min-width: 640px;
   }
+  .auth-panel {
+    padding: 2rem 1.4rem;
+  }
+
+  .auth-panel--compact {
+    width: 100%;
+    padding: 1.4rem;
+  }
 .toast.is-hiding {
   opacity: 0;
   transform: translateY(-8px);
