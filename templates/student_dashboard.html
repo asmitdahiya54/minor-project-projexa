@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 {% block title %}My Dashboard | {{ app_name }}{% endblock %}
 {% block page_heading %}Student Dashboard{% endblock %}
+
 {% block content %}
 <section class="profile-hero">
-  <div class="profile-summary">
+  <div class="hero-copy profile-summary">
     {% if student.profile_image %}
     <img src="{{ url_for('static', filename='uploads/' ~ student.profile_image) }}" alt="{{ student.name }}" class="profile-image">
     {% else %}
@@ -12,51 +13,22 @@
     <div>
       <span class="badge">{{ student.student_id }}</span>
       <h2>{{ student.name }}</h2>
-      <p>{{ student.department }} • {{ student.year }}</p>
+      <p>{{ student.department }} &middot; {{ student.year }}</p>
     </div>
   </div>
-  <div class="hero-actions">
-    <a class="btn btn-secondary" href="{{ url_for('student_detail', student_id=student.id) }}"><i class="fa-solid fa-id-card"></i><span>Profile</span></a>
-    <a class="btn btn-primary" href="{{ url_for('add_feedback') }}"><i class="fa-solid fa-pen"></i><span>Submit feedback</span></a>
+  <div class="hero-metrics">
+    <article class="hero-metric">
+      <span>Attendance rate</span>
+      <strong>{{ attendance_summary.rate }}%</strong>
+    </article>
+    <article class="hero-metric">
+      <span>Estimated CGPA</span>
+      <strong>{{ cgpa_estimate }}</strong>
+    </article>
+    <article class="hero-metric">
+      <span>Recent results</span>
+      <strong>{{ recent_results|length }}</strong>
+    </article>
   </div>
 </section>
-<section class="stat-grid">
-  <article class="stat-card"><span>Attendance rate</span><strong>{{ attendance_summary.rate }}%</strong></article>
-  <article class="stat-card"><span>Total classes</span><strong>{{ attendance_summary.total }}</strong></article>
-  <article class="stat-card"><span>Estimated CGPA</span><strong>{{ cgpa_estimate }}</strong></article>
-  <article class="stat-card"><span>Recent results</span><strong>{{ recent_results|length }}</strong></article>
-</section>
-<section class="panel-grid two-col">
-  <article class="panel">
-    <div class="panel__header"><h3>Recent results</h3><a href="{{ url_for('student_results', student_id=student.id) }}">Open all</a></div>
-    <div class="table-wrap">
-      <table class="data-table">
-        <thead><tr><th>Subject</th><th>Semester</th><th>Score</th><th>Grade</th></tr></thead>
-        <tbody>
-          {% for row in recent_results %}
-          <tr><td>{{ row.subject }}</td><td>{{ row.semester }}</td><td>{{ row.marks_obtained }} / {{ row.max_marks }}</td><td>{{ row.grade }}</td></tr>
-          {% else %}
-          <tr><td colspan="4" class="empty">No results available yet.</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </article>
-  <article class="panel">
-    <div class="panel__header"><h3>Feedback history</h3><a href="{{ url_for('feedback') }}">Open feedback</a></div>
-    <div class="result-list">
-      {% for entry in feedback_entries %}
-      <article class="result-item">
-        <div>
-          <strong>{{ entry.category }}</strong>
-          <p>{{ entry.message }}</p>
-        </div>
-        <div class="grade-chip">{{ entry.rating }}/5</div>
-      </article>
-      {% else %}
-      <p class="empty">No feedback submitted yet.</p>
-      {% endfor %}
-    </div>
-  </article>
-</section>
-{% endblock %}
+
