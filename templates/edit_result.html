@@ -39,6 +39,15 @@
       </label>
 
       <label>
+        <span>Semester</span>
+        <select name="semester">
+          {% for sem in semesters %}
+          <option value="{{ sem }}" {% if result.semester == sem %}selected{% endif %}>{{ sem }}</option>
+          {% endfor %}
+        </select>
+      </label>
+
+      <label>
         <span>Marks obtained</span>
         <input type="number" name="marks_obtained" min="0" step="0.01" value="{{ result.marks_obtained }}" required>
       </label>
@@ -46,14 +55,6 @@
       <label>
         <span>Maximum marks</span>
         <input type="number" name="max_marks" min="1" step="0.01" value="{{ result.max_marks }}" required>
-      </label>
-      <label>
-        <span>Semester</span>
-        <select name="semester">
-          {% for sem in semesters %}
-          <option value="{{ sem }}" {% if result.semester == sem %}selected{% endif %}>{{ sem }}</option>
-          {% endfor %}
-        </select>
       </label>
 
       <label class="form-grid__full">

@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Dashboard | {{ app_name }}{% endblock %}
 {% block page_heading %}Operations Dashboard{% endblock %}
+
 {% block content %}
 <section class="hero-card">
   <div class="hero-copy">
@@ -14,7 +15,6 @@
         <span>Add student</span>
       </a>
       {% endif %}
-
       <a class="btn btn-secondary" href="{{ url_for('results') }}">
         <i class="fa-solid fa-chart-column"></i>
         <span>Review results</span>
@@ -41,6 +41,7 @@
     </article>
   </div>
 </section>
+
 <section class="stat-grid">
   <article class="stat-card">
     <span>Active students</span>
@@ -50,7 +51,6 @@
     <span>On leave</span>
     <strong>{{ stats.leave_students }}</strong>
   </article>
-
   <article class="stat-card">
     <span>Graduated</span>
     <strong>{{ stats.graduated_students }}</strong>
@@ -72,7 +72,6 @@
     <strong>{{ recent_results|length }}</strong>
     <p>Most recent marks published across your accessible student list.</p>
   </article>
-
   <article class="quick-card">
     <span>System readiness</span>
     <strong>Stable</strong>

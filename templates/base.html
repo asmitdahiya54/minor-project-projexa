@@ -15,7 +15,6 @@
 
   {% block head %}{% endblock %}
 </head>
-
 <body>
   <div class="site-backdrop" aria-hidden="true"></div>
 
@@ -33,7 +32,7 @@
           </div>
         </div>
 
-<div class="sidebar-panel">
+        <div class="sidebar-panel">
           <span class="sidebar-label">Workspace</span>
           <strong>{{ current_role|title }} Console</strong>
           <p>Student records, attendance, results, analytics, and secure collaboration in one place.</p>
@@ -58,7 +57,7 @@
           </a>
           {% endif %}
 
-         <a href="{{ url_for('attendance') }}" class="nav-link {% if request.endpoint in ['attendance','attendance_report','student_attendance'] %}active{% endif %}">
+          <a href="{{ url_for('attendance') }}" class="nav-link {% if request.endpoint in ['attendance','attendance_report','student_attendance'] %}active{% endif %}">
             <i class="fa-solid fa-calendar-check"></i>
             <span>Attendance</span>
           </a>
@@ -68,7 +67,7 @@
             <span>Results</span>
           </a>
 
-<a href="{{ url_for('feedback') }}" class="nav-link {% if request.endpoint in ['feedback','add_feedback'] %}active{% endif %}">
+          <a href="{{ url_for('feedback') }}" class="nav-link {% if request.endpoint in ['feedback','add_feedback'] %}active{% endif %}">
             <i class="fa-solid fa-comments"></i>
             <span>Feedback</span>
           </a>
@@ -76,9 +75,8 @@
           <a href="{{ url_for('charts') }}" class="nav-link {% if request.endpoint == 'charts' %}active{% endif %}">
             <i class="fa-solid fa-chart-pie"></i>
             <span>Analytics</span>
-          </a>  
-
-         {% else %}
+          </a>
+          {% else %}
           <a href="{{ url_for('student_dashboard') }}" class="nav-link {% if request.endpoint == 'student_dashboard' %}active{% endif %}">
             <i class="fa-solid fa-house"></i>
             <span>My Dashboard</span>

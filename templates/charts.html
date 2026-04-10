@@ -1,9 +1,24 @@
 {% extends "base.html" %}
 {% block title %}Analytics | {{ app_name }}{% endblock %}
-{% block page_heading %}Analytics & Charts{% endblock %}
+{% block page_heading %}Analytics and Charts{% endblock %}
 
 {% block content %}
+<section class="hero-card">
+  <div class="hero-copy">
+    <span class="badge">Performance intelligence</span>
+    <h2>Visualize academic and attendance trends with clearer dashboards.</h2>
+    <p>Filter by department and year to compare attendance, results, feedback patterns, and enrollment distribution.</p>
+  </div>
+</section>
+
 <section class="panel panel--form">
+  <div class="panel__header">
+    <div>
+      <h3>Analytics filters</h3>
+      <p>Refresh the charts for a specific segment of students.</p>
+    </div>
+  </div>
+
   <form id="chartFilters" class="filters-grid compact-grid">
     <label>
       <span>Department</span>
@@ -33,44 +48,15 @@
 </section>
 
 <section class="panel-grid two-col charts-grid">
-  <article class="panel">
-    <div class="panel__header">
-      <h3>Attendance by student</h3>
-    </div>
-    <canvas id="attendanceChart"></canvas>
-  </article>
-
-  <article class="panel">
-    <div class="panel__header">
-      <h3>Average score by subject</h3>
-    </div>
-    <canvas id="resultsChart"></canvas>
-  </article>
-
-  <article class="panel">
-    <div class="panel__header">
-      <h3>Grade distribution</h3>
-    </div>
-    <canvas id="gradeChart"></canvas>
-  </article>
-
-    <article class="panel">
-    <div class="panel__header">
-      <h3>Feedback rating distribution</h3>
-    </div>
-    <canvas id="feedbackChart"></canvas>
-  </article>
-
-  <article class="panel">
-    <div class="panel__header">
-      <h3>Department split</h3>
-    </div>
-    <canvas id="deptChart"></canvas>
-  </article>
+  <article class="panel"><div class="panel__header"><h3>Attendance by student</h3></div><canvas id="attendanceChart"></canvas></article>
+  <article class="panel"><div class="panel__header"><h3>Attendance trend</h3></div><canvas id="attendanceTrendChart"></canvas></article>
+  <article class="panel"><div class="panel__header"><h3>Average score by subject</h3></div><canvas id="resultsChart"></canvas></article>
+  <article class="panel"><div class="panel__header"><h3>Grade distribution</h3></div><canvas id="gradeChart"></canvas></article>
+  <article class="panel"><div class="panel__header"><h3>Feedback rating distribution</h3></div><canvas id="feedbackChart"></canvas></article>
+  <article class="panel"><div class="panel__header"><h3>Department split</h3></div><canvas id="deptChart"></canvas></article>
 </section>
 {% endblock %}
 
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock %}
-

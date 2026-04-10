@@ -1,4 +1,4 @@
-% extends "base.html" %}
+{% extends "base.html" %}
 {% block title %}Edit Student | {{ app_name }}{% endblock %}
 {% block page_heading %}Edit Student{% endblock %}
 
@@ -96,6 +96,3 @@
 
     <div class="form-actions">
       <a class="btn btn-secondary" href="{{ url_for('student_detail', student_id=student.id) }}">Cancel</a
-
-
-      
