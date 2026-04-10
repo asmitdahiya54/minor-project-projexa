@@ -1088,6 +1088,22 @@ textarea {
     grid-template-columns: 1fr;
   }
 }
+@media (max-width: 900px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: fixed;
+    left: -100%;
+    width: min(86vw, 330px);
+    transition: left 0.2s ease;
+    z-index: 30;
+  }
+
+  .sidebar.is-open {
+    left: 0;
+  }
 .toast.is-hiding {
   opacity: 0;
   transform: translateY(-8px);
