@@ -1281,3 +1281,190 @@ def chart_where():
         clauses.append("students.year = ?")
         params.append(year)
     return " AND ".join(clauses), params
+@app.route("/api/charts/attendance")
+@roles_required("admin", "teacher")
+def chart_attendance():
+    where, params = chart_where()
+    bars = db().execute(
+        f"""
+        SELECT students.name,
+               ROUND(100.0 * SUM(CASE WHEN attendance.status='Present' THEN 1 ELSE 0 END) / NULLIF(COUNT(attendance.id),0), 1) AS attendance_rate
+        FROM students
+        LEFT JOIN attendance ON attendance.student_id = students.id
+        WHERE {where}
+        GROUP BY students.id, students.name
+        HAVING COUNT(attendance.id) > 0
+        ORDER BY attendance_rate ASC
+        """,
+        params,
+    ).fetchall()
+    trend = db().execute(
+        f"""
+        SELECT attendance.date,
+               SUM(CASE WHEN attendance.status='Present' THEN 1 ELSE 0 END) AS present_count,
+               COUNT(attendance.id) AS total_count
+        FROM attendance
+        JOIN students ON students.id = attendance.student_id
+        WHERE {where}
+        GROUP BY attendance.date
+        ORDER BY attendance.date DESC
+        LIMIT 10
+        """,
+        params,
+    ).fetchall()
+    return jsonify({"attendance_by_student": [dict(r) for r in bars], "attendance_trend": [dict(r) for r in reversed(trend)]})
+
+
+@app.route("/api/charts/results")
+@roles_required("admin", "teacher")
+def chart_results():
+    where, params = chart_where()
+    avg_rows = db().execute(
+        f"""
+        SELECT results.subject, ROUND(AVG((results.marks_obtained / results.max_marks) * 100), 1) AS average_score
+        FROM results
+        JOIN students ON students.id = results.student_id
+        WHERE {where}
+        GROUP BY results.subject
+        ORDER BY average_score DESC
+        """,
+        params,
+    ).fetchall()
+    dist = db().execute(
+        f"""
+        SELECT results.grade, COUNT(results.id) AS total
+        FROM results
+        JOIN students ON students.id = results.student_id
+        WHERE {where}
+        GROUP BY results.grade
+        ORDER BY results.grade ASC
+        """,
+        params,
+    ).fetchall()
+    return jsonify({"subject_average": [dict(r) for r in avg_rows], "grade_distribution": [dict(r) for r in dist]})
+
+
+@app.route("/api/charts/feedback")
+@roles_required("admin", "teacher")
+def chart_feedback():
+    where, params = chart_where()
+    dist = db().execute(
+        f"""
+        SELECT feedback.rating, COUNT(feedback.id) AS total
+        FROM feedback
+        JOIN students ON students.id = feedback.student_id
+        WHERE {where}
+        GROUP BY feedback.rating
+        ORDER BY feedback.rating ASC
+        """,
+        params,
+    ).fetchall()
+    cat = db().execute(
+        f"""
+        SELECT feedback.category, ROUND(AVG(feedback.rating), 1) AS average_rating
+        FROM feedback
+        JOIN students ON students.id = feedback.student_id
+        WHERE {where}
+        GROUP BY feedback.category
+        ORDER BY average_rating DESC
+        """,
+        params,
+    ).fetchall()
+    dept = db().execute(
+        f"""
+        SELECT students.department, COUNT(students.id) AS total
+        FROM students
+        WHERE {where}
+        GROUP BY students.department
+        ORDER BY total DESC
+        """,
+        params,
+    ).fetchall()
+    return jsonify({
+        "rating_distribution": [dict(r) for r in dist],
+        "category_breakdown": [dict(r) for r in cat],
+        "department_split": [dict(r) for r in dept],
+    })
+
+
+@app.route("/change-password", methods=["GET", "POST"])
+@login_required
+def change_password():
+    if request.method == "POST":
+        current_password = request.form.get("current_password") or ""
+        password = request.form.get("password") or ""
+        confirm = request.form.get("confirm_password") or ""
+
+        user = db().execute("SELECT * FROM users WHERE id=?", (session["user_id"],)).fetchone()
+
+        if not current_password or not password or not confirm:
+            return respond(False, "All password fields are required.", url_for("change_password"), 400)
+        if not check_password_hash(user["password"], current_password):
+            return respond(False, "Current password is incorrect.", url_for("change_password"), 400)
+        if len(password) < 8:
+            return respond(False, "New password must be at least 8 characters long.", url_for("change_password"), 400)
+        if password != confirm:
+            return respond(False, "New password and confirmation do not match.", url_for("change_password"), 400)
+
+        db().execute("UPDATE users SET password=? WHERE id=?", (generate_password_hash(password), session["user_id"]))
+        db().commit()
+        return respond(True, "Password updated successfully.", url_for("dashboard"))
+
+    return render_template("change_password.html")
+
+
+def report_pdf(student, rows, report_type="results"):
+    try:
+        from reportlab.lib import colors
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib.styles import getSampleStyleSheet
+        from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+    except ImportError:
+        return None
+
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(buf, pagesize=A4, title="SIMS Report")
+    styles = getSampleStyleSheet()
+    title = "Student Report Card" if report_type == "results" else "Attendance Report"
+    elements = [
+        Paragraph(title, styles["Title"]),
+        Spacer(1, 12),
+        Paragraph(f"Name: {student['name']}", styles["BodyText"]),
+        Paragraph(f"Enrollment No: {student['student_id']}", styles["BodyText"]),
+        Paragraph(f"Department: {student['department']} | Year: {student['year']}", styles["BodyText"]),
+        Spacer(1, 12),
+    ]
+
+    table_data = [["Subject", "Semester", "Exam", "Score", "Grade"]] if report_type == "results" else [["Date", "Subject", "Status", "Remarks"]]
+    for r in rows:
+        if report_type == "results":
+            table_data.append([r["subject"], r["semester"], r["exam_type"], f"{r['marks_obtained']} / {r['max_marks']}", r["grade"]])
+        else:
+            table_data.append([r["date"], r["subject"], r["status"], r["remarks"] or "-"])
+
+    table = Table(table_data, repeatRows=1)
+    table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#0f172a")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#cbd5e1")),
+        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f8fafc")]),
+        ("PADDING", (0, 0), (-1, -1), 8),
+    ]))
+    elements.append(table)
+    doc.build(elements)
+    buf.seek(0)
+    return buf
+
+
+@app.route("/students/<int:student_id>/report-card.pdf")
+@login_required
+def report_card_pdf(student_id):
+    student = student_or_404(student_id)
+    if session.get("role") == "student" and student_id != session.get("student_db_id"):
+        abort(403)
+    rows = db().execute("SELECT * FROM results WHERE student_id=? ORDER BY semester, subject", (student_id,)).fetchall()
+    pdf = report_pdf(student, rows, "results")
+    if pdf is None:
+        flash("PDF export requires the reportlab package. Add it from requirements.txt.", "error")
+        return redirect(url_for("student_results", student_id=student_id))
+    return send_file(pdf, as_attachment=True, download_name=f"{student['student_id']}_report_card.pdf")
