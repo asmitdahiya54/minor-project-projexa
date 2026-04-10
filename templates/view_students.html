@@ -3,110 +3,23 @@
 {% block page_heading %}Students Directory{% endblock %}
 
 {% block content %}
-<section class="panel">
-  <div class="panel__header">
-    <h3>Search and filters</h3>
-    <div class="actions-inline">
-      {% if current_role == 'admin' %}
-      <a class="btn btn-primary" href="{{ url_for('add_student') }}">
-        <i class="fa-solid fa-user-plus"></i>
-        <span>Add student</span>
-      </a>
-      {% endif %}
-
-      <a class="btn btn-secondary" href="{{ url_for('export_students', search=filters.search, dept=filters.dept, year=filters.year, status=filters.status) }}">
-        <i class="fa-solid fa-file-export"></i>
-        <span>Export CSV</span>
-      </a>
-    </div>
+<section class="hero-card">
+  <div class="hero-copy">
+    <span class="badge">Directory management</span>
+    <h2>Search, review, and manage student profiles with confidence.</h2>
+    <p>Use the filters below to quickly narrow the student list by department, year, status, or keyword.</p>
   </div>
-
-  <form method="get" class="filters-grid">
-    <label class="search-field">
-      <i class="fa-solid fa-magnifying-glass"></i>
-      <input
-        type="text"
-        name="search"
-        value="{{ filters.search }}"
-        placeholder="Search by name or student ID"
-        id="studentSearchInput"
-        autocomplete="off"
-      >
-    </label>
-
-    <div class="autocomplete-panel" id="studentAutocomplete"></div>
-
-    <select name="dept">
-      <option value="">All departments</option>
-      {% for dept in ['Computer Science','Information Technology','Electronics','Mechanical Engineering','Civil Engineering','Business Administration'] %}
-      <option value="{{ dept }}" {% if filters.dept == dept %}selected{% endif %}>{{ dept }}</option>
-      {% endfor %}
-    </select>
-
-    <select name="year">
-      <option value="">All years</option>
-      {% for year in ['First Year','Second Year','Third Year','Fourth Year'] %}
-      <option value="{{ year }}" {% if filters.year == year %}selected{% endif %}>{{ year }}</option>
-      {% endfor %}
-    </select>
-
-    <select name="status">
-      <option value="">All statuses</option>
-      {% for status in ['Active','On Leave','Graduated'] %}
-      <option value="{{ status }}" {% if filters.status == status %}selected{% endif %}>{{ status }}</option>
-      {% endfor %}
-    </select>
-
-    <button class="btn btn-primary" type="submit">
-      <i class="fa-solid fa-filter"></i>
-      <span>Apply</span>
-    </button>
-  </form>
-</section>
-
-<section class="panel">
-  <div class="table-wrap">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Student</th>
-          <th>Department</th>
-          <th>Year</th>
-          <th>Status</th>
-          <th>Assigned teacher</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for student in students %}
-        <tr>
-          <td>
-            <strong>{{ student.name }}</strong>
-            <span class="table-sub">{{ student.student_id }}</span>
-          </td>
-          <td>{{ student.department }}</td>
-          <td>{{ student.year }}</td>
-          <td>{{ student.status }}</td>
-          <td>{{ student.teacher_name or 'Unassigned' }}</td>
-          <td class="actions-inline">
-            <a class="icon-btn" href="{{ url_for('student_detail', student_id=student.id) }}">
-              <i class="fa-solid fa-eye"></i>
-            </a>
-
-            {% if current_role == 'admin' %}
-            <a class="icon-btn" href="{{ url_for('edit_student', student_id=student.id) }}">
-              <i class="fa-solid fa-pen"></i>
-            </a>
-            {% endif %}
-          </td>
-        </tr>
-        {% else %}
-        <tr>
-          <td colspan="6" class="empty">No students match your filters.</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+  <div class="hero-actions">
+    {% if current_role == 'admin' %}
+    <a class="btn btn-primary" href="{{ url_for('add_student') }}">
+      <i class="fa-solid fa-user-plus"></i>
+      <span>Add student</span>
+    </a>
+    {% endif %}
+    <a class="btn btn-secondary" href="{{ url_for('export_students', search=filters.search, dept=filters.dept, year=filters.year, status=filters.status) }}">
+      <i class="fa-solid fa-file-export"></i>
+      <span>Export CSV</span>
+    </a>
   </div>
 </section>
-{% endblock %}
+
