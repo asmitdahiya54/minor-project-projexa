@@ -681,3 +681,20 @@ textarea {
 .autocomplete-panel {
   position: relative;
 }
+.autocomplete-panel__menu {
+  position: absolute;
+  top: -0.4rem;
+  width: min(100%, 380px);
+  background: var(--bg-strong);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  z-index: 30;
+}
+
+.autocomplete-panel__menu a {
+  display: block;
+  padding: 0.95rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
