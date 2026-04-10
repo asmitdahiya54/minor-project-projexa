@@ -25,3 +25,33 @@
   </div>
 </section>
 
+<section class="panel">
+  <div class="panel__header">
+    <div>
+      <h3>Academic results</h3>
+      <p>Full result history for this student, including semester, exam type, and grade.</p>
+    </div>
+  </div>
+
+  <div class="result-list">
+    {% for row in rows %}
+    <article class="result-item">
+      <div>
+        <strong>{{ row.subject }}</strong>
+        <div class="result-item__meta">
+          <span class="badge">{{ row.semester }}</span>
+          <p>{{ row.exam_type }} &middot; {{ row.marks_obtained }} / {{ row.max_marks }}</p>
+        </div>
+        {% if row.remarks %}
+        <p>{{ row.remarks }}</p>
+        {% endif %}
+      </div>
+      <div class="grade-chip" style="background: {{ grade_color(row.grade) }};">{{ row.grade }}</div>
+    </article>
+    {% else %}
+    <p class="empty">No results available yet.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
+
