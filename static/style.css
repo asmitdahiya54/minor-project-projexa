@@ -711,3 +711,18 @@ textarea {
   padding: 1.6rem;
   gap: 1.3rem;
 }
+.auth-panel {
+  padding: 3rem;
+}
+
+.auth-panel--hero {
+  display: grid;
+  align-content: space-between;
+  background: linear-gradient(160deg, rgba(8, 18, 34, 0.98), rgba(21, 94, 239, 0.9));
+  color: #ffffff;
+}
+
+.auth-panel--hero p,
+.auth-panel--hero .eyebrow {
+  color: rgba(255, 255, 255, 0.78);
+}
