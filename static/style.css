@@ -1076,7 +1076,18 @@ textarea {
     transform: translateY(0);
   }
 }
-
+@media (max-width: 1180px) {
+  .hero-metrics,
+  .stat-grid,
+  .quick-grid,
+  .insights-grid,
+  .summary-strip,
+  .panel-grid.two-col,
+  .filters-grid,
+  .compact-grid {
+    grid-template-columns: 1fr;
+  }
+}
 .toast.is-hiding {
   opacity: 0;
   transform: translateY(-8px);
