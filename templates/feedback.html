@@ -1,6 +1,19 @@
 {% extends "base.html" %}
 {% block title %}Feedback | {{ app_name }}{% endblock %}
 {% block page_heading %}Feedback Center{% endblock %}
+
 {% block content %}
-<section class="panel"><div class="panel__header"><h3>Feedback entries</h3><a class="btn btn-primary" href="{{ url_for('add_feedback') }}"><i class="fa-solid fa-plus"></i><span>Submit feedback</span></a></div><div class="result-list">{% for row in rows %}<article class="result-item"><div><strong>{{ row.name }} • {{ row.category }}</strong><p>{{ row.message }}</p></div><div class="actions-inline"><span class="grade-chip">{{ row.rating }}/5</span>{% if current_role in ['admin','teacher'] %}<form method="post" action="{{ url_for('delete_feedback', feedback_id=row.id) }}" onsubmit="return confirm('Delete this feedback?');"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="icon-btn" type="submit"><i class="fa-solid fa-trash"></i></button></form>{% endif %}</div></article>{% else %}<p class="empty">No feedback available.</p>{% endfor %}</div></section>
-{% endblock %}
+<section class="hero-card">
+  <div class="hero-copy">
+    <span class="badge">Qualitative insight</span>
+    <h2>Review feedback in a cleaner, action-ready format.</h2>
+    <p>Track recent comments, satisfaction ratings, and category-based feedback from students or staff.</p>
+  </div>
+  <div class="hero-actions">
+    <a class="btn btn-primary" href="{{ url_for('add_feedback') }}">
+      <i class="fa-solid fa-plus"></i>
+      <span>Submit feedback</span>
+    </a>
+  </div>
+</section>
+
