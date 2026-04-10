@@ -1076,3 +1076,45 @@ def results():
     ).fetchall()
     return render_template("results.html", rows=rows, filters=filters, departments=DEPARTMENTS, years=YEARS)
 
+@app.route("/results/add", methods=["GET", "POST"])
+@roles_required("admin", "teacher")
+def add_result():
+    students = visible_students({"status": "Active"})
+    selected_student = to_int(request.args.get("student_id")) or to_int(request.form.get("student_id"))
+
+    if request.method == "POST":
+        sid = to_int(request.form.get("student_id"))
+        subject = clean(request.form.get("subject"), 80)
+        exam_type = clean(request.form.get("exam_type"), 40) or "Midterm"
+        semester = clean(request.form.get("semester"), 40)
+        marks = to_float(request.form.get("marks_obtained"))
+        max_marks = to_float(request.form.get("max_marks"), 100)
+        remarks = clean(request.form.get("remarks"), 200)
+
+        if not sid or subject not in SUBJECTS or semester not in SEMESTERS:
+            return respond(False, "Provide a valid student, subject, and semester.", url_for("add_result"), 400)
+        if not max_marks or marks is None or marks < 0 or marks > max_marks:
+            return respond(False, "Marks must be between 0 and the maximum marks.", url_for("add_result"), 400)
+
+        student = student_or_404(sid)
+        grade = calc_grade((marks / max_marks) * 100)
+        conn = db()
+        cur = conn.execute(
+            """
+            INSERT INTO results (student_id,subject,marks_obtained,max_marks,exam_type,semester,grade,remarks)
+            VALUES (?,?,?,?,?,?,?,?)
+            """,
+            (sid, subject, marks, max_marks, exam_type, semester, grade, remarks),
+        )
+        conn.commit()
+        row = conn.execute("SELECT * FROM results WHERE id=?", (cur.lastrowid,)).fetchone()
+
+        notify_email(
+            student["email"],
+            "New result published",
+            f"Hello {student['name']},\n\nYour result for {row['subject']} has been published.\nScore: {row['marks_obtained']} / {row['max_marks']}\nGrade: {row['grade']}\n\nRegards,\nSIMS Pro"
+        )
+
+        return respond(True, f"Result added for {student['name']} with grade {grade}.", url_for("student_results", student_id=sid))
+
+    return render_template("add_result.html", students=students, selected_student=selected_student, subjects=SUBJECTS, exam_types=EXAM_TYPES, semesters=SEMESTERS)
