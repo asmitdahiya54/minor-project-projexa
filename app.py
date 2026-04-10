@@ -1177,3 +1177,34 @@ def delete_result(result_id):
         return respond(True, "Result deleted successfully.", url_for("student_results", student_id=student["id"]))
     return respond(True, "Result deleted successfully.", url_for("results"))
 
+@app.route("/feedback")
+@login_required
+def feedback():
+    if session.get("role") == "student":
+        rows = db().execute(
+            """
+            SELECT feedback.*, students.name, students.student_id AS enrollment_no
+            FROM feedback
+            JOIN students ON students.id = feedback.student_id
+            WHERE students.id=?
+            ORDER BY datetime(feedback.created_at) DESC
+            """,
+            (session["student_db_id"],),
+        ).fetchall()
+        students = [student_or_404(session["student_db_id"])]
+    else:
+        where, params = visible_clause("students")
+        rows = db().execute(
+            f"""
+            SELECT feedback.*, students.name, students.student_id AS enrollment_no
+            FROM feedback
+            JOIN students ON students.id = feedback.student_id
+            WHERE {where}
+            ORDER BY datetime(feedback.created_at) DESC
+            """,
+            params,
+        ).fetchall()
+        students = visible_students({"status": "Active"})
+
+    return render_template("feedback.html", rows=rows, students=students, categories=FEEDBACK_CATEGORIES)
+
