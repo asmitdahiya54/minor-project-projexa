@@ -682,3 +682,38 @@ def student_payload(form, files, editing=False, current=None):
         errs.append(str(exc))
 
     return data, errs
+def dashboard_ctx():
+    where, params = visible_clause("students")
+    conn = db()
+    totals = conn.execute(
+        f"""
+        SELECT
+            COUNT(*) total,
+            SUM(CASE WHEN status='Active' THEN 1 ELSE 0 END) active,
+            SUM(CASE WHEN status='On Leave' THEN 1 ELSE 0 END) leave_count,
+            SUM(CASE WHEN status='Graduated' THEN 1 ELSE 0 END) graduated
+        FROM students
+        WHERE {where}
+        """,
+        params,
+    ).fetchone()
+
+    feedback_avg = conn.execute(
+        f"""
+        SELECT ROUND(AVG(feedback.rating),1) avg_rating, COUNT(feedback.id) feedback_count
+        FROM feedback
+        JOIN students ON students.id = feedback.student_id
+        WHERE {where}
+        """,
+        params,
+    ).fetchone()
+
+    result_count = conn.execute(
+        f"""
+        SELECT COUNT(results.id) result_count
+        FROM results
+        JOIN students ON students.id = results.student_id
+        WHERE {where}
+        """,
+        params,
+    ).fetchone()
