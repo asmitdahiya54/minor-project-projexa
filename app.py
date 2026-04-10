@@ -1435,3 +1435,46 @@ def change_password():
     return render_template("change_passwo" \
     "" \
     "rd.html")
+
+def report_pdf(student, rows, report_type="results"):
+    try:
+        from reportlab.lib import colors
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib.styles import getSampleStyleSheet
+        from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+    except ImportError:
+        return None
+
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(buf, pagesize=A4, title="SIMS Report")
+    styles = getSampleStyleSheet()
+    title = "Student Report Card" if report_type == "results" else "Attendance Report"
+    elements = [
+        Paragraph(title, styles["Title"]),
+        Spacer(1, 12),
+        Paragraph(f"Name: {student['name']}", styles["BodyText"]),
+        Paragraph(f"Enrollment No: {student['student_id']}", styles["BodyText"]),
+        Paragraph(f"Department: {student['department']} | Year: {student['year']}", styles["BodyText"]),
+        Spacer(1, 12),
+    ]
+
+    table_data = [["Subject", "Semester", "Exam", "Score", "Grade"]] if report_type == "results" else [["Date", "Subject", "Status", "Remarks"]]
+    for r in rows:
+        if report_type == "results":
+            table_data.append([r["subject"], r["semester"], r["exam_type"], f"{r['marks_obtained']} / {r['max_marks']}", r["grade"]])
+        else:
+            table_data.append([r["date"], r["subject"], r["status"], r["remarks"] or "-"])
+
+    table = Table(table_data, repeatRows=1)
+    table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#0f172a")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#cbd5e1")),
+        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f8fafc")]),
+        ("PADDING", (0, 0), (-1, -1), 8),
+    ]))
+    elements.append(table)
+    doc.build(elements)
+    buf.seek(0)
+    return buf
+
