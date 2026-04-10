@@ -809,3 +809,32 @@ def logout():
     session.clear()
     flash("You have been logged out securely.", "success")
     return redirect(url_for("login"))
+@app.route("/")
+@login_required
+def dashboard():
+    if session.get("role") == "student":
+        return redirect(url_for("student_dashboard"))
+    return render_template("dashboard.html", **dashboard_ctx())
+
+
+@app.route("/student/dashboard")
+@roles_required("student")
+def student_dashboard():
+    return render_template("student_dashboard.html", **student_dash_ctx(session["student_db_id"]))
+
+
+@app.route("/students")
+@roles_required("admin", "teacher")
+def view_students():
+    filters = {
+        "search": clean(request.args.get("search"), 100),
+        "dept": clean(request.args.get("dept"), 80),
+        "year": clean(request.args.get("year"), 40),
+        "status": clean(request.args.get("status"), 40),
+    }
+    return render_template(
+        "view_students.html",
+        students=visible_students(filters),
+        filters=filters,
+        teachers=teachers(),
+    )
