@@ -930,3 +930,33 @@ def student_detail(student_id):
         results=results,
         feedback_entries=feedback_rows,
     )
+
+@app.route("/students/<int:student_id>/edit", methods=["GET", "POST"])
+@roles_required("admin")
+def edit_student(student_id):
+    student = student_or_404(student_id)
+    if request.method == "POST":
+        data, errs = student_payload(request.form, request.files, True, student)
+        if errs:
+            if wants_json():
+                return jsonify({"success": False, "message": " ".join(errs)}), 400
+            flash(" ".join(errs), "error")
+            return render_template("edit_student.html", student=student, teachers=teachers(), departments=DEPARTMENTS, years=YEARS, statuses=STATUSES)
+
+        db().execute(
+            """
+            UPDATE students
+            SET name=?, email=?, dob=?, gender=?, department=?, year=?, status=?, address=?, enroll_date=?, profile_image=?, assigned_teacher_id=?
+            WHERE id=?
+            """,
+            (
+                data["name"], data["email"], data["dob"], data["gender"], data["department"],
+                data["year"], data["status"], data["address"], data["enroll_date"],
+                data["profile_image"], data["assigned_teacher_id"], student_id
+            ),
+        )
+        db().execute("UPDATE users SET email=? WHERE student_id=? AND role='student'", (data["email"], student_id))
+        db().commit()
+        return respond(True, f"{data['name']} updated successfully.", url_for("student_detail", student_id=student_id))
+
+    return render_template("edit_student.html", student=student, teachers=teachers(), departments=DEPARTMENTS, years=YEARS, statuses=STATUSES)
