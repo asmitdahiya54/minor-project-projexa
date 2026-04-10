@@ -1166,3 +1166,14 @@ def edit_result(result_id):
 
     return render_template("edit_result.html", result=row, student=student, subjects=SUBJECTS, exam_types=EXAM_TYPES, semesters=SEMESTERS)
 
+@app.route("/results/<int:result_id>/delete", methods=["POST"])
+@roles_required("admin", "teacher")
+def delete_result(result_id):
+    row = db().execute("SELECT * FROM results WHERE id=?", (result_id,)).fetchone()
+    if row:
+        student = student_or_404(row["student_id"])
+        db().execute("DELETE FROM results WHERE id=?", (result_id,))
+        db().commit()
+        return respond(True, "Result deleted successfully.", url_for("student_results", student_id=student["id"]))
+    return respond(True, "Result deleted successfully.", url_for("results"))
+
