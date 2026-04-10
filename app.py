@@ -1021,3 +1021,11 @@ def mark_attendance():
     conn.commit()
     return respond(True, f"Attendance saved for {saved} student(s).", url_for("attendance", date=att_date, subject=subject))
 
+@app.route("/attendance/report")
+@roles_required("admin", "teacher")
+def attendance_report():
+    filters = {"dept": clean(request.args.get("dept"), 80), "year": clean(request.args.get("year"), 40)}
+    students = visible_students({"dept": filters["dept"], "year": filters["year"]})
+    rows = [{"student": s, "summary": attendance_summary(s["id"])} for s in students]
+    return render_template("attendance_report.html", rows=rows, filters=filters, departments=DEPARTMENTS, years=YEARS)
+
