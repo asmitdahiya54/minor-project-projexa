@@ -100,7 +100,7 @@ User Roles
       └──Download reports
 
 
-Default Login Credentials
+## Default Login Credentials
 
 Admin
 . Username: admin
@@ -131,7 +131,7 @@ Examples:
 . IT2024001 / student123
 
 
-- Teacher Assignment by Year
+## Teacher Assignment by Year
  The system automatically assigns one teacher per academic year:
 
 . First Year: Rahul Sharma
@@ -140,7 +140,7 @@ Examples:
 . Fourth Year: Neha Singh
 If no teacher is selected while creating or editing a student, the system automatically assigns the correct teacher based on the selected year.
 
-- Installation
+## Installation
 1.Clone or download the project
 2.Open the project folder in terminal
 3.Create a virtual environment
@@ -171,8 +171,9 @@ MAIL_SENDER=
 
 http://127.0.0.1:5000
 
-Deployment
+## Deployment
 This project is deployed on platform - Render.
+  (https://minor-project-projexa.onrender.com/)
 
 Deployment setup
 . Add gunicorn to requirements.txt
@@ -216,3 +217,10 @@ This project was developed as a minor project for academic use. Its goal is to s
 
 License
 This project is created for educational purposes.
+
+Team leader - Asmit
+Members-Dikshit
+        Manish Chauhan
+        Dev Narwal
+        Aditya Dangi
+        Gourav Yadav
