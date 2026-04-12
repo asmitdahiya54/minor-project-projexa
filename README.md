@@ -129,3 +129,90 @@ Examples:
 . CS2024001 / student123
 . CS2024002 / student123
 . IT2024001 / student123
+
+
+- Teacher Assignment by Year
+ The system automatically assigns one teacher per academic year:
+
+. First Year: Rahul Sharma
+. Second Year: Priya Verma
+. Third Year: Amit Mehta
+. Fourth Year: Neha Singh
+If no teacher is selected while creating or editing a student, the system automatically assigns the correct teacher based on the selected year.
+
+- Installation
+1.Clone or download the project
+2.Open the project folder in terminal
+3.Create a virtual environment
+  python -m venv venv
+
+4.Activate the virtual environment
+  venv\Scripts\activate
+
+5.Install dependencies
+  pip install -r requirements.txt
+
+Environment Variables
+Create a .env file in the root directory and add:
+
+SECRET_KEY=change-this-to-a-secure-random-secret
+FLASK_ENV=development
+SIMS_DB_PATH=
+SMTP_HOST=
+SMTP_PORT=587
+SMTP_USERNAME=
+SMTP_PASSWORD=
+MAIL_SENDER=
+
+- Run Locally
+  (python app.py)
+
+  Then open:
+
+http://127.0.0.1:5000
+
+Deployment
+This project is deployed on platform - Render.
+
+Deployment setup
+. Add gunicorn to requirements.txt
+. Add Procfile
+. Set environment variable SECRET_KEY
+. Connect the GitHub repository to Render
+. Use:
+  Build command:
+
+(pip install -r requirements.txt)
+
+Start command:
+
+(gunicorn app:app)
+
+- Modules
+. Authentication and authorization
+. Student management
+. Attendance management
+. Results management
+. Feedback management
+. Analytics and reporting
+
+-Security Features
+. Password hashing
+. CSRF token validation
+. Role-based access control
+. Secure session handling
+. File upload validation
+
+- Future Improvements
+. Password reset by email
+. Better reporting filters
+. Student promotion workflow
+. PostgreSQL integration
+. Notification improvements
+. Advanced analytics dashboard
+
+Project Purpose
+This project was developed as a minor project for academic use. Its goal is to simplify student data management through a centralized and user-friendly digital system.
+
+License
+This project is created for educational purposes.
