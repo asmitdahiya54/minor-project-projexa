@@ -104,25 +104,24 @@ User Roles
 
 Admin
 . Username: admin
-. Password: admin123
+. Password: 
 
 Teachers
 . Username: teacher_first
-Password: teacher123
+Password: 
 
 . Username: teacher_second
-Password: teacher123
+Password: 
 
 . Username: teacher_third
-Password: teacher123
+Password: 
 
 . Username: teacher_fourth
-Password: teacher123
+Password: 
 
 Students
 
 . Username: student ID
-  Password: student123
 
 Examples:
 
